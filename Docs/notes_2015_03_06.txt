@@ -27,7 +27,7 @@ Set up a H0licow organization
 Set up an environment repo
   python
   Data
-    - spec-z catalogs
+*[]    - spec-z catalogs
     - short example photometry files, just for testing the code
 
 Comparison to the Millennium sims
