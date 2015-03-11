@@ -25,76 +25,76 @@ if str(sys.argv[1]) == "samp":
     print "This process is both processor and memory intensive and will take a couple of hours for a sampling of 1000..."
     start_time = time.time()
 
-with open('fieldsforhist50try_%s.lst' % str(sys.argv[1])) as f:
+with open('fieldsforhist50try_%s_noCFHTLENSsamp.lst' % str(sys.argv[1])) as f:
     listfields = f.readlines()
 
-with open('fieldshistW1_50.lst', 'w') as outfile:
+with open('fieldshistW1_50_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W1" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW2_50.lst', 'w') as outfile:
+with open('fieldshistW2_50_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W2" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW3_50.lst', 'w') as outfile:
+with open('fieldshistW3_50_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W3" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW4_50.lst', 'w') as outfile:
+with open('fieldshistW4_50_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W4" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldsforhist75try_%s.lst' % str(sys.argv[1])) as f:
+with open('fieldsforhist75try_%s_noCFHTLENSsamp.lst' % str(sys.argv[1])) as f:
     listfields = f.readlines()
 
-with open('fieldshistW1_75.lst', 'w') as outfile:
+with open('fieldshistW1_75_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W1" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW2_75.lst', 'w') as outfile:
+with open('fieldshistW2_75_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W2" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW3_75.lst', 'w') as outfile:
+with open('fieldshistW3_75_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W3" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
-with open('fieldshistW4_75.lst', 'w') as outfile:
+with open('fieldshistW4_75_noCFHTLENSsamp.lst', 'w') as outfile:
     for i in range(len(listfields)):
         if "W4" in [x[0:len(listfields[0])-1] for x in listfields][i]:
             with open([x[0:len(listfields[0])-1] for x in listfields][i]) as infile:
                 outfile.write(infile.read())
 
 cols=1
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.suptitle(r'HE0435 weight histogram test W1-W4', fontsize=10, y=0.998)
@@ -164,21 +164,21 @@ subplot = 1
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=3
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 x = linspace(0,2,500)
@@ -246,21 +246,21 @@ subplot = 2
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=5
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(453)
@@ -308,21 +308,21 @@ subplot = 3
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=7
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(454)
@@ -370,21 +370,21 @@ subplot = 4
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=9
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(456)
@@ -432,21 +432,21 @@ subplot = 5
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=11
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(457)
@@ -494,21 +494,21 @@ subplot = 6
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=13
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(458)
@@ -556,21 +556,21 @@ subplot = 7
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=15
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(459)
@@ -618,21 +618,21 @@ subplot = 8
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=17
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,11)
@@ -680,21 +680,21 @@ subplot = 9
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=19
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,12)
@@ -742,21 +742,21 @@ subplot = 10
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=21
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,13)
@@ -804,21 +804,21 @@ subplot = 11
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=23
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,14)
@@ -866,21 +866,21 @@ subplot = 12
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=25
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 x = linspace(0,3,500)
@@ -948,21 +948,21 @@ subplot = 13
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=27
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 x = linspace(0,3,500)
@@ -1029,21 +1029,21 @@ subplot = 14
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=29
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,18)
@@ -1091,21 +1091,21 @@ subplot = 15
 print "finished subplot %d/16; fraction of points inside the q < 10 cut: W1_50 %.3f W1_75 %.3f W2_50 %.3f W2_75 %.3f W3_50 %.3f W3_75 %.3f W4_50 %.3f W4_75 %.3f " % (subplot, float(q_W1_50.size)/q_W1_50read.size, float(q_W1_75.size)/q_W1_75read.size, float(q_W2_50.size)/q_W2_50read.size, float(q_W2_75.size)/q_W2_75read.size, float(q_W3_50.size)/q_W3_50read.size, float(q_W3_75.size)/q_W3_75read.size, float(q_W4_50.size)/q_W4_50read.size, float(q_W4_75.size)/q_W4_75read.size)
 
 cols=31
-q_W1_50read = np.loadtxt('fieldshistW1_50.lst', usecols=[cols], unpack=True)
+q_W1_50read = np.loadtxt('fieldshistW1_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_50 = q_W1_50read[q_W1_50read < 10]
-q_W2_50read = np.loadtxt('fieldshistW2_50.lst', usecols=[cols], unpack=True)
+q_W2_50read = np.loadtxt('fieldshistW2_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_50 = q_W2_50read[q_W2_50read < 10]
-q_W3_50read = np.loadtxt('fieldshistW3_50.lst', usecols=[cols], unpack=True)
+q_W3_50read = np.loadtxt('fieldshistW3_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_50 = q_W3_50read[q_W3_50read < 10]
-q_W4_50read = np.loadtxt('fieldshistW4_50.lst', usecols=[cols], unpack=True)
+q_W4_50read = np.loadtxt('fieldshistW4_50_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_50 = q_W4_50read[q_W4_50read < 10]
-q_W1_75read = np.loadtxt('fieldshistW1_75.lst', usecols=[cols], unpack=True)
+q_W1_75read = np.loadtxt('fieldshistW1_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W1_75 = q_W1_75read[q_W1_75read < 10]
-q_W2_75read = np.loadtxt('fieldshistW2_75.lst', usecols=[cols], unpack=True)
+q_W2_75read = np.loadtxt('fieldshistW2_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W2_75 = q_W2_75read[q_W2_75read < 10]
-q_W3_75read = np.loadtxt('fieldshistW3_75.lst', usecols=[cols], unpack=True)
+q_W3_75read = np.loadtxt('fieldshistW3_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W3_75 = q_W3_75read[q_W3_75read < 10]
-q_W4_75read = np.loadtxt('fieldshistW4_75.lst', usecols=[cols], unpack=True)
+q_W4_75read = np.loadtxt('fieldshistW4_75_noCFHTLENSsamp.lst', usecols=[cols], unpack=True)
 q_W4_75 = q_W4_75read[q_W4_75read < 10]
 
 plt.subplot(4,5,19)
@@ -1159,18 +1159,18 @@ plt.legend(bbox_to_anchor=(1.5, 4), loc='center left', borderaxespad=0., fontsiz
 plt.tight_layout()
 
 
-plt.savefig('HE0435overdensities_%s.png' % str(sys.argv[1]), dpi=1000)
+plt.savefig('HE0435overdensities_%s_noCFHTLENSsamp.png' % str(sys.argv[1]), dpi=1000)
 
 #plt.show()
 
-os.system("rm fieldshistW1_50.lst")
-os.system("rm fieldshistW2_50.lst")
-os.system("rm fieldshistW3_50.lst")
-os.system("rm fieldshistW4_50.lst")
-os.system("rm fieldshistW1_75.lst")
-os.system("rm fieldshistW2_75.lst")
-os.system("rm fieldshistW3_75.lst")
-os.system("rm fieldshistW4_75.lst")
+os.system("rm fieldshistW1_50_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW2_50_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW3_50_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW4_50_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW1_75_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW2_75_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW3_75_noCFHTLENSsamp.lst")
+os.system("rm fieldshistW4_75_noCFHTLENSsamp.lst")
 
 if str(sys.argv[1]) == "samp":
     print(" --- %s seconds ---" % (time.time() - start_time))
