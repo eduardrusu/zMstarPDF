@@ -1,0 +1,101 @@
+Photoz/Mstellar codes
+=====================
+Code         To Do
+----------   -----------------
+BPZ          Check to see that the tabulated P(z|H_BPZ) is accessible - it is
+Eazy         same here
+LePhare      Look for tabulated PDFs for P(M_stellar) or P(M_stellar,z_phot) - only 
+	     available for P(z)
+             READ paper/manual - read
+             Try to generate joint PDF if not accessible
+	      - in this case, add a factor that takes into account the
+	        correlation btwn stellar mass and z (a D_L^2 factor)
+		NB: LePhare may already do this, given the asymmetric
+		uncertainties. 
+             Does P(M_stellar) include z uncertainty already? - no it does not. Checked
+	     that the confidence interval for M_stellar is the same whether the redshift 	     is fixed or not
+FAST         - Checked that the confidence interval for M_stellar does change with the 	
+	     confidence interval for z, so P(z) is taken into account; according to the 	     documentation, MCMC is run, but it is not accessible externally
+StellarPops  Make it work!
+
+Photoz/Mstellar approach
+=====================
+- From Phil: Is it possible to reconstruct the joint PDF Pr(z,Mstar | photometry) from the CFHTLenS outputs? In an ideal world we'd be provided with not only Pr(z | photometry) but also Pr(Mstar | z,photometry) (perhaps on a 2D grid), such that the product gives us what we need. I think this is a good question for the producers of the catalogs: let's check their papers for the answer, and then contact them if we can't find it. Alternatively, we have some compressed information (Mstar estimates with confidence intervals, plus a tabulated Pr(z|photometry)) that could perhaps be interpreted as above, to give a useful approximation. I'm not sure if this approximation will be good enough for our purposes: it might be. We must test it, if we have to go this route. BTW I ran this plan past Eli Rykoff (of redMaPPer fame) and he was not too optimistic. Admittedly, he worries about photo-z accuracy to a greater extent than we do, but still, his opinion was that we should be running stellarpops on the CFHTLS galaxies as well as the H0LiCOW ones, for best results.
+- Ideally we need to run Stellarpops (Matt's code) on the lens fields and CFHTLens in order to get the full PDF Pr(z,Mstar | photometry); may be too time consuming to use on the whole CFHTLens, therefore likely need to limit to a subsample
+- While getting the ful P(Mstar) for each object in CFHTLens is computationally prohibitive, getting just a rudimentary PDF (best-fit and confidence levels) should work. As Phil asked, is that enough?
+- In order to test for systematics, we want to separately use EAZY, BPZ (for redshift), FAST (for stellar masses), Lephare (redshift and stellar masses). But these are not ideal when it comes to stellar masses. FAST uses as input a "rudimentary" (compressed information) PDF (best-fit value with 68,95,99 limits), and also outputs a rudimentary PDF for Mstar; it also uses a different set of template from those used to compute P(z). I need to check if it is possible to get it to use the same templates. On the other hand, to get the PDF for Mstar from Lephare I would need to sample from its P(z), fix the redshift, and rerun many times, which is computationally prohibitive for CFHTLens.
+- What happens if we don't use PDF Pr(z,Mstar | photometry) at all, but just the best-fit values (usually the peaks of the distributions), as long as we use the same code for both the lens fields and the calibration fields? I did this in the histograms ("orig" and "samp") and there are vast differences (large offsets) compared to using the rudimentary PDFs. But need to remember that these are not the final PDFs, and for example I used different codes for the lens fields compared to those used for the CFHTLens catalogue values. 
+- Keep in mind that when using different codes on CFHTLens, we are likely not doing as good a job as was done in estimating the P(z) given in the CFHTLens catalogues, because they were very careful to calibrate against spectroscopic samples. 
+- CFHTLens: for redshift and stellar masses, they used BPZ to compute P(z) (tabulated values provided), but they used a fixed z (the most probable value) in computing stellar masses separately, with Lephare.
+
+Lens fields
+===========
+
+Star/gal separation - for B1608, we have deep HST coverage in r band; I intend to use the same technique CFHTLens uses, and test/train it against the HST morphology; I'm against using machine training algorithms based on CFHTLens color space because we have different filters, resolution, possible systematics on photometry etc.  
+
+Detection in r vs i - CFHTLens does object detection in i, whereas we do it for the lens fields in r-band, which is deepest. This introduce systematics in terms of the total galaxy magnitudes we determine from mag_auto, and in terms of the magnitude cut of i=24. Should we also do the detections in i-band? 
+
+CFHTLens
+========
+Need to email the authors of the CFHTLens papers on several issues:
+	- Find out what value of h they used
+	- See if we can get their BPZ and LePhare config files, and especially the interpolated templates they used
+	- CFHTLens catalogue includes photometry and extinction values; but it's unclear to me if the photometry has already been corrected for extinction, or it needs to be
+
+Catalogue incompleteness: the documentation does not provide a number, but i=23-24 objects have a completeness < 100%; at the moment the only way I can think to test for systematics introduced by this is to recompute histograms for, say, i=23,23.5,24. This is also related to the galaxy/star classification issue for faint objects; recomputing the histograms for different limiting mags should give us the systematics due to both of these issues
+
+Star/gal separation 
+	- technique used in the paper (Coupon 2009): 
+		- i<21 stars: flux radius < limiting value 
+		- 21<i<23 stars: flux radius < limiting value & chi^2_star < chi^2_gal/2 		(delta chi^2 tested on spectroscopic sample); gal: flux radius > limiting value or chi^2_star > chi^2_gal/2
+		- i>23: all objects flagged as galaxies
+	- do we want/need to extend the classification to i>23? since we take ratios of weights, does it matter, as long as we use the same classification for the lens fields? a test for systematics would be to recompute the histograms both with improved classification for i=23-24, and without; W4 is known to have a larger star fraction than the other fields, yet the histograms show that the weights computed for this field are similar to the others, therefore it doesn't seem that accurate star/galaxy classification matters much
+	- how do we improve the classification? I think we should use the 21<i<23 stars method beyond i=23, but instead of fitting galaxy and star templates, which takes long and we don't have access to the templates they use, we should use machine learning based on location in color and size space, as suggested by Phil
+
+Histograms so far
+=================
+- in the python folder there are 5 histograms containing 16 weight ratios each. Each ratio is computed only for subfields that have more than 50% or 75% of their surface free of masks; the numbers on the histograms, for each of the W1-W4 subfields, are: peak of the histogram, average of the distribution, and median, respectively. For each weight ratio, I cut the distributions above a weight ratio of 10. This is mainly because when weighting by mass, mass^2 and mass^3, the tail of the distributions is very long and affects the statistics
+- the 5 histograms:
+	- those marked with "orig" do not consider P(z) or P(Mstar), just the best-fit values
+	- those marked with "samp" consider a rudimentary P(z) and P(Mstar). I took the +/-68% confidence limits, and approximated the real distribution with a Gaussian of the appropriate sigma on each side. I then extracted 100 realizations of z and Mstar for each object (the final catalogue size is therefore 100 times the original)
+	- those marked with "i23" contain only objects up to i=23, the rest up to i=24
+	- the one marked with "noCFHTLENSsamp" consider the rudimentary P(z) and P(Mstar) only for the lens fields, but not for the calibration fields.
+- these are not the final histograms: for the lens fields, I used just a simple cut in class_star to separate stars and galaxies; also, for the calibration fields, I used z, Mstar, and their confidence levels from CFHTLens, therefore not computed in the same way with the lens fields
+- conclusions at this stage (these may change when I recompute the histograms after fixing the issues above):
+	- "samp" compared to "orig" have wider distributions, as expected, and also shifted, which is expected due to the asymmetrical error bars; the shifts seem very large
+	- field W4 is no longer appears different from the others, as it did in the first histograms; might have been a bug 
+	- 50% and 75% free surface fields are very similar
+	- i<23 and i<24 limits: the comparison is not very useful now because the star-galaxy classification is not reliable; the distributions are much broader for i<23, and I'm not sure why
+	- I worry that when we account for different systematics we will get large shifts between the average/median of the weight ratio distributions; the original idea is to use the size of the shifts as error bars for the average/median, but if these are too wide, they are not informative anymore
+	- we need to decide what weights to use in order to get kappa_ext from the Millenium simulations; Do we use the weights Greene et al. suggested? do we use the ones with smallest scatter when accounting for different systematics?
+
+github
+======
+Set up a H0licow organization - done
+Set up an environment repo - done
+  python - done
+  Data 	- work in progress...
+    	- spec-z catalogs
+   	- short example photometry files, just for testing the code
+
+Comparison to the Millennium sims
+=================================
+- STATUS UPDATE (Edi): I have all the data and I'm inspecting it; I also have code that Renata (Chris' student)wrote
+- Run photo-z code(s) on mock galaxy catalogs and compare to "spec-z" values
+ that are in the catalogs
+- Ditto for the stellar masses
+- Make histograms of 0435/sim_fields for (weighted) number counts and compare
+ to 0435/CFHTLens_field histograms
+ 	- try using the same number of fields in the sims as we used in the
+   	CFHTLens histograms.  Then, for each sim field, use the mask that
+   	correspondes to one of the CFHTLens fields
+- how do we account for the fact that CFHTLens and the lens fields are contaminated by stars, and the simulations are not? DO we expect this systematic to be limited because we take ratios of weights?
+
+ABC approach
+============
+Look into formalizing the comparison to the Millennium into a ABC approach
+ - We have a bunch of summary statistics
+ - Consider calculating our ratios (i.e., zeta values from Edi's histograms)
+   within apertures of different radii
+
+
