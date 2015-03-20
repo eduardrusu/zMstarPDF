@@ -1,8 +1,8 @@
 # fields CFHTLenS W1-4
 # subfields: 171 1deg^2 throughout W1-4
 # cells: 4x4arcmin covering each subfield, in a grid
-# run as: python fields#.lst masks#.lst samplesize#
-# where samplesize number is 100 or 1000
+# run as: python fields#.lst masks#.lst samplesize# msk0435size maglimit
+# where samplesize number is 0, 100 or 1000 and msk0435size is 45, 60, 90 or 120; maglimit is 23 23.5 or 24
 
 import numpy as np
 import scipy
@@ -27,10 +27,12 @@ with open(sys.argv[1]) as f:  # fields#.lst
 with open(sys.argv[2]) as f:   # masks#.lst
     listmasks = f.readlines()
 
-print str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3])
+print("Arguments: \n List of fields to work on: %s \n List of masks associated with the fields: %s \n Number of samples to be drawn from P(z) and P(Mstar): %s \n Radius of each cell: %s \n Limiting magnitude: %s" % (str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]), str(sys.argv[5])))
 
-msk0435 = fits.open('msk0435.fits')
+msk0435 = fits.open('msk0435_asecrad%s.fits' % str(sys.argv[4]))
 cat0435 = Table.read('HE0435rugiJK_i24nostarXYlepharephotozstellarmasserrbar.cat', names=('X', 'Y', 'ra','dec','z','z_inf','z_sup','mass','mass_inf','mass_sup'), format='ascii')
+if str(sys.argv[5]) == "23":
+    cat0435 = Table.read('HE0435rugiJK_i24nostarXYlepharephotozstellarmasserrbari23.cat', names=('X', 'Y', 'ra','dec','z','z_inf','z_sup','mass','mass_inf','mass_sup'), format='ascii')
 dist0435 = Column(np.arange(len(cat0435)), name='dist', dtype=('<f8'))  # this is done in order to implement the 1/r weight convention for < 10 arcsec
 cat0435.add_column(dist0435)
 center0435 = SkyCoord('04:38:14.871 -12:17:14.96', frame='fk5', unit=(u.hourangle, u.deg))
@@ -242,7 +244,7 @@ for count in range(len(listfields)):
         for i in range(len(catfield)): #range(len(catfield)):   #range(1000):    JUST TO CHECK QUICKLY
             if i in [1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000, 130000, 140000, 150000, 160000, 170000, 180000, 190000, 200000]:
                 print i, "objects..."
-            if (catfield['Z_B'][i] <= z_s0435) and (catfield['MASK'][i] == 0) and (catfield['star_flag'][i] == 0) and ((catfield['MAG_i'][i] <= 24 and catfield['MAG_i'][i] > 0) or (catfield['MAG_y'][i] <= 24 and catfield['MAG_y'][i] > 0)): # detection in either i or y bands
+            if (catfield['Z_B'][i] <= z_s0435) and (catfield['MASK'][i] == 0) and (catfield['star_flag'][i] == 0) and ((catfield['MAG_i'][i] <= int(str(sys.argv[5])) and catfield['MAG_i'][i] > 0) or (catfield['MAG_y'][i] <= int(str(sys.argv[5])) and catfield['MAG_y'][i] > 0)): # above threshold in either i or y bands
                 coordfieldwcs = SkyCoord(ra=catfield[i]['ALPHA_J2000']*u.degree, dec=catfield[i]['DELTA_J2000']*u.degree, frame='fk5')
         #print coordfieldwcs
                 coordfieldpix = worldfield.wcs_world2pix(coordfieldwcs.ra.deg, coordfieldwcs.dec.deg, 0)
@@ -409,8 +411,9 @@ for count in range(len(listfields)):
         print ("No. of fields with area without mask > 75 percent & > 50 percent: %d/%d, %d/%d" % ((maskedcell>=0.75).sum(), cells_on_a_side ** 2, (maskedcell>=0.50).sum(), cells_on_a_side ** 2))
 
 # write a file where the most probable value of z and Mstar has been used, and a file for each of the 100 or 1000 samples
-        f = open('%s_q50_orig.lst' % [x[0:len(listfields[0])-1] for x in listfields][count],'w')
-        g = open('%s_q50_samp.lst' % [x[0:len(listfields[0])-1] for x in listfields][count],'w')
+        f = open('%s_q50_orig_size%s_i%s.lst' % ([x[0:len(listfields[0])-1] for x in listfields][count],str(sys.argv[4]),str(sys.argv[5])),'w')
+        if int(str(sys.argv[3])) != 0:
+            g = open('%s_q50_samp_size%s_i%s.lst' % ([x[0:len(listfields[0])-1] for x in listfields][count],str(sys.argv[4]),str(sys.argv[5])),'w')
         for i in range(cells_on_a_side):
             for j in range(cells_on_a_side):
                 if maskedcell[i][j] >= 0.50:
@@ -419,10 +422,12 @@ for count in range(len(listfields)):
                         g.write('q_gal= %.4e q_oneoverr= %.4e q_zweight= %.4e q_mass= %.4e q_mass2= %.4e q_mass2rms= %.4e q_mass3= %.4e q_mass3rms= %.4e q_zoverr= %.4e q_massoverr= %.4e q_mass2overr= %.4e q_mass3overr= %.4e q_mass2overrrms= %.4e q_mass3overrrms= %.4e q_zmassoverr= %.4e q_zmass2overr= %.4e \n' % (q_gal[i][j][k], q_oneoverr[i][j][k], q_zweight[i][j][k], q_mass[i][j][k], q_mass2[i][j][k], q_mass2rms[i][j][k], q_mass3[i][j][k], q_mass3rms[i][j][k], q_zoverr[i][j][k], q_massoverr[i][j][k], q_mass2overr[i][j][k], q_mass3overr[i][j][k], q_mass2overrrms[i][j][k], q_mass3overrrms[i][j][k], q_zmassoverr[i][j][k], q_zmass2overr[i][j][k]))
 
         f.close()
-        g.close()
+        if int(str(sys.argv[3])) != 0:
+            g.close()
 
-        f = open('%s_q75_orig.lst' % [x[0:len(listfields[0])-1] for x in listfields][count],'w')
-        g = open('%s_q75_samp.lst' % [x[0:len(listfields[0])-1] for x in listfields][count],'w')
+        f = open('%s_q75_orig_size%s_i%s.lst' % ([x[0:len(listfields[0])-1] for x in listfields][count],str(sys.argv[4])),'w')
+        if int(str(sys.argv[3]),str(sys.argv[5])) != 0:
+            g = open('%s_q75_samp_size%s_i%s.lst' % ([x[0:len(listfields[0])-1] for x in listfields][count],str(sys.argv[4]),str(sys.argv[5])),'w')
         for i in range(cells_on_a_side):
             for j in range(cells_on_a_side):
                 if maskedcell[i][j] >= 0.75:
@@ -431,7 +436,8 @@ for count in range(len(listfields)):
                         g.write('q_gal= %.4e q_oneoverr= %.4e q_zweight= %.4e q_mass= %.4e q_mass2= %.4e q_mass2rms= %.4e q_mass3= %.4e q_mass3rms= %.4e q_zoverr= %.4e q_massoverr= %.4e q_mass2overr= %.4e q_mass3overr= %.4e q_mass2overrrms= %.4e q_mass3overrrms= %.4e q_zmassoverr= %.4e q_zmass2overr= %.4e \n' % (q_gal[i][j][k], q_oneoverr[i][j][k], q_zweight[i][j][k], q_mass[i][j][k], q_mass2[i][j][k], q_mass2rms[i][j][k], q_mass3[i][j][k], q_mass3rms[i][j][k], q_zoverr[i][j][k], q_massoverr[i][j][k], q_mass2overr[i][j][k], q_mass3overr[i][j][k], q_mass2overrrms[i][j][k], q_mass3overrrms[i][j][k], q_zmassoverr[i][j][k], q_zmass2overr[i][j][k]))
 
         f.close()
-        g.close()
+        if int(str(sys.argv[3])) != 0:
+            g.close()
 
         print("Total time for subfield: --- %s seconds ---" % (time.time() - start_timesubfield))
 
