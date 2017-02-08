@@ -11,6 +11,8 @@ Our main test data are the 5 H0LiCOW lens fields, observed in _ugriJHK_ as well 
 
 This repository contains scripts and notes, as well as code used in our investigations of these options. In particular, it contains the complete code used for the analysis presented in [_Rusu et al, 2017_] (http://adsabs.harvard.edu/abs/2016arXiv160701047R). **The porting of the code is not yet complete.** A summary of our results is available on this [webpage] (http://shsuyu.github.io/H0LiCOW/site/paperIII.html).
 
+At present, we have completed our investigation of the first H0LiCOW lens, HE0435−1223, and we are focusing on the second lens, WFI2033-4723.
+
 ### People
 
 * Cristian Eduard Rusu (UC Davis)
