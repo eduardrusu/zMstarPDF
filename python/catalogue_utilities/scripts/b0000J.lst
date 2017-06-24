@@ -1,0 +1,9 @@
+mkdir -p /scratch/cerusu
+cp /u/ki/cerusu/MstarMilleniumSLAC_WFI2033.py /scratch/cerusu/.
+cp /u/ki/cerusu/lephare_dev/test/runlephare_phys_para_millenium.sh /scratch/cerusu/.
+cp /u/ki/cerusu/simsdata/GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare.txt /scratch/cerusu/.
+cd /scratch/cerusu
+python /scratch/cerusu/MstarMilleniumSLAC_WFI2033.py /scratch/cerusu/GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare.txt
+echo $'# ID \t mstar_specz \t mstar_photoz' | cat - GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare_mstar.txt > GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare_mstar.txt1; mv GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare_mstar.txt{1,}
+mv GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_WFI2033.images_forlephare_mstar.txt /u/ki/cerusu/simsdata/.
+rm /u/ki/cerusu/simsdata/outb0000J.lst
