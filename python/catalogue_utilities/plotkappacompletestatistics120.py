@@ -97,8 +97,7 @@ kappa_counts11 = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_gamma_oneover
 kappa_counts11_ = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_oneoverr_mass2rms_%s_%s_meds_increments2_2_2.cat" % (root,lens,inner,mag,rad), unpack=True)
 kappa_counts12 = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_gamma_oneoverr_mass3rms_%s_%s_meds_increments2_2_2_4.cat" % (root,lens,inner,mag,rad), unpack=True)
 kappa_counts12_ = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_oneoverr_mass3rms_%s_%s_meds_increments2_2_2.cat" % (root,lens,inner,mag,rad), unpack=True)
-# NEED TO CORRECT THE NEXT LINE AFTER THE FILE IS FOUND
-kappa_counts13 = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_gamma_oneoverr_mass2overrrms_%s_%s_meds_increments2_2_2_8.cat" % (root,lens,inner,mag,str(45)), unpack=True)
+kappa_counts13 = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_gamma_oneoverr_mass2overrrms_%s_%s_meds_increments2_2_2_8.cat" % (root,lens,inner,mag,rad), unpack=True)
 kappa_counts13_ = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_oneoverr_mass2overrrms_%s_%s_meds_increments2_2_2.cat" % (root,lens,inner,mag,rad), unpack=True)
 kappa_counts14 = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_gamma_oneoverr_mass3overrrms_%s_%s_meds_increments2_2_2_4.cat" % (root,lens,inner,mag,rad), unpack=True)
 kappa_counts14_ = np.loadtxt("%skappahist_%s_%sinnermask_nobeta_gal_oneoverr_mass3overrrms_%s_%s_meds_increments2_2_2.cat" % (root,lens,inner,mag,rad), unpack=True)
