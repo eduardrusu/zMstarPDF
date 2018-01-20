@@ -56,3 +56,5 @@ target/
 # old files
 attic
 
+.DS_Store
+python/.DS_Store
