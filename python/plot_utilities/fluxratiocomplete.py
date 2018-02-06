@@ -5,20 +5,28 @@ import numpy as np
 
 plt.clf()
 
-SIS_b = 1.45
-SIS_c = 1.54
+SIS_b = 1.54
+SIS_c = 1.46
 SIS_d = 0.52
-SIS_bc = 0.95
-SIS_bd = 0.36
-SIS_cd = 0.38
+SIS_bc = 1.05
+SIS_db = 0.34
+SIS_dc = 0.36
+
 SIE_b = 1.47
 SIE_c = 1.39
 SIE_d = 0.58
-SIE_bc = 0.95
-SIE_bd = 0.39
-SIE_cd = 0.42
+SIE_bc = 1.06
+SIE_db = 0.39
+SIE_dc = 0.41
 
-data = np.loadtxt('fluxratioerr.cat', dtype={'names': ('filter', 'B/A', 'B/Ae', 'C/A', 'C/Ae', 'D/A', 'D/Ae', 'C/B', 'C/Be', 'D/B', 'D/Be', 'D/C', 'D/Ce'),'formats': ('S2', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')})
+G2_b = 2.06
+G2_c = 1.94
+G2_d = 0.96
+G2_bc = 1.06
+G2_db = 0.46
+G2_dc = 0.49
+
+data = np.loadtxt('fluxratioerr.cat', dtype={'names': ('filter', 'B/A', 'B/Ae', 'C/A', 'C/Ae', 'D/A', 'D/Ae', 'B/C', 'B/Ce', 'D/B', 'D/Be', 'D/C', 'D/Ce'),'formats': ('S2', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')})
 filt = [x[0] for x in data]
 b = [x[1] for x in data]
 b_e = [x[2] for x in data]
@@ -57,16 +65,16 @@ plt.plot(x, x*0+SIS_bc, color='m', linestyle='--')
 
 plt.plot(x, bd, label=data.dtype.names[9], color='c')
 plt.errorbar(x, bd, yerr=bd_e, color='c')
-plt.plot(x, x*0+SIS_bd, color='c', linestyle='--')
-#plt.plot(x, x*0+SIE_bd, color='c', linestyle=':')
+plt.plot(x, x*0+SIS_db, color='c', linestyle='--')
+#plt.plot(x, x*0+SIE_db, color='c', linestyle=':')
 
 plt.plot(x, cd, label=data.dtype.names[11], color='y')
 plt.errorbar(x, cd, yerr=cd_e, color='y')
-plt.plot(x, x*0+SIS_cd, color='y', linestyle='--')
-#plt.plot(x, x*0+SIE_cd, color='y', linestyle=':')
+plt.plot(x, x*0+SIS_dc, color='y', linestyle='--')
+#plt.plot(x, x*0+SIE_dc, color='y', linestyle=':')
 
+plt.xlabel('Filter')
+plt.ylabel('Flux ratio')
 plt.legend()
-
-
 
 plt.savefig('fluxratioinversecomplete.eps', dpi=150, bbox_inches='tight')
