@@ -1,6 +1,6 @@
 # CE Rusu, Jan 19 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
-# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 IRAC deti meds
+# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 IRAC deti meds yes
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
 # definitions:
@@ -13,6 +13,7 @@
 #irac shows whether IRAC bands are used or not; use either "IRAC" or "noIRAC"
 #det characterizes the object detection type; for example, for WFI2033 I detect in i or i+r; use either "detir" or "deti"
 #mode (sum or meds): whether the weighted counts are summed or Median * counts is considered
+#remove=yes/no: refers to whether or not some objects specified in the code should be removed from the lens catalogue
 #overlap: the CFHTLenS field is covered with a grid of cells that can overlap; overlap=2 means that the field is covered with two grids: a first grid of non-overlapping cells, and then another of non-overlapping cells, and the two grids are offset relatively by 1/2 of the width of a cell; overlap is used to increase the number of data points; overlap of 2 increases the data points by a factor of 4
 # convergence refers to the effective convergence from Momcheva et al. 2006
 
@@ -41,7 +42,9 @@ radius = int(str(sys.argv[6]))
 irac = str(sys.argv[7])
 det = str(sys.argv[8])
 type = str(sys.argv[9])
+remove = str(sys.argv[10])
 
+suffix = '' # added to the name of the output catalogues
 samples = 10
 
 #print("Arguments: \n Lens: %s \n Field file: %s \n Field mask file: %s \n Limiting radius: %s \n" % (lensID, fieldID, fmask, radius))
@@ -266,6 +269,11 @@ def lensprep(lenscat):
     lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # remove the masked objects; I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
     #print msk_lens[0].data[400,485] # testing
     lenscat = np.delete(lenscat,np.where(lenscat[classify] < 0),axis=1) # removes all stars from the catalogue
+    if remove == 'yes':
+        coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5') # do this again because I already removed some rows
+        coordremove1 = SkyCoord('16:09:13.956 +65:32:28.00', frame='fk5', unit=(u.hourangle, u.deg))
+        lenscat = np.delete(lenscat,np.where(coord_lensinit.separation(coordremove1).arcsec < 0.5),axis=1) # removes selected objects from the catalogue, within a selection radius of 0.5 arcsec
+        suffix = '_handpicked'
     #for i in range(np.shape(lensbpz)[1]): # used for testing
         #print lensbpz[:,i][x_lens],lensbpz[:,i][y_lens]
     lenscat[x_lens] = lenscat[x_lens] - (pixnr - (2/pixlens.value) * radius)/2   # rescale the pixel coordinates in the original catalogue as appropriate for the relevant aperture radius; since the original is fractional, I am not using ((pixnr - (2/pixlens.value) * radius)/2).astype(int)
@@ -617,51 +625,51 @@ print "Writing output..."
 
 count = ">75 percent and >50 percent: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
-fcount = open('%s/%s_%s_%s_%s_%s_%s_%sarcsec_count.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
+fcount = open('%s/%s_%s_%s_%s_%s_%s_%sarcsec%s_count.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
 fcount.write(count)
 fcount.close()
 
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
+os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix))
 
-file50_0 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_0 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_1 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_1 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_2 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_2 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_3 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_3 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_4 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_4 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_5 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_5 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_6 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_6 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_7 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_7 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_8 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_8 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_9 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_9 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
+file50_0 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_0 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_1 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_1 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_2 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_2 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_3 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_3 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_4 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_4 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_5 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_5 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_6 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_6 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_7 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_7 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_8 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_8 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file50_9 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec%s_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
+file75_9 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec%s_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner,suffix),'a')
 
 header = "#      1_overlap_x  2_overlap_y  3_cell_x  4_cell_y  5_lens_gal_24bpz  6_lens_gal_23bpz  7_lens_zweight_24bpz  8_lens_zweight_23bpz 9_lens_mass_24bpz 10_lens_mass_23bpz 11_lens_mass2_24bpz 12_lens_mass2_23bpz 13_lens_mass3_24bpz 14_lens_mass3_23bpz 15_lens_oneoverr_24bpz 16_lens_oneoverr_23bpz 17_lens_zoverr_24bpz 18_lens_zoverr_23bpz 19_lens_massoverr_24bpz 20_lens_massoverr_23bpz 21_lens_mass2overr_24bpz 22_lens_mass2overr_23bpz 23_lens_mass3overr_24bpz 24_lens_mass3overr_23bpz 25_lens_mass2rms_24bpz 26_lens_mass2rms_23bpz 27_lens_mass3rms_24bpz 28_lens_mass3rms_23bpz 29_lens_mass2overrms_24bpz 30_lens_mass2overrms_23bpz 31_lens_mass3overrms_24bpz 32_lens_mass3overrms_23bpz 33_lens_flexion_24bpz 34_lens_flexion_23bpz 35_lens_tidal_24bpz 36_lens_tidal_23bpz 37_lens_convergence_24bpz 38_lens_convergence_23bpz 39_lens_convergencehalo_24bpz 40_lens_convergencehalo_23bpz 41_lens_gal_24eazy 42_lens_gal_23eazy 43_lens_zweight_24eazy 44_lens_zweight_23eazy 45_lens_mass_24eazy 46_lens_mass_23eazy 47_lens_mass2_24eazy 48_lens_mass2_23eazy 49_lens_mass3_24eazy 50_lens_mass3_23eazy 51_lens_oneoverr_24eazy 52_lens_oneoverr_23eazy 53_lens_zoverr_24eazy 54_lens_zoverr_23eazy  55_lens_massoverr_24eazy  56_lens_massoverr_23eazy  57_lens_mass2overr_24eazy  58_lens_mass2overr_23eazy  59_lens_mass3overr_24eazy  60_lens_mass3overr_23eazy  61_lens_mass2rms_24eazy  62_lens_mass2rms_23eazy  63_lens_mass3rms_24eazy  64_lens_mass3rms_23eazy  65_lens_mass2overrms_24eazy  66_lens_mass2overrms_23eazy  67_lens_mass3overrms_24eazy  68_lens_mass3overrms_23eazy  69_lens_flexion_24eazy  70_lens_flexion_23eazy  71_lens_tidal_24eazy  72_lens_tidal_23eazy  73_lens_convergence_24eazy  74_lens_convergence_23eazy  75_lens_convergencehalo_24eazy  76_lens_convergencehalo_23eazy \n"
 
