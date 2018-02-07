@@ -98,6 +98,8 @@ def lensinit(lensbpz_masked_,lens_gal_,lens_zweight_,lens_mass_,lens_mass2_,lens
         lens_mass3rms_[k][l][i][j][n] = scipy.special.cbrt(lens_mass3_[k][l][i][j][n])
         lens_mass2overrms_[k][l][i][j][n] = np.sqrt(lens_mass2overr_[k][l][i][j][n])
         lens_mass3overrms_[k][l][i][j][n] = scipy.special.cbrt(lens_mass3overr_[k][l][i][j][n])
+        
+        return lens_gal_,lens_zweight_,lens_mass_,lens_mass2_,lens_mass3_,lens_oneoverr_,lens_zoverr_,lens_massoverr_,lens_mass2overr_,lens_mass3overr_,lens_flexion_,lens_tidal_,lens_convergence_,lens_convergencehalo_,lens_mass2rms_,lens_mass3rms_,lens_mass2overrms_,lens_mass3overrms_
 
 def fieldinit(field_masked_,w_gal_,field_gal_,field_zweight_,field_mass_,field_mass2_,field_mass3_,field_oneoverr_,field_zoverr_,field_massoverr_,field_mass2overr_,field_mass3overr_,field_mass2rms_,field_mass3rms_,field_mass2overrms_,field_mass3overrms_,field_flexion_,field_tidal_,field_convergence_,field_convergencehalo_):
     if (w_gal_ != 0):
@@ -150,6 +152,8 @@ def fieldinit(field_masked_,w_gal_,field_gal_,field_zweight_,field_mass_,field_m
         field_mass3rms_[k][l][i][j] = scipy.special.cbrt(field_mass3_[k][l][i][j])
         field_mass2overrms_[k][l][i][j] = np.sqrt(field_mass2overr_[k][l][i][j])
         field_mass3overrms_[k][l][i][j] = scipy.special.cbrt(field_mass3overr_[k][l][i][j])
+
+        return field_gal_,field_zweight_,field_mass_,field_mass2_,field_mass3_,field_oneoverr_,field_zoverr_,field_massoverr_,field_mass2overr_,field_mass3overr_,field_mass2rms_,field_mass3rms_,field_mass2overrms_,field_mass3overrms_,field_flexion_,field_tidal_,field_convergence_,field_convergencehalo_
 
 start_time = time.time()
 
@@ -257,9 +261,9 @@ sep = 38 # distance in arcsec between the lens center and the galaxies
 def lensprep(lenscat):
     coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5')
     sep_lens = coord_lensinit.separation(center_lens).arcsec
-    sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec; it's ok to do this now, because below I am using the mask to remove the objects inside the inner mask
+    sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec; this does not mean I'm removing those objects, because I use the mask for that below
     lenscat = np.c_['0',lenscat,sep_lens.reshape((1, sep_lens.shape[0]))] # inserting as the last column of the catalogue
-    lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
+    lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # remove the masked objects; I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
     #print msk_lens[0].data[400,485] # testing
     lenscat = np.delete(lenscat,np.where(lenscat[classify] < 0),axis=1) # removes all stars from the catalogue
     #for i in range(np.shape(lensbpz)[1]): # used for testing
@@ -542,17 +546,13 @@ for k in range(overlap):
                             lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 24) | (lenseazy_masked24[z_lens + n * 3] > z_s)),axis=1)
                             lensbpz_masked23 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[i_lens] > 23) | (lensbpz_masked24[z_lens + n * 3] > z_s)),axis=1)
                             lenseazy_masked23 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 23) | (lenseazy_masked24[z_lens + n * 3] > z_s)),axis=1)
-
-                        lensinit(lensbpz_masked24,lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz)
+                        lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz = lensinit(lensbpz_masked24,lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz)
                         #print "d ",lens_gal_24bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-
-                        lensinit(lensbpz_masked23,lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz)
+                        lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz = lensinit(lensbpz_masked23,lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz)
                         #print "d ",lens_gal_23bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-                                  
-                        lensinit(lenseazy_masked24,lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy)
+                        lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy = lensinit(lenseazy_masked24,lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy)
                         #print "d ",lens_gal_24eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
-
-                        lensinit(lenseazy_masked23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy)
+                        lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy = lensinit(lenseazy_masked23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy)
                         #print "d ",lens_gal_23eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
 
                     '''Compute weights for the field catalogue'''
@@ -568,8 +568,10 @@ for k in range(overlap):
                     field_masked_23 = np.delete(field_masked_24,np.where(field_masked_24[i_field] > 23),axis=1)
                     w_gal_24 = np.shape(field_masked_24)[1]
                     w_gal_23 = np.shape(field_masked_23)[1]
-                    fieldinit(field_masked_24,w_gal_24,field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24)
-                    fieldinit(field_masked_23,w_gal_23,field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23)
+                    #mmm = np.copy(field_convergencehalo_23)
+                    field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24 = fieldinit(field_masked_24,w_gal_24,field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24)
+                    field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23 = fieldinit(field_masked_23,w_gal_23,field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23)
+                    #print np.min(mmm - field_convergencehalo_23)
 
                     ''' TEST THAT BOTH THE LENS AND FIELD CATALOGUE ARE PROPERLY MASKED AND MATCHED AGAINST EACHOTHER (BROUGHT THE LENS CATALOGUE TO FIELD PIXEL SCALE)'''
                     #if (k == 0) and (l == 0) and (i == 18) and (j == 15): # tested for radius 45, not appropriate for 120
