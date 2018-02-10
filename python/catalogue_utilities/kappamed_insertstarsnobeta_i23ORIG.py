@@ -1,6 +1,6 @@
-# This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights. This version uses the gamma & kappa from MS plane 35, and only considers i<23 galaxies (designed for WFI2033).
+# This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of  galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights. This version uses the gamma & kappa from MS plane 35, and only considers i<23 galaxies (designed for WFI2033).
 
-# run from the working directory (with all the files) for each of the 64 simulation fields, with the following arguments: lens name, field name, outer mask radius, type, inner mask radius; e.g.: python kappamed_insertstarsnobeta_i23.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 120 measured 5
+# run from the working directory (with all the files) for each of the 64 simulation fields, with the following arguments: lens name, field name, outer mask radius, type, inner mask radius; e.g.: python kappamed_insertstarsnobeta_i23.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 120 measured 8
 
 import numpy as np
 import scipy
@@ -22,7 +22,7 @@ def pause():
 
 def readbinary(replacestr,plane,radiusstr):
     replace = plane + replacestr
-    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%smed%s.c_" % (rootkappaplanes + replace,plane,radiusstr))
+    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%smed%s.c_" % (rootkappagamma + replace,plane,radiusstr))
     os.system("sed \"35s/.*/  fpt = fopen (\\\"kappa_values_%smed%s.dat\\\", \\\"w\\\");/\"  readKappaBinary_%smed%s.c_ > readKappaBinary_%smed%s.c" % (plane,radiusstr,plane,radiusstr,plane,radiusstr))
     os.system("rm readKappaBinary_%smed%s.c_" % (plane,radiusstr))
     os.system("gcc readKappaBinary_%smed%s.c -o compiled_%smed%s.out" % (plane,radiusstr,plane,radiusstr))
@@ -96,8 +96,8 @@ def weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,
             
                 cellkappagamma = np.c_[cellkappagamma,w_gal_23,w_zweight_23,w_mass_23,w_mass2_23,w_mass3_23,w_oneoverr_23,w_zoverr_23,w_massoverr_23,w_mass2overr_23,w_mass3overr_23,w_mass2rms_23,w_mass3rms_23,w_mass2overrms_23,w_mass3overrms_23,w_flexion_23,w_tidal_23,w_SIS_23,w_SIShalo_23]
                 if initialized == 0:
-                    os.system('rm -f %snobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],radius,inner))
-                    f=open('%snobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],radius,inner),'ab') # open in binary
+                    os.system('rm nobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (pln,type,bands,lens,plane[0:13],radius,inner))
+                    f=open('nobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (pln,type,bands,lens,plane[0:13],radius,inner),'ab') # open in binary
                     output = "# ID kappa gamma1 gamma2 w_gal_23 w_zweight_23 w_mass_23 w_mass2_23 w_mass3_23 w_oneoverr_23 w_zoverr_23 w_massoverr_23 w_mass2overr_23 w_mass3overr_23 w_mass2rms_23 w_mass3rms_23 w_mass2overrms_23 w_mass3overrms_23 w_flexion_23 w_tidal_23 w_SIS_23 w_SIShalo_23 \n"
                     f.write(output) # needs to be done inside the loop because otherwise it crashes
                     initialized = 1
@@ -113,6 +113,10 @@ def weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,
 
 start_time = time.time()
 
+rootkappagamma = "\/mfst01a\/rusucs\/results_kappagamma\/mstarsim\/" # this is where I orininally saved the files
+#rootwghtratios = "/wam03b/rusucs/MSwghtratios/" # save to the partition with more available space
+rootgals = "/mfst01a/rusucs/WFI2033/MSgals/"
+#rootkappagamma = "/mfst01a/rusucs/results_kappagamma/mstarsim/"
 lens = str(sys.argv[1])
 plane = str(sys.argv[2])
 radiusstr = str(sys.argv[3])
@@ -194,10 +198,6 @@ if lens == "RX1131":
 if lens == "J1206":
     z_s = 1.79
     pln = 34
-
-rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
-rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
@@ -301,19 +301,19 @@ inc_ugriz_24 = inc_h12_24
 
 # read the stellar contaminants I wil insert
 
-star_imag_18, star_z_18, star_mstar_18 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star018zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_185, star_z_185, star_mstar_185 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star18185zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_19, star_z_19, star_mstar_19 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star18519zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_195, star_z_195, star_mstar_195 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star19195zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_20, star_z_20, star_mstar_20 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star19520zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_205, star_z_205, star_mstar_205 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star20205zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_21, star_z_21, star_mstar_21 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star20521zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_215, star_z_215, star_mstar_215 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star21215zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_22, star_z_22, star_mstar_22 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star21522zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_225, star_z_225, star_mstar_225 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star22225zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_23, star_z_23, star_mstar_23 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star22523zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_235, star_z_235, star_mstar_235 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star23235zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star23524zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_18, star_z_18, star_mstar_18 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star018zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_185, star_z_185, star_mstar_185 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star18185zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_19, star_z_19, star_mstar_19 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star18519zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_195, star_z_195, star_mstar_195 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star19195zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_20, star_z_20, star_mstar_20 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star19520zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_205, star_z_205, star_mstar_205 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star20205zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_21, star_z_21, star_mstar_21 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star20521zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_215, star_z_215, star_mstar_215 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star21215zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_22, star_z_22, star_mstar_22 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star21522zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_225, star_z_225, star_mstar_225 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star22225zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_23, star_z_23, star_mstar_23 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star22523zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_235, star_z_235, star_mstar_235 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star23235zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("/mfst01a/rusucs/results_kappagamma/mstarsim/star23524zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
 
 ############################
 # read the binary kappa file
@@ -329,7 +329,7 @@ if str(pln) in plane:
     readbinary(".gamma_2",plane,radiusstr)
     gamma2 = np.loadtxt("kappa_values_%smed%s.dat" % (plane,radiusstr), usecols = [1], unpack=True)
     kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
-    os.system("rm -f kappa_values_%smed%s.dat" % (plane,radiusstr))
+    os.system("rm kappa_values_%smed%s.dat" % (plane,radiusstr))
     print "Read kappa and shear in ", time.time() - start_readkappa, "seconds"
 else: sys.exit('Wrong MS plane for this lens!!!')
 

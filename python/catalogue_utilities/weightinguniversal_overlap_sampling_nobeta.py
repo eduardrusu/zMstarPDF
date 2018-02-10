@@ -1,6 +1,6 @@
 # CE Rusu, Jan 19 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
-# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 IRAC deti meds
+# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 15 IRAC deti meds yes 0.61 0.71
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
 # definitions:
@@ -13,6 +13,8 @@
 #irac shows whether IRAC bands are used or not; use either "IRAC" or "noIRAC"
 #det characterizes the object detection type; for example, for WFI2033 I detect in i or i+r; use either "detir" or "deti"
 #mode (sum or meds): whether the weighted counts are summed or Median * counts is considered
+#remove=yes/no: refers to whether or not some objects specified in the code should be removed from the lens catalogue
+#zinf, zsup: the lower and upper redshift gap in case I remove redshift slices; just use a negative range if not removing anything
 #overlap: the CFHTLenS field is covered with a grid of cells that can overlap; overlap=2 means that the field is covered with two grids: a first grid of non-overlapping cells, and then another of non-overlapping cells, and the two grids are offset relatively by 1/2 of the width of a cell; overlap is used to increase the number of data points; overlap of 2 increases the data points by a factor of 4
 # convergence refers to the effective convergence from Momcheva et al. 2006
 
@@ -38,10 +40,15 @@ fmask = str(sys.argv[3])
 rootlens = str(sys.argv[4])
 output = str(sys.argv[5])
 radius = int(str(sys.argv[6]))
-irac = str(sys.argv[7])
-det = str(sys.argv[8])
-type = str(sys.argv[9])
+inner = int(str(sys.argv[7]))
+irac = str(sys.argv[8])
+det = str(sys.argv[9])
+type = str(sys.argv[10])
+remove = str(sys.argv[11])
+zinf = float(str(sys.argv[12]))
+zsup = float(str(sys.argv[13]))
 
+suffix = '' # added to the name of the output catalogues
 samples = 10
 
 #print("Arguments: \n Lens: %s \n Field file: %s \n Field mask file: %s \n Limiting radius: %s \n" % (lensID, fieldID, fmask, radius))
@@ -64,7 +71,6 @@ def lensinit(lensbpz_masked_,lens_gal_,lens_zweight_,lens_mass_,lens_mass2_,lens
         convergence = np.sqrt(lens_mass) / lensbpz_masked_[sep] # sqrt(const * M * (D_PS / (D_P * D_S))) / R
         lens_masshalo = 10 ** lensbpz_masked_[Mhalo + n * 3]
         convergencehalo = np.sqrt(lens_masshalo) / lensbpz_masked_[sep] # sqrt(const * M * (D_PS / (D_P * D_S))) / R
-        
         if type == "meds":
             lens_zweight_[k][l][i][j][n] = np.median(lens_zweight) * lens_gal_[k][l][i][j][n]
             lens_mass_[k][l][i][j][n] = np.median(lens_mass) * lens_gal_[k][l][i][j][n]
@@ -93,11 +99,11 @@ def lensinit(lensbpz_masked_,lens_gal_,lens_zweight_,lens_mass_,lens_mass2_,lens
             lens_tidal_[k][l][i][j][n] = np.sum(lens_tidal)
             lens_convergence_[k][l][i][j][n] = np.sum(convergence)
             lens_convergencehalo_[k][l][i][j][n] = np.sum(convergencehalo)
-        
         lens_mass2rms_[k][l][i][j][n] = np.sqrt(lens_mass2_[k][l][i][j][n])
         lens_mass3rms_[k][l][i][j][n] = scipy.special.cbrt(lens_mass3_[k][l][i][j][n])
         lens_mass2overrms_[k][l][i][j][n] = np.sqrt(lens_mass2overr_[k][l][i][j][n])
         lens_mass3overrms_[k][l][i][j][n] = scipy.special.cbrt(lens_mass3overr_[k][l][i][j][n])
+    return lens_gal_,lens_zweight_,lens_mass_,lens_mass2_,lens_mass3_,lens_oneoverr_,lens_zoverr_,lens_massoverr_,lens_mass2overr_,lens_mass3overr_,lens_flexion_,lens_tidal_,lens_convergence_,lens_convergencehalo_,lens_mass2rms_,lens_mass3rms_,lens_mass2overrms_,lens_mass3overrms_
 
 def fieldinit(field_masked_,w_gal_,field_gal_,field_zweight_,field_mass_,field_mass2_,field_mass3_,field_oneoverr_,field_zoverr_,field_massoverr_,field_mass2overr_,field_mass3overr_,field_mass2rms_,field_mass3rms_,field_mass2overrms_,field_mass3overrms_,field_flexion_,field_tidal_,field_convergence_,field_convergencehalo_):
     if (w_gal_ != 0):
@@ -116,7 +122,6 @@ def fieldinit(field_masked_,w_gal_,field_gal_,field_zweight_,field_mass_,field_m
         convergence = np.sqrt(field_mass) / field_masked_[cell_sep] # sqrt(const * M * (D_PS / (D_P * D_S))) / R
         field_masshalo = 10 ** field_masked_[Mhalo_field]
         convergencehalo = np.sqrt(field_masshalo) / field_masked_[cell_sep] # sqrt(const * M * (D_PS / (D_P * D_S))) / R
-        
         if type == "meds":
             field_zweight_[k][l][i][j] = np.median(field_zweight) * w_gal_
             field_mass_[k][l][i][j] = np.median(field_mass) * w_gal_
@@ -145,11 +150,11 @@ def fieldinit(field_masked_,w_gal_,field_gal_,field_zweight_,field_mass_,field_m
             field_tidal_[k][l][i][j] = np.sum(field_tidal)
             field_convergence_[k][l][i][j] = np.sum(convergence)
             field_convergencehalo_[k][l][i][j] = np.sum(convergencehalo)
-        
         field_mass2rms_[k][l][i][j] = np.sqrt(field_mass2_[k][l][i][j])
         field_mass3rms_[k][l][i][j] = scipy.special.cbrt(field_mass3_[k][l][i][j])
         field_mass2overrms_[k][l][i][j] = np.sqrt(field_mass2overr_[k][l][i][j])
         field_mass3overrms_[k][l][i][j] = scipy.special.cbrt(field_mass3overr_[k][l][i][j])
+    return field_gal_,field_zweight_,field_mass_,field_mass2_,field_mass3_,field_oneoverr_,field_zoverr_,field_massoverr_,field_mass2overr_,field_mass3overr_,field_mass2rms_,field_mass3rms_,field_mass2overrms_,field_mass3overrms_,field_flexion_,field_tidal_,field_convergence_,field_convergencehalo_
 
 start_time = time.time()
 
@@ -180,7 +185,6 @@ if lensID == "WFI2033":
     brightmag = 16.90
     pixnr = 915
     pixlens = 0.2625 * u.arcsec
-    inner = 5 # inner mask cut radius in arcsec
 
 #dist = distances.Distance()
 #dist.OMEGA_M = 0.25 # change to the cosmology used by the Millennium Simulation
@@ -239,7 +243,7 @@ if lensID == "WFI2033":
 lensbpz = np.loadtxt('%s/%s%sbpz_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
 lenseazy = np.loadtxt('%s/%s%seazy_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
 #msk_lens = fits.open('%s/testmask45.fits' % (rootlenscat)) # testing
-msk_lens = fits.open('%s/msk%s_asecrad%s_no%sarcsec.fits' % (rootlenscat,lensID,radius,inner))
+msk_lens = fits.open('%s/msk%sarcsecrad%sarcsecgap.fits' % (rootlenscat,radius,inner))
 # defining the columns:
 x_lens = 0
 y_lens = 1
@@ -254,28 +258,30 @@ Mhalo = 10 # first instance
 # soon to be defined:
 sep = 38 # distance in arcsec between the lens center and the galaxies
 
-coord_lensinit = SkyCoord(ra=lensbpz[RA_lens]*u.degree, dec=lensbpz[DEC_lens]*u.degree, frame='fk5')
-sep_lens = coord_lensinit.separation(center_lens).arcsec
-sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec; it's ok to do this now, because below I am using the mask to remove the objects inside the inner mask
+def lensprep(lenscat):
+    coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5')
+    sep_lens = coord_lensinit.separation(center_lens).arcsec
+    sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec; this does not mean I'm removing those objects, because I use the mask for that below
+    lenscat = np.c_['0',lenscat,sep_lens.reshape((1, sep_lens.shape[0]))] # inserting as the last column of the catalogue
+    lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # remove the masked objects; I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
+    #print msk_lens[0].data[400,485] # testing
+    lenscat = np.delete(lenscat,np.where(lenscat[classify] < 0),axis=1) # removes all stars from the catalogue
+    if remove == 'yes':
+        coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5') # do this again because I already removed some rows
+        removecat = np.loadtxt('%s/removehandpicked.cat' % rootlenscat)
+        for i in range(len(removecat)):
+            coordremove = SkyCoord('%s %s' %(removecat[i][0],removecat[i][1]), frame='fk5', unit=(u.deg, u.deg))
+            lenscat = np.delete(lenscat,np.where(coord_lensinit.separation(coordremove).arcsec < 0.5),axis=1) # removes selected objects from the catalogue, within a selection radius of 0.5 arcsec
+        global suffix
+        suffix = '_handpicked'
+    #for i in range(np.shape(lensbpz)[1]): # used for testing
+        #print lensbpz[:,i][x_lens],lensbpz[:,i][y_lens]
+    lenscat[x_lens] = lenscat[x_lens] - (pixnr - (2/pixlens.value) * radius)/2   # rescale the pixel coordinates in the original catalogue as appropriate for the relevant aperture radius; since the original is fractional, I am not using ((pixnr - (2/pixlens.value) * radius)/2).astype(int)
+    lenscat[y_lens] = lenscat[y_lens] - (pixnr - (2/pixlens.value) * radius)/2
+    return lenscat
 
-lensbpz = np.c_['0',lensbpz,sep_lens.reshape((1, sep_lens.shape[0]))]
-lensbpz = np.delete(lensbpz,np.where(msk_lens[0].data[lensbpz[y_lens].astype(int),lensbpz[x_lens].astype(int)] != 0),axis=1) # I tested that this is the correct order of x and y. x and y in lensbpz are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
-#print msk_lens[0].data[400,485] # testing
-lensbpz = np.delete(lensbpz,np.where(lensbpz[classify] < 0),axis=1) # removes all stars from the catalogue
-#for i in range(np.shape(lensbpz)[1]): # used for testing
-    #print lensbpz[:,i][x_lens],lensbpz[:,i][y_lens]
-lensbpz[x_lens] = lensbpz[x_lens] - (pixnr - (2/pixlens.value) * radius)/2   # rescale the pixel coordinates in the original catalogue as appropriate for the relevant aperture radius; since the original is fractional, I am not using ((pixnr - (2/pixlens.value) * radius)/2).astype(int)
-lensbpz[y_lens] = lensbpz[y_lens] - (pixnr - (2/pixlens.value) * radius)/2
-
-coord_lensinit = SkyCoord(ra=lenseazy[RA_lens]*u.degree, dec=lenseazy[DEC_lens]*u.degree, frame='fk5')
-sep_lens = coord_lensinit.separation(center_lens).arcsec
-sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec
-
-lenseazy = np.c_['0',lenseazy,sep_lens.reshape((1, sep_lens.shape[0]))]
-lenseazy = np.delete(lenseazy,np.where(msk_lens[0].data[lenseazy[y_lens].astype(int),lenseazy[x_lens].astype(int)] != 0),axis=1)
-lenseazy = np.delete(lenseazy,np.where(lenseazy[classify] < 0),axis=1) # removes all stars from the catalogue
-lenseazy[x_lens] = lenseazy[x_lens] - (pixnr - (2/pixlens.value) * radius)/2   # rescale the pixel coordinates in the original catalogue as appropriate for the relevant aperture radius
-lenseazy[y_lens] = lenseazy[y_lens] - (pixnr - (2/pixlens.value) * radius)/2
+lensbpz = lensprep(lensbpz)
+lenseazy = lensprep(lenseazy)
 
 # Open the lens and field masks and set up the cell grid
 print "Masking the lens catalogue corresponding to each CFHTLenS field cell..."
@@ -407,6 +413,7 @@ cell_ypix = -2
 cell_sep = -1
 
 field = np.delete(field,np.where(field[z_field] > z_s),axis=1) # eliminate objects at redshifts higher than the source
+field = np.delete(field,np.where((field[z_field] >= zinf) & (field[z_field] <= zsup)),axis=1) # eliminate objects corresponding to the redshift slice
 field[i_field][field[i_field] < 0] = field[y_field][field[i_field] < 0] # for objects with y mags, use those
 field = np.delete(field,np.where(field[i_field] < brightmag),axis = 1) # eliminate objects brighter than the upper brightness limit
 field[mass_BEST_field][field[mass_BEST_field] < 0] = 9.0 # fix the very rare unphysical masses
@@ -536,29 +543,33 @@ for k in range(overlap):
                         lenseazy_masked24 = np.copy(lenseazy_masked)
                         if n == 0:
                             lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[i_lens] > 24) | (lensbpz_masked24[z_lens] > z_s)),axis=1)
+                            lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[z_lens] >= zinf) & (lensbpz_masked24[z_lens] <= zsup)),axis=1) # remove the redshift slice
                             lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 24) | (lenseazy_masked24[z_lens] > z_s)),axis=1)
+                            lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[z_lens] >= zinf) & (lenseazy_masked24[z_lens] <= zsup)),axis=1)
                             lensbpz_masked23 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[i_lens] > 23) | (lensbpz_masked24[z_lens] > z_s)),axis=1)
+                            lensbpz_masked23 = np.delete(lensbpz_masked23,np.where((lensbpz_masked23[z_lens] >= zinf) & (lensbpz_masked23[z_lens] <= zsup)),axis=1)
                             lenseazy_masked23 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 23) | (lenseazy_masked24[z_lens] > z_s)),axis=1)
+                            lenseazy_masked23 = np.delete(lenseazy_masked23,np.where((lenseazy_masked23[z_lens] >= zinf) & (lenseazy_masked23[z_lens] <= zsup)),axis=1)
                         else:
                             for o in range(lensbpz_masked24.shape[1]):
                                 lensbpz_masked24[i_lens][o] = np.random.normal(lensbpz_masked24[i_lens][o], np.max([lensbpz_masked24[i_err_lens][o],0.005]),1)[0]
                             for o in range(lenseazy_masked24.shape[1]):
                                 lenseazy_masked24[i_lens][o] = np.random.normal(lenseazy_masked24[i_lens][o], np.max([lenseazy_masked24[i_err_lens][o],0.005]),1)[0]
                             lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[i_lens] > 24) | (lensbpz_masked24[z_lens + n * 3] > z_s)),axis=1)
+                            lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[z_lens + n * 3] >= zinf) & (lensbpz_masked24[z_lens + n * 3] <= zsup)),axis=1)  # remove the redshift slice
                             lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 24) | (lenseazy_masked24[z_lens + n * 3] > z_s)),axis=1)
+                            lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[z_lens + n * 3] >= zinf) & (lenseazy_masked24[z_lens + n * 3] <= zsup)),axis=1)
                             lensbpz_masked23 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[i_lens] > 23) | (lensbpz_masked24[z_lens + n * 3] > z_s)),axis=1)
+                            lensbpz_masked23 = np.delete(lensbpz_masked23,np.where((lensbpz_masked23[z_lens + n * 3] >= zinf) & (lensbpz_masked23[z_lens + n * 3] <= zsup)),axis=1)
                             lenseazy_masked23 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[i_lens] > 23) | (lenseazy_masked24[z_lens + n * 3] > z_s)),axis=1)
-
-                        lensinit(lensbpz_masked24,lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz)
+                            lenseazy_masked23 = np.delete(lenseazy_masked23,np.where((lenseazy_masked23[z_lens + n * 3] >= zinf) & (lenseazy_masked23[z_lens + n * 3] <= zsup)),axis=1)
+                        lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz = lensinit(lensbpz_masked24,lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz)
                         #print "d ",lens_gal_24bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-
-                        lensinit(lensbpz_masked23,lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz)
+                        lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz = lensinit(lensbpz_masked23,lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz)
                         #print "d ",lens_gal_23bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-                                  
-                        lensinit(lenseazy_masked24,lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy)
+                        lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy = lensinit(lenseazy_masked24,lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy)
                         #print "d ",lens_gal_24eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
-
-                        lensinit(lenseazy_masked23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy)
+                        lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy = lensinit(lenseazy_masked23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy)
                         #print "d ",lens_gal_23eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
 
                     '''Compute weights for the field catalogue'''
@@ -574,8 +585,10 @@ for k in range(overlap):
                     field_masked_23 = np.delete(field_masked_24,np.where(field_masked_24[i_field] > 23),axis=1)
                     w_gal_24 = np.shape(field_masked_24)[1]
                     w_gal_23 = np.shape(field_masked_23)[1]
-                    fieldinit(field_masked_24,w_gal_24,field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24)
-                    fieldinit(field_masked_23,w_gal_23,field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23)
+                    #mmm = np.copy(field_convergencehalo_23)
+                    field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24 = fieldinit(field_masked_24,w_gal_24,field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24)
+                    field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23 = fieldinit(field_masked_23,w_gal_23,field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23)
+                    #print np.min(mmm - field_convergencehalo_23)
 
                     ''' TEST THAT BOTH THE LENS AND FIELD CATALOGUE ARE PROPERLY MASKED AND MATCHED AGAINST EACHOTHER (BROUGHT THE LENS CATALOGUE TO FIELD PIXEL SCALE)'''
                     #if (k == 0) and (l == 0) and (i == 18) and (j == 15): # tested for radius 45, not appropriate for 120
@@ -621,51 +634,52 @@ print "Writing output..."
 
 count = ">75 percent and >50 percent: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
-fcount = open('%s/%s_%s_%s_%s_%s_%s_%sarcsec_count.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
+mskname = 'msk%sarcsecrad%sarcsecgap.fits'[0:-5] % (radius,inner)
+fcount = open('%s/%s_%s_%s_%s_%s_%s_zgap%s_%s%s_count.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
 fcount.write(count)
 fcount.close()
 
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_50_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
-os.system('rm %s/%s_75_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)) # '-f' ignores non-existent files
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
 
-file50_0 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_0 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_0.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_1 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_1 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_1.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_2 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_2 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_2.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_3 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_3 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_3.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_4 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_4 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_4.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_5 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_5 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_5.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_6 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_6 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_6.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_7 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_7 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_7.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_8 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_8 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_8.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file50_9 = open('%s/%s_50_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
-file75_9 = open('%s/%s_75_%s_%s_%s_%s_%s_%sarcsec_9.lst' % (output,fieldID[-25:-4],radius,lensID,det,irac,type,inner),'a')
+file50_0 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_0 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_1 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_1 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_2 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_2 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_3 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_3 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_4 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_4 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_5 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_5 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_6 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_6 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_7 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_7 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_8 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_8 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_9 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_9 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
 
 header = "#      1_overlap_x  2_overlap_y  3_cell_x  4_cell_y  5_lens_gal_24bpz  6_lens_gal_23bpz  7_lens_zweight_24bpz  8_lens_zweight_23bpz 9_lens_mass_24bpz 10_lens_mass_23bpz 11_lens_mass2_24bpz 12_lens_mass2_23bpz 13_lens_mass3_24bpz 14_lens_mass3_23bpz 15_lens_oneoverr_24bpz 16_lens_oneoverr_23bpz 17_lens_zoverr_24bpz 18_lens_zoverr_23bpz 19_lens_massoverr_24bpz 20_lens_massoverr_23bpz 21_lens_mass2overr_24bpz 22_lens_mass2overr_23bpz 23_lens_mass3overr_24bpz 24_lens_mass3overr_23bpz 25_lens_mass2rms_24bpz 26_lens_mass2rms_23bpz 27_lens_mass3rms_24bpz 28_lens_mass3rms_23bpz 29_lens_mass2overrms_24bpz 30_lens_mass2overrms_23bpz 31_lens_mass3overrms_24bpz 32_lens_mass3overrms_23bpz 33_lens_flexion_24bpz 34_lens_flexion_23bpz 35_lens_tidal_24bpz 36_lens_tidal_23bpz 37_lens_convergence_24bpz 38_lens_convergence_23bpz 39_lens_convergencehalo_24bpz 40_lens_convergencehalo_23bpz 41_lens_gal_24eazy 42_lens_gal_23eazy 43_lens_zweight_24eazy 44_lens_zweight_23eazy 45_lens_mass_24eazy 46_lens_mass_23eazy 47_lens_mass2_24eazy 48_lens_mass2_23eazy 49_lens_mass3_24eazy 50_lens_mass3_23eazy 51_lens_oneoverr_24eazy 52_lens_oneoverr_23eazy 53_lens_zoverr_24eazy 54_lens_zoverr_23eazy  55_lens_massoverr_24eazy  56_lens_massoverr_23eazy  57_lens_mass2overr_24eazy  58_lens_mass2overr_23eazy  59_lens_mass3overr_24eazy  60_lens_mass3overr_23eazy  61_lens_mass2rms_24eazy  62_lens_mass2rms_23eazy  63_lens_mass3rms_24eazy  64_lens_mass3rms_23eazy  65_lens_mass2overrms_24eazy  66_lens_mass2overrms_23eazy  67_lens_mass3overrms_24eazy  68_lens_mass3overrms_23eazy  69_lens_flexion_24eazy  70_lens_flexion_23eazy  71_lens_tidal_24eazy  72_lens_tidal_23eazy  73_lens_convergence_24eazy  74_lens_convergence_23eazy  75_lens_convergencehalo_24eazy  76_lens_convergencehalo_23eazy \n"
 
