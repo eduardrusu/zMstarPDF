@@ -76,15 +76,15 @@ if __name__=='__main__':
     smooth_demo()
 '''
 
-plt.clf()
-x = np.linspace(-0.1,1,2000)
-y = np.loadtxt("kappahist_WFI2033_5innermask_nobeta_gal_gamma_oneoverr_23_45_meds_increments2_2_2.cat",unpack=True)
-winlen = 36
+#plt.clf()
+#x = np.linspace(-0.1,1,2000)
+#y = np.loadtxt("kappahist_WFI2033_5innermask_nobeta_gal_gamma_oneoverr_23_45_meds_increments2_2_2.cat",unpack=True)
+#winlen = 36
 #z = smooth(y,winlen,'flat')
-z = smooth(y,winlen,'hanning')
+#z = smooth(y,winlen,'hanning')
 #z = smooth(y,winlen,'hamming')
 #z = smooth(y,winlen,'bartlett')
 #z = smooth(y,winlen,'blackman')
-plt.plot(x,y)
-plt.plot(x,z[(winlen/2-1):-(winlen/2)])
-plt.show()
+#plt.plot(x,y)
+#plt.plot(x,z[(winlen/2-1):-(winlen/2)])
+#plt.show()
