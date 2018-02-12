@@ -1,6 +1,7 @@
-# This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights. This version uses the gamma & kappa from MS plane 35, and only considers i<23 galaxies (designed for WFI2033).
-
-# run from the working directory (with all the files) for each of the 64 simulation fields, with the following arguments: lens name, field name, outer mask radius, type, inner mask radius; e.g.: python kappamed_insertstarsnobeta_i23.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 120 measured 5
+# CE Rusu, Feb 11 2018
+# This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights. This version only considers i<23 galaxies (designed for WFI2033).
+# run from the working directory (with all the files) for each of the 64 simulation fields, with the following arguments: lens name, field name, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python kappamed_insertstarsnobeta_i23.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
+# the code can oly be used for limmag 23 or 24 currently
 
 import numpy as np
 import scipy
@@ -20,15 +21,15 @@ from scipy.interpolate import griddata
 def pause():
     programPause = raw_input("Press the <ENTER> key to continue...") # use for debugging
 
-def readbinary(replacestr,plane,radiusstr):
+def readbinary(replacestr):
     replace = plane + replacestr
-    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%smed%s.c_" % (rootkappaplanes + replace,plane,radiusstr))
-    os.system("sed \"35s/.*/  fpt = fopen (\\\"kappa_values_%smed%s.dat\\\", \\\"w\\\");/\"  readKappaBinary_%smed%s.c_ > readKappaBinary_%smed%s.c" % (plane,radiusstr,plane,radiusstr,plane,radiusstr))
-    os.system("rm readKappaBinary_%smed%s.c_" % (plane,radiusstr))
-    os.system("gcc readKappaBinary_%smed%s.c -o compiled_%smed%s.out" % (plane,radiusstr,plane,radiusstr))
-    os.system("./compiled_%smed%s.out" % (plane,radiusstr))
-    os.system("rm readKappaBinary_%smed%s.c" % (plane,radiusstr))
-    os.system("rm compiled_%smed%s.out" % (plane,radiusstr))
+    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (replace,lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("sed \"35s/.*/  fpt = fopen (\\\"kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat\\\", \\\"w\\\");/\"  readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_ > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,int(limmag),radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("gcc readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c -o compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("./compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("rm -f compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,int(limmag),radius,innermsk,gap))
 
 def contaminants(count,cont_ugr,posxmin,posxmax,posymin,posymax,star_imag,star_z,star_mstar):
     cont = np.random.random_integers(0,499,int(count * cont_ugr)) # randomly select from the star catalogues which contain 500 stars each
@@ -39,7 +40,7 @@ def contaminants(count,cont_ugr,posxmin,posxmax,posymin,posymax,star_imag,star_z
     cont_mstar = star_mstar[cont]
     return cont, cont_posx, cont_posy, cont_imag, cont_z, cont_mstar
 
-def weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,type,lens,plane,bands,inner):
+def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands):
     initialized = 0
     for i in range(spacing):
         for j in range(spacing):
@@ -73,32 +74,32 @@ def weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,
             p_SIS = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIS':np.sqrt(cat_msk[:,index_mstar]) / cat_msk[:,index_sep]})
             p_SIShalo = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIShalo':np.sqrt(cat_msk[:,index_Mhalo]) / cat_msk[:,index_sep]})
             
-            w_gal_23 = np.bincount(cat_msk[:,index_index].astype(int))
-            if (p_zweight.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_zoverr.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_oneoverr.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_mass.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_mass2.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_mass3.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_massoverr.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_mass2overr.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_mass3overr.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_flexion.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_tidal.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_SIS.groupby(['cell']).median().values[:,0].size == w_gal_23.size) and (p_SIShalo.groupby(['cell']).median().values[:,0].size == w_gal_23.size): # it seems for 45 arcsec aperture only, in some cases the two vary by 1 (e.g. 24335 and 24336)
-                w_gal_23 = np.bincount(cat_msk[:,index_index].astype(int))
-                w_zweight_23 = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass_23 = p_mass.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass2_23 = p_mass2.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass3_23 = p_mass3.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_oneoverr_23 = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_zoverr_23 = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_massoverr_23 = p_massoverr.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass2overr_23 = p_mass2overr.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass3overr_23 = p_mass3overr.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_flexion_23 = p_flexion.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_tidal_23 = p_tidal.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_SIS_23 = p_SIS.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_SIShalo_23 = p_SIShalo.groupby(['cell']).median().values[:,0] * w_gal_23
-                w_mass2rms_23 = np.sqrt(w_mass2_23)
-                w_mass3rms_23 = scipy.special.cbrt(w_mass3_23)
-                w_mass2overrms_23 = np.sqrt(w_mass2overr_23)
-                w_mass3overrms_23 = scipy.special.cbrt(w_mass3overr_23)
+            w_gal_2X = np.bincount(cat_msk[:,index_index].astype(int)) # 2X stands for 23 or 24 limmag
+            if (p_zweight.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_zoverr.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_oneoverr.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_mass.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_mass2.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_mass3.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_massoverr.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_mass2overr.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_mass3overr.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_flexion.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_tidal.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_SIS.groupby(['cell']).median().values[:,0].size == w_gal_2X.size) and (p_SIShalo.groupby(['cell']).median().values[:,0].size == w_gal_2X.size): # it seems for 45 arcsec aperture only, in some cases the two vary by 1 (e.g. 24335 and 24336)
+                w_gal_2X = np.bincount(cat_msk[:,index_index].astype(int))
+                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass_2X = p_mass.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2_2X = p_mass2.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass3_2X = p_mass3.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_massoverr_2X = p_massoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2overr_2X = p_mass2overr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass3overr_2X = p_mass3overr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_flexion_2X = p_flexion.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_tidal_2X = p_tidal.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_SIS_2X = p_SIS.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_SIShalo_2X = p_SIShalo.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2rms_2X = np.sqrt(w_mass2_2X)
+                w_mass3rms_2X = scipy.special.cbrt(w_mass3_2X)
+                w_mass2overrms_2X = np.sqrt(w_mass2overr_2X)
+                w_mass3overrms_2X = scipy.special.cbrt(w_mass3overr_2X)
             
-                cellkappagamma = np.c_[cellkappagamma,w_gal_23,w_zweight_23,w_mass_23,w_mass2_23,w_mass3_23,w_oneoverr_23,w_zoverr_23,w_massoverr_23,w_mass2overr_23,w_mass3overr_23,w_mass2rms_23,w_mass3rms_23,w_mass2overrms_23,w_mass3overrms_23,w_flexion_23,w_tidal_23,w_SIS_23,w_SIShalo_23]
+                cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X]
                 if initialized == 0:
-                    os.system('rm -f %snobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],radius,inner))
-                    f=open('%snobeta%s%smedinject_%s_%s_%s_%s_%sarcsecinnermsk.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],radius,inner),'ab') # open in binary
-                    output = "# ID kappa gamma1 gamma2 w_gal_23 w_zweight_23 w_mass_23 w_mass2_23 w_mass3_23 w_oneoverr_23 w_zoverr_23 w_massoverr_23 w_mass2overr_23 w_mass3overr_23 w_mass2rms_23 w_mass3rms_23 w_mass2overrms_23 w_mass3overrms_23 w_flexion_23 w_tidal_23 w_SIS_23 w_SIShalo_23 \n"
+                    os.system('rm -f %snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,inner,gap))
+                    f=open('%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,inner,gap),'ab') # open in binary
+                    output = "# ID kappa gamma1 gamma2 w_gal_%s w_zweight_%s w_mass_%s w_mass2_%s w_mass3_%s w_oneoverr_%s w_zoverr_%s w_massoverr_%s w_mass2overr_%s w_mass3overr_%s w_mass2rms_%s w_mass3rms_%s w_mass2overrms_%s w_mass3overrms_%s w_flexion_%s w_tidal_%s w_SIS_%s w_SIShalo_%s \n" % (limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag)
                     f.write(output) # needs to be done inside the loop because otherwise it crashes
                     initialized = 1
                 output = ""
@@ -115,9 +116,13 @@ start_time = time.time()
 
 lens = str(sys.argv[1])
 plane = str(sys.argv[2])
-radiusstr = str(sys.argv[3])
-type = str(sys.argv[4]) # computed or measured
-innermsk = int(str(sys.argv[5])) # inner mask in arcsec
+limmag = float(str(sys.argv[3]))
+radiusstr = str(sys.argv[4])
+type = str(sys.argv[5]) # computed or measured
+innermsk = int(str(sys.argv[6])) # inner mask in arcsec
+zinf = float(str(sys.argv[7]))
+zsup = float(str(sys.argv[8]))
+gap = 'gap_%s_%s' % (zinf,zsup)
 
 if lens == "B1608":
     z_s = 1.39
@@ -133,28 +138,33 @@ if lens == "HE0435":
         fracspec21 = 0.75
         fracspec22 = 0.83
         fracspec23 = 0.11
+        fracspec24 = 0.00
     if (radiusstr == "120"):
         radius = 120
         fracspec20 = 1
         fracspec21 = 0.87
         fracspec22 = 0.44
         fracspec23 = 0.08
+        fracspec24 = 0.00
     if (radiusstr == "60"):
         radius = 60
         fracspec20 = 1 # gal+stars
         fracspec21 = 0.8
         fracspec22 = 0.78
         fracspec23 = 0.15
+        fracspec24 = 0.00
     if (radiusstr == "90"):
         radius = 90
         fracspec20 = 1
         fracspec21 = 0.85
         fracspec22 = 0.5
         fracspec23 = 0.1
+        fracspec24 = 0.00
 if lens == "WFI2033":
     z_s = 1.66
     z_l = 0.66
     brightmag = 16.90
+    #limmag = 23
     #innermsk = 8 # inner mask in arcsec
     pln = 35
     if (radiusstr == "45"):
@@ -164,6 +174,7 @@ if lens == "WFI2033":
         fracspec21 = 1
         fracspec22 = 0.73
         fracspec23 = 0.15
+        fracspec24 = 0.00
     if (radiusstr == "120"):
         hstcoverage = 1 * 0.47
         radius = 120
@@ -171,6 +182,7 @@ if lens == "WFI2033":
         fracspec21 = 0.81
         fracspec22 = 0.52
         fracspec23 = 0.07
+        fracspec24 = 0.00
     if (radiusstr == "60"):
         hstcoverage = 1
         radius = 60
@@ -178,6 +190,7 @@ if lens == "WFI2033":
         fracspec21 = 1
         fracspec22 = 0.70
         fracspec23 = 0.11
+        fracspec24 = 0.00
     if (radiusstr == "90"):
         hstcoverage = 1 * 0.47 * (90.0**2)/(120.0**2)
         radius = 90
@@ -185,6 +198,7 @@ if lens == "WFI2033":
         fracspec21 = 0.88
         fracspec22 = 0.6
         fracspec23 = 0.06
+        fracspec24 = 0.00
 if lens == "HE1104":
     z_s = 2.32
 #pln = 30 & 31
@@ -198,6 +212,7 @@ if lens == "J1206":
 rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
 rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
+rootstars = "/lfs08/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
@@ -240,8 +255,8 @@ nospec_215 = 1 - fracspec22
 nospec_22 = 1 - fracspec22
 nospec_225 = 1 - fracspec23
 nospec_23 = 1 - fracspec23
-nospec_235 = 1
-nospec_24 = 1
+nospec_235 = 1 - fracspec24
+nospec_24 = 1 - fracspec24
 
 cont_ugrizJHK_18 = cont_h12_18 * nospec_18 * (1 - hstcoverage)
 cont_ugrizJHK_185 = cont_h12_185 * nospec_185 * (1 - hstcoverage)
@@ -254,8 +269,8 @@ cont_ugrizJHK_215 = cont_h12_215 * nospec_215 * (1 - hstcoverage)
 cont_ugrizJHK_22 = cont_h12_22 * nospec_22 * (1 - hstcoverage)
 cont_ugrizJHK_225 = cont_h12_225 * nospec_225 * (1 - hstcoverage)
 cont_ugrizJHK_23 = cont_h12_23 * nospec_23 * (1 - hstcoverage)
-cont_ugrizJHK_235 = cont_h12_235 * nospec_235
-cont_ugrizJHK_24 = cont_h12_24 * nospec_24
+cont_ugrizJHK_235 = cont_h12_235 * nospec_235 * (1 - hstcoverage)
+cont_ugrizJHK_24 = cont_h12_24 * nospec_24 * (1 - hstcoverage)
 
 cont_ugriz_18 = cont_h12_18
 cont_ugriz_185 = cont_h12_185
@@ -282,8 +297,8 @@ inc_ugrizJHK_215 = inc_h12_215 * nospec_215 * (1 - hstcoverage)
 inc_ugrizJHK_22 = inc_h12_22 * nospec_22 * (1 - hstcoverage)
 inc_ugrizJHK_225 = inc_h12_225 * nospec_225 * (1 - hstcoverage)
 inc_ugrizJHK_23 = inc_h12_23 * nospec_23 * (1 - hstcoverage)
-inc_ugrizJHK_235 = inc_h12_235 * nospec_235
-inc_ugrizJHK_24 = inc_h12_24 * nospec_24
+inc_ugrizJHK_235 = inc_h12_235 * nospec_235 * (1 - hstcoverage)
+inc_ugrizJHK_24 = inc_h12_24 * nospec_24 * (1 - hstcoverage)
 
 inc_ugriz_18 = inc_h12_18
 inc_ugriz_185 = inc_h12_185
@@ -301,19 +316,19 @@ inc_ugriz_24 = inc_h12_24
 
 # read the stellar contaminants I wil insert
 
-star_imag_18, star_z_18, star_mstar_18 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star018zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_185, star_z_185, star_mstar_185 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star18185zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_19, star_z_19, star_mstar_19 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star18519zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_195, star_z_195, star_mstar_195 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star19195zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_20, star_z_20, star_mstar_20 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star19520zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_205, star_z_205, star_mstar_205 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star20205zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_21, star_z_21, star_mstar_21 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star20521zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_215, star_z_215, star_mstar_215 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star21215zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_22, star_z_22, star_mstar_22 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star21522zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_225, star_z_225, star_mstar_225 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star22225zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_23, star_z_23, star_mstar_23 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star22523zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_235, star_z_235, star_mstar_235 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star23235zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
-star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("/lfs08/rusucs/results_kappagamma/mstarsim/star23524zcut_catpdzmstar_magrepaired.cat",usecols = [0,2,3], unpack=True)
+star_imag_18, star_z_18, star_mstar_18 = np.loadtxt("%sstar018zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_185, star_z_185, star_mstar_185 = np.loadtxt("%sstar18185zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_19, star_z_19, star_mstar_19 = np.loadtxt("%sstar18519zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_195, star_z_195, star_mstar_195 = np.loadtxt("%sstar19195zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_20, star_z_20, star_mstar_20 = np.loadtxt("%sstar19520zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_205, star_z_205, star_mstar_205 = np.loadtxt("%sstar20205zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_21, star_z_21, star_mstar_21 = np.loadtxt("%sstar20521zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_215, star_z_215, star_mstar_215 = np.loadtxt("%sstar21215zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_22, star_z_22, star_mstar_22 = np.loadtxt("%sstar21522zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_225, star_z_225, star_mstar_225 = np.loadtxt("%sstar22225zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_23, star_z_23, star_mstar_23 = np.loadtxt("%sstar22523zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_235, star_z_235, star_mstar_235 = np.loadtxt("%sstar23235zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("%sstar23524zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
 
 ############################
 # read the binary kappa file
@@ -322,15 +337,15 @@ star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("/lfs08/rusucs/results_kappa
 start_readkappa = time.time()
 
 if str(pln) in plane:
-    readbinary(".kappa",plane,radiusstr)
-    pos1D,kappa = np.loadtxt("kappa_values_%smed%s.dat" % (plane,radiusstr), unpack=True)
-    readbinary(".gamma_1",plane,radiusstr)
-    gamma1 = np.loadtxt("kappa_values_%smed%s.dat" % (plane,radiusstr), usecols = [1], unpack=True)
-    readbinary(".gamma_2",plane,radiusstr)
-    gamma2 = np.loadtxt("kappa_values_%smed%s.dat" % (plane,radiusstr), usecols = [1], unpack=True)
+    os.chdir(rootkappaplanes)
+    readbinary(".kappa",plane)
+    pos1D,kappa = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), unpack=True)
+    readbinary(".gamma_1",plane)
+    gamma1 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
+    readbinary(".gamma_2",plane)
+    gamma2 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
     kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
-    os.system("rm -f kappa_values_%smed%s.dat" % (plane,radiusstr))
-    print "Read kappa and shear in ", time.time() - start_readkappa, "seconds"
+    os.system("rm -f kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap))
 else: sys.exit('Wrong MS plane for this lens!!!')
 
 ############################
@@ -373,13 +388,19 @@ for i in range(4):
             z__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = zspec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
             z__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = zspec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             z__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = zspec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
+            z__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = zspec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
+            
             mstar__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] = mstarspec__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] # use the corresponding stellar masses for the "spectroscopic" redshifts objects
             mstar__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mstarspec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
             mstar__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mstarspec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             mstar__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mstarspec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
+            mstar__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = mstarspec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
+
+            mhalo__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] = mhalospec__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)]
             mhalo__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mhalospec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
             mhalo__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mhalospec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             mhalo__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mhalospec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
+            mhalo__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = mhalospec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
 
             # count the galaxies in order to implement the fraction of stars
             count18 = z__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (z__ugrizJHK <= z_s)].size
@@ -393,8 +414,8 @@ for i in range(4):
             count22 = z__ugrizJHK[(imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (z__ugrizJHK <= z_s)].size
             count225 = z__ugrizJHK[(imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (z__ugrizJHK <= z_s)].size
             count23 = z__ugrizJHK[(imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (z__ugrizJHK <= z_s)].size
-            #count235 = z__ugrizJHK[(imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (z__ugrizJHK <= z_s)].size
-            #count24 = z__ugrizJHK[(imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (z__ugrizJHK <= z_s)].size
+            count235 = z__ugrizJHK[(imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (z__ugrizJHK <= z_s)].size
+            count24 = z__ugrizJHK[(imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (z__ugrizJHK <= z_s)].size
             #print count18,count185,count19,count195,count20,count205,count21,count215,count22,count225,count23,count235,count24
         
             posxmin = np.min(posx__ugrizJHK) # used to insert random stellar contaminants
@@ -414,12 +435,11 @@ for i in range(4):
             cont_22,cont_posx_22,cont_posy_22,cont_imag_22,cont_z_22,cont_mstar_22 = contaminants(count22,cont_ugrizJHK_22,posxmin,posxmax,posymin,posymax,star_imag_22,star_z_22,star_mstar_22)
             cont_225,cont_posx_225,cont_posy_225,cont_imag_225,cont_z_225,cont_mstar_225 = contaminants(count225,cont_ugrizJHK_225,posxmin,posxmax,posymin,posymax,star_imag_225,star_z_225,star_mstar_225)
             cont_23,cont_posx_23,cont_posy_23,cont_imag_23,cont_z_23,cont_mstar_23 = contaminants(count23,cont_ugrizJHK_23,posxmin,posxmax,posymin,posymax,star_imag_23,star_z_23,star_mstar_23)
-            #cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235,cont_mstar_235 = contaminants(count235,cont_ugrizJHK_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235,star_mstar_235)
-            #cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24,cont_mstar_24 = contaminants(count24,cont_ugrizJHK_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24,star_mstar_24)
-
+            cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235,cont_mstar_235 = contaminants(count235,cont_ugrizJHK_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235,star_mstar_235)
+            cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24,cont_mstar_24 = contaminants(count24,cont_ugrizJHK_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24,star_mstar_24)
             #print cont_18.size,cont_185.size,cont_19.size,cont_195.size,cont_20.size,cont_205.size,cont_21.size,cont_215.size,cont_22.size,cont_225.size,cont_23.size,cont_235.size,cont_24.size
         
-            # masking the fraction of galaxies expected to not be detected as galaxies
+            # masking the fraction of galaxies expected to not be detected as galaxies; here also apply the brightmag, limmag, z_s and z gap cuts
             z___ugrizJHK = z__ugrizJHK
             z__ugrizJHK = z___ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 23) & (z___ugrizJHK <= z_s) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
             posx__ugrizJHK = posx__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 23) & (z___ugrizJHK <= z_s) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
@@ -449,8 +469,8 @@ for i in range(4):
             count22 = z__ugriz[(imag__ugriz > 21.5) & (imag__ugriz <= 22) & (z__ugriz <= z_s)].size
             count225 = z__ugriz[(imag__ugriz > 22) & (imag__ugriz <= 22.5) & (z__ugriz <= z_s)].size
             count23 = z__ugriz[(imag__ugriz > 22.5) & (imag__ugriz <= 23) & (z__ugriz <= z_s)].size
-            #count235 = z__ugriz[(imag__ugriz > 23) & (imag__ugriz <= 23.5) & (z__ugriz <= z_s)].size
-            #count24 = z__ugriz[(imag__ugriz > 23.5) & (imag__ugriz <= 24) & (z__ugriz <= z_s)].size
+            count235 = z__ugriz[(imag__ugriz > 23) & (imag__ugriz <= 23.5) & (z__ugriz <= z_s)].size
+            count24 = z__ugriz[(imag__ugriz > 23.5) & (imag__ugriz <= 24) & (z__ugriz <= z_s)].size
         
             # generate the stellar contaminants
             cont_18,cont_posx_18,cont_posy_18,cont_imag_18,cont_z_18,cont_mstar_18 = contaminants(count18,cont_ugriz_18,posxmin,posxmax,posymin,posymax,star_imag_18,star_z_18,star_mstar_18)
@@ -578,11 +598,11 @@ start_radius = time.time()
 
 cat = cat_ugrizJHK
 bands = "ugrizJHK"
-weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,type,lens,plane,bands,innermsk)
+weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 cat = cat_ugriz
 bands = "ugriz"
-weightedcounts(cat,spacing,radius,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,type,lens,plane,bands,innermsk)
+weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 print "Computed weights in ", time.time() - start_weights, "seconds"
 

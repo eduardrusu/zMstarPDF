@@ -377,6 +377,7 @@ for i in range(4):
             mstar__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mstarspec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
             mstar__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mstarspec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             mstar__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mstarspec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
+            mhalo__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] = mhalospec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK <= 20)]
             mhalo__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mhalospec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
             mhalo__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mhalospec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             mhalo__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mhalospec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
