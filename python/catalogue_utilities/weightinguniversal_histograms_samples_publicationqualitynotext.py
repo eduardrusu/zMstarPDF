@@ -1,5 +1,5 @@
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce paper-quality histograms without overlapped text
-# run as python weightinguniversal_histograms_samples.py WFI2033 45 23 meds bpz deti IRAC 5 100
+# run as # run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_publicationqualitynotext.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
 
 import numpy as np
 import sys
@@ -227,7 +227,7 @@ if ((radius == "120") & (mag == "23") & (mode == "meds")):
 if ((radius == "120") & (mag == "24") & (mode == "sum")):
     fig.text(0.5, 0.05, r"$\zeta^\mathrm{sum,WX}_{q,120'',i<24}$", ha='center', va='center', size='20')
 #fig.text(0.05, 0.5, 'normalized counts', ha='center', va='center', size='20', rotation='vertical')
-plt.savefig('%s%s_weightedcountshist_%s_%s_%s_%s_%s_%s_%sarcsec_notextforpaper.png' % (root, lens, radius, mag, mode, photz, detect, irac, inner), dpi=500)
+plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_notext.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup), dpi=500)
 
 print(" --- %s seconds ---" % (time.time() - start_time))
 

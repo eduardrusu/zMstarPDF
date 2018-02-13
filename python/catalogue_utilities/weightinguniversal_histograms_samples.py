@@ -1,6 +1,6 @@
 # C.E. Rusu, 12 Feb 2018
-# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta.py to produce histograms and compute statistics
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_WFI2033.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
+# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta.py to produce histograms and compute statistics. For small widths of the averages/medians distributions, where they are approximately gaussian, use this code, otherwise use weightinguniversal_histograms_samples_asymmetric.py instead
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
 
 import numpy as np
 import sys
@@ -30,7 +30,7 @@ fontordonate = 4
 fontabsciss = 10
 fontlabel = 4
 pltrange = 3
-samples = 10
+samples = 10 # currently only works for 10
 limit = 10**30
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
