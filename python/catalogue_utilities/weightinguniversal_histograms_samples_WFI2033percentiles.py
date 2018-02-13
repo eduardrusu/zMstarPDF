@@ -1,11 +1,23 @@
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians. For small widths of the averages/medians distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
-# run as python weightinguniversal_histograms_samples_WFI2033.py WFI2033 45 23 meds bpz deti IRAC 5 100
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_WFI2033percentiles.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100
 
 import numpy as np
 import sys
 import os
 import time
 import matplotlib.pyplot as plt
+
+lens = str(sys.argv[1])
+radius = str(sys.argv[2])
+inner = str(sys.argv[3])
+mag = str(sys.argv[4])
+mode = str(sys.argv[5])
+photz = str(sys.argv[6])
+detect = str(sys.argv[7])
+irac = str(sys.argv[8])
+zinf = str(sys.argv[9])
+zsup = str(sys.argv[10])
+bin = int(str(sys.argv[11]))
 
 plt.clf()
 
@@ -14,17 +26,7 @@ fontlabel = 4
 pltrange = 3
 samples = 10
 limit = 10**30
-root = "/Volumes/perseus_1/CFHTLens_galphotmstar/"
-
-lens = str(sys.argv[1])
-radius = str(sys.argv[2])
-mag = str(sys.argv[3])
-mode = str(sys.argv[4])
-photz = str(sys.argv[5])
-detect = str(sys.argv[6])
-irac = str(sys.argv[7])
-inner = str(sys.argv[8])
-bin = int(str(sys.argv[9]))
+root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
 def sample(median,stdlow,stdhigh): # samples from different standard deviation gaussians on each side of the mean
     rand = np.random.uniform(0,1,250)

@@ -1,6 +1,7 @@
 # CE Rusu, Feb 8 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
 # run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 15 IRAC deti meds yes 0.61 0.71
+# the code produces output for two different limiting mags: 23 and 24
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
 # definitions:
@@ -9,7 +10,6 @@
 #field mask refers to the mask .fits file of the corresponding CHFT field
 #cell refers to a rectangular surface of length on a side 2*radius
 #radius is the aperture radius around the actual lens object around which the environmant is explored
-#limmag is the limiting mag considered in i band
 #irac shows whether IRAC bands are used or not; use either "IRAC" or "noIRAC"
 #det characterizes the object detection type; for example, for WFI2033 I detect in i or i+r; use either "detir" or "deti"
 #mode (sum or meds): whether the weighted counts are summed or Median * counts is considered

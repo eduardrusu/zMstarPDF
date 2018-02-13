@@ -1,5 +1,6 @@
-# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute statistics
-# run as python weightinguniversal_histograms_samples_WFI2033.py WFI2033 45 23 meds bpz deti IRAC 5 100
+# C.E. Rusu, 12 Feb 2018
+# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta.py to produce histograms and compute statistics
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_WFI2033.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
 
 import numpy as np
 import sys
@@ -7,24 +8,31 @@ import os
 import time
 import matplotlib.pyplot as plt
 
+lens = str(sys.argv[1])
+radius = str(sys.argv[2])
+inner = str(sys.argv[3])
+mag = str(sys.argv[4])
+mode = str(sys.argv[5])
+photz = str(sys.argv[6])
+detect = str(sys.argv[7])
+irac = str(sys.argv[8])
+zinf = str(sys.argv[9])
+zsup = str(sys.argv[10])
+bin = int(str(sys.argv[11]))
+try: handpicked = '_'+str(sys.argv[12])
+except: handpicked = ''
+
 plt.clf()
 
+fontlegend = 8
+fontsize = 8
+fontordonate = 4
 fontabsciss = 10
 fontlabel = 4
 pltrange = 3
 samples = 10
 limit = 10**30
-root = "/Volumes/perseus_1/CFHTLens_galphotmstar/"
-
-lens = str(sys.argv[1])
-radius = str(sys.argv[2])
-mag = str(sys.argv[3])
-mode = str(sys.argv[4])
-photz = str(sys.argv[5])
-detect = str(sys.argv[6])
-irac = str(sys.argv[7])
-inner = str(sys.argv[8])
-bin = int(str(sys.argv[9]))
+root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
 start_time = time.time()
 
@@ -40,15 +48,15 @@ medsum50W4 = np.zeros((18,samples))
 medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
-    print '%s...' %nr
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_75_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_75_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_75_%s_%s_%s_%s_%s_%sarcsec_%s.lst' %(radius,lens,detect,irac,mode,inner,str(nr)) in x)]
+    print '%s/9' %nr
+    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)] # select from the files in the root directory
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
 
     if mag == "24" and photz == "bpz": cols=[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38]
     if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
@@ -161,7 +169,7 @@ for i in range(18):
 
 print "Plotting..."
 
-plt.suptitle(r'%s weighted counts histogram W1-W4 %s %s %s %s %s arcsec %s %s' % (lens, radius, mag, mode, photz, irac, inner, detect), fontsize=10, y=0.998)
+plt.suptitle(r'%s weighted counts histogram W1-W4 %s arcsec %s inner %s %s %s %s %s %s zgap %s %s' % (lens, radius, inner, mag, mode, photz, irac, detect, handpicked, zinf, zsup), fontsize=fontsize, y=0.998)
 
 for i in range(18):
 
@@ -283,7 +291,7 @@ for i in range(18):
     if i == 16: plt.xlabel(r'$\zeta_\mathrm{SIS}$', fontsize=fontabsciss)
     if i == 17: plt.xlabel(r'$\zeta_\mathrm{SIShalo}$', fontsize=fontabsciss)
     if i in [0,4,8,12,15]:
-        plt.ylabel("Normalized counts", fontsize=5)
+        plt.ylabel("Normalized counts", fontsize=fontordonate)
     plt.tick_params(axis='x', labelsize=4)
     plt.tick_params(axis='y', labelsize=4)
     plt.setp(plt.xticks()[1], rotation=90)
@@ -292,8 +300,8 @@ for i in range(18):
 
 plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
 plt.subplot(5,4,5)
-plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=10)
-plt.savefig('%s%s_weightedcountshist_%s_%s_%s_%s_%s_%s_%sarcsec.png' % (root, lens, radius, mag, mode, photz, detect, irac, inner), dpi=500)
+plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=fontlegend)
+plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s_%s_zgap%s_%s.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup), dpi=500)
                 
 print(" --- %s seconds ---" % (time.time() - start_time))
 
