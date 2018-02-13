@@ -1,4 +1,4 @@
-# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians. For small widths of the averages/medians distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
+# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians (meaning from the distribution of the 10 samples). For small widths of the averages/medians distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
 # run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_asymmetric.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100
 
 import numpy as np
@@ -27,7 +27,7 @@ fontlegend = 8
 fontsize = 8
 fontordonate = 4
 fontabsciss = 10
-fontlabel = 3
+fontlabel = 2
 pltrange = 3
 samples = 10
 limit = 10**30
