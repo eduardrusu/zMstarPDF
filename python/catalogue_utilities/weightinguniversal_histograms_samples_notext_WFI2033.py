@@ -44,10 +44,10 @@ print "Reading..."
 #lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' %(radius,lens,detect,irac,mode,inner) in x)]
 #lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_%s_%s_%s_%s_%s_%sarcsec_0.lst' %(radius,lens,detect,irac,mode,inner) in x)]
 ''' if I want to plot everything together'''
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)] # select from the files in the root directory
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)] # select from the files in the root directory
+lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
 
 if mag == "24" and photz == "bpz": cols=[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38]
 if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
