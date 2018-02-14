@@ -1,5 +1,6 @@
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce paper-quality histograms without overlapped text
 # run as # run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_publicationqualitynotext.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
+# currently the code considers a fraction of 50% for the fields without mask
 
 import numpy as np
 import sys
