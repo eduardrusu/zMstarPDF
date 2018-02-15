@@ -1,6 +1,4 @@
-# CE Rusu Feb 14 2018
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 45 23 meds gal gamma oneoverr mass
-# the code currently works for maglim 23 (WFI2033)
+# Run as python inferkappa_unbiasedwithshear.py WFI2033 5 45 23 meds gal gamma oneoverr mass
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
 # weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
 # the code is written such that, if shear is used as overdensity, it should be the second weight used (unless only one weight is used);
@@ -16,38 +14,31 @@ import time
 start_time=time.time()
 
 lens = str(sys.argv[1])
-zinf = str(sys.argv[2])
-zsup = str(sys.argv[3])
-handpicked = str(sys.argv[4])
-other = str(sys.argv[5]) # refers to an optional suffix for the shear constraint
-innermask = str(sys.argv[6])
-radius = str(sys.argv[7])
-mag = str(sys.argv[8])
-mode = str(sys.argv[9])
-conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
-
-if handpicked == 'yes': handpickedstr = '_handpicked'
-else: handpickedstr = ''
+innermask = str(sys.argv[2])
+radius = str(sys.argv[3])
+mag = str(sys.argv[4])
+mode = str(sys.argv[5])
+conjoined = len(sys.argv) - 6 # total number of arguments including code name, minus the number of ones that are not weights
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[10])
+    weightin1 = str(sys.argv[6])
 if conjoined == 2:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
+    weightin1 = str(sys.argv[6])
+    weightin2 = str(sys.argv[7])
 if conjoined == 3:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
+    weightin1 = str(sys.argv[6])
+    weightin2 = str(sys.argv[7])
+    weightin3 = str(sys.argv[8])
 if conjoined == 4:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
+    weightin1 = str(sys.argv[6])
+    weightin2 = str(sys.argv[7])
+    weightin3 = str(sys.argv[8])
+    weightin4 = str(sys.argv[9])
 
 print "conjoined:", conjoined
-root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,type,inner,handpickedstr,zinf,zsup)),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+root = "/mfst01a/rusucs/WFI2033/MSwghtratios/"
+rootout = "/mfst01a/rusucs/WFI2033/MSkapparesults/"
+weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sarcsec.lst' % (lens,mode,str(innermask)),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -58,28 +49,12 @@ increment2 = 2
 increment3 = 2
 increment4 = 2
 
-# define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'no' and int(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.154
-        constrwidth_gamma_inf = 0.139
-        constrwidth_gamma_sup = 0.169
-    if other == 'chameleon' and handpicked == 'no' and int(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.193
-        constrwidth_gamma_inf = 0.178
-        constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and int(zsup) < 0:
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and int(zsup) < 0:
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
+    constr_gamma = 0.16
+    constrwidth_gamma_inf = 0.14
+    constrwidth_gamma_sup = 0.18
     filters = "ugrizJHK"
-    print 'shear: ',constr_gamma
 
-# declare which weights to read
 if mag == "23" and radius == "45":
     measured_index = 0 # specifies the column index in weightsfile
     measured_index_inf = 1
@@ -89,40 +64,86 @@ if mag == "23" and radius == "120":
     measured_index_inf = 4
     measured_index_sup = 5
 
-def declareweight(weightin):
-    if weightin == "gal": weight_index = 4
-    if weightin == "z": weight_index = 5
-    if weightin == "mass": weight_index = 6
-    if weightin == "mass2": weight_index = 7
-    if weightin == "mass3": weight_index = 8
-    if weightin == "oneoverr": weight_index = 9
-    if weightin == "zoverr": weight_index = 10
-    if weightin == "massoverr": weight_index = 11
-    if weightin == "mass2overr": weight_index = 12
-    if weightin == "mass3overr": weight_index = 13
-    if weightin == "mass2rms": weight_index = 14
-    if weightin == "mass3rms": weight_index = 15
-    if weightin == "mass2overrrms": weight_index = 16
-    if weightin == "mass3overrrms": weight_index = 17
-    if weightin == "flexion": weight_index = 18
-    if weightin == "tidal": weight_index = 19
-    if weightin == "SIS": weight_index = 20
-    if weightin == "SIShalo": weight_index = 21
-    return weight_index
-
 if mag == "23":
-    weight1_index = declareweight(weightin1)
+    if weightin1 == "gal": weight1_index = 4
+    if weightin1 == "z": weight1_index = 5
+    if weightin1 == "mass": weight1_index = 6
+    if weightin1 == "mass2": weight1_index = 7
+    if weightin1 == "mass3": weight1_index = 8
+    if weightin1 == "oneoverr": weight1_index = 9
+    if weightin1 == "zoverr": weight1_index = 10
+    if weightin1 == "massoverr": weight1_index = 11
+    if weightin1 == "mass2overr": weight1_index = 12
+    if weightin1 == "mass3overr": weight1_index = 13
+    if weightin1 == "mass2rms": weight1_index = 14
+    if weightin1 == "mass3rms": weight1_index = 15
+    if weightin1 == "mass2overrrms": weight1_index = 16
+    if weightin1 == "mass3overrrms": weight1_index = 17
+    if weightin1 == "flexion": weight1_index = 18
+    if weightin1 == "tidal": weight1_index = 19
+    if weightin1 == "SIS": weight1_index = 20
+    if weightin1 == "SIShalo": weight1_index = 21
 if conjoined >= 2:
     if mag == "23":
-        weight2_index = declareweight(weightin2)
+        if weightin2 == "gal": weight2_index = 4
+        if weightin2 == "z": weight2_index = 5
+        if weightin2 == "mass": weight2_index = 6
+        if weightin2 == "mass2": weight2_index = 7
+        if weightin2 == "mass3": weight2_index = 8
+        if weightin2 == "oneoverr": weight2_index = 9
+        if weightin2 == "zoverr": weight2_index = 10
+        if weightin2 == "massoverr": weight2_index = 11
+        if weightin2 == "mass2overr": weight2_index = 12
+        if weightin2 == "mass3overr": weight2_index = 13
+        if weightin2 == "mass2rms": weight2_index = 14
+        if weightin2 == "mass3rms": weight2_index = 15
+        if weightin2 == "mass2overrrms": weight2_index = 16
+        if weightin2 == "mass3overrrms": weight2_index = 17
+        if weightin2 == "flexion": weight2_index = 18
+        if weightin2 == "tidal": weight2_index = 19
+        if weightin2 == "SIS": weight2_index = 20
+        if weightin2 == "SIShalo": weight2_index = 21
     if conjoined >= 3:
         if mag == "23":
-            weight3_index = declareweight(weightin3)
+            if weightin3 == "gal": weight3_index = 4
+            if weightin3 == "z": weight3_index = 5
+            if weightin3 == "mass": weight3_index = 6
+            if weightin3 == "mass2": weight3_index = 7
+            if weightin3 == "mass3": weight3_index = 8
+            if weightin3 == "oneoverr": weight3_index = 9
+            if weightin3 == "zoverr": weight3_index = 10
+            if weightin3 == "massoverr": weight3_index = 11
+            if weightin3 == "mass2overr": weight3_index = 12
+            if weightin3 == "mass3overr": weight3_index = 13
+            if weightin3 == "mass2rms": weight3_index = 14
+            if weightin3 == "mass3rms": weight3_index = 15
+            if weightin3 == "mass2overrrms": weight3_index = 16
+            if weightin3 == "mass3overrrms": weight3_index = 17
+            if weightin3 == "flexion": weight3_index = 18
+            if weightin3 == "tidal": weight3_index = 19
+            if weightin3 == "SIS": weight3_index = 20
+            if weightin3 == "SIShalo": weight3_index = 21
         if conjoined == 4:
             if mag == "23":
-                weight4_index = declareweight(weightin4)
+                if weightin4 == "gal": weight4_index = 4
+                if weightin4 == "z": weight4_index = 5
+                if weightin4 == "mass": weight4_index = 6
+                if weightin4 == "mass2": weight4_index = 7
+                if weightin4 == "mass3": weight4_index = 8
+                if weightin4 == "oneoverr": weight4_index = 9
+                if weightin4 == "zoverr": weight4_index = 10
+                if weightin4 == "massoverr": weight4_index = 11
+                if weightin4 == "mass2overr": weight4_index = 12
+                if weightin4 == "mass3overr": weight4_index = 13
+                if weightin4 == "mass2rms": weight4_index = 14
+                if weightin4 == "mass3rms": weight4_index = 15
+                if weightin4 == "mass2overrrms": weight4_index = 16
+                if weightin4 == "mass3overrrms": weight4_index = 17
+                if weightin4 == "flexion": weight4_index = 18
+                if weightin4 == "tidal": weight4_index = 19
+                if weightin4 == "SIS": weight4_index = 20
+                if weightin4 == "SIShalo": weight4_index = 21
 
-# read weight constraints
 constr_gal_meds = weightsfile[measured_index][0]
 constrwidth_gal_meds_inf = weightsfile[measured_index_inf][0]
 constrwidth_gal_meds_sup = weightsfile[measured_index_sup][0]
@@ -195,50 +216,109 @@ constr_SIShalo_meds = weightsfile[measured_index][17]
 constrwidth_SIShalo_meds_inf = weightsfile[measured_index_inf][17]
 constrwidth_SIShalo_meds_sup = weightsfile[measured_index_sup][17]
 
-def declareweight(weightin):
-    if weightin == "gal": constr_weight = constr_gal_meds; constrwidth_weight_inf = constrwidth_gal_meds_inf; constrwidth_weight_sup = constrwidth_gal_meds_sup
-    if weightin == "z": constr_weight = constr_z_meds; constrwidth_weight_inf = constrwidth_z_meds_inf; constrwidth_weight_sup = constrwidth_z_meds_sup
-    if weightin == "mass": constr_weight = constr_mass_meds; constrwidth_weight_inf = constrwidth_mass_meds_inf; constrwidth_weight_sup = constrwidth_mass_meds_sup
-    if weightin == "mass2": constr_weight = constr_mass2_meds; constrwidth_weight_inf = constrwidth_mass2_meds_inf; constrwidth_weight_sup = constrwidth_mass2_meds_sup
-    if weightin == "mass3": constr_weight = constr_mass3_meds; constrwidth_weight_inf = constrwidth_mass3_meds_inf; constrwidth_weight_sup = constrwidth_mass3_meds_sup
-    if weightin == "oneoverr": constr_weight = constr_oneoverr_meds; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup
-    if weightin == "zoverr": constr_weight = constr_zoverr_meds; constrwidth_weight_inf = constrwidth_zoverr_meds_inf; constrwidth_weight_sup = constrwidth_zoverr_meds_sup
-    if weightin == "massoverr": constr_weight = constr_massoverr_meds; constrwidth_weight_inf = constrwidth_massoverr_meds_inf; constrwidth_weight_sup = constrwidth_massoverr_meds_sup
-    if weightin == "mass2overr": constr_weight = constr_mass2overr_meds; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup
-    if weightin == "mass3overr": constr_weight = constr_mass3overr_meds; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup
-    if weightin == "mass2rms": constr_weight = constr_mass2rms_meds; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup
-    if weightin == "mass3rms": constr_weight = constr_mass3rms_meds; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup
-    if weightin == "mass2overrrms": constr_weight = constr_mass2overrrms_meds; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup
-    if weightin == "mass3overrrms": constr_weight = constr_mass3overrrms_meds; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup
-    if weightin == "flexion": constr_weight = constr_flexion_meds; constrwidth_weight_inf = constrwidth_flexion_meds_inf; constrwidth_weight_sup = constrwidth_flexion_meds_sup
-    if weightin == "tidal": constr_weight = constr_tidal_meds; constrwidth_weight_inf = constrwidth_tidal_meds_inf; constrwidth_weight_sup = constrwidth_tidal_meds_sup
-    if weightin == "SIS": constr_weight = constr_SIS_meds; constrwidth_weight_inf = constrwidth_SIS_meds_inf; constrwidth_weight_sup = constrwidth_SIS_meds_sup
-    if weightin == "SIShalo": constr_weight = constr_SIShalo_meds; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup
-    if weightin == "gamma": constr_weight = constr_gamma; constrwidth_weight_inf = constrwidth_gamma_inf; constrwidth_weight_sup = constrwidth_gamma_sup
-    return constr_weight, constrwidth_weight_inf, constrwidth_weight_sup
+if conjoined == 4:
+        if weightin4 == "gal": constr_weight4 = constr_gal_meds; constrwidth_weight4_inf = constrwidth_gal_meds_inf; constrwidth_weight4_sup = constrwidth_gal_meds_sup
+        if weightin4 == "z": constr_weight4 = constr_z_meds; constrwidth_weight4_inf = constrwidth_z_meds_inf; constrwidth_weight4_sup = constrwidth_z_meds_sup
+        if weightin4 == "mass": constr_weight4 = constr_mass_meds; constrwidth_weight4_inf = constrwidth_mass_meds_inf; constrwidth_weight4_sup = constrwidth_mass_meds_sup
+        if weightin4 == "mass2": constr_weight4 = constr_mass2_meds; constrwidth_weight4_inf = constrwidth_mass2_meds_inf; constrwidth_weight4_sup = constrwidth_mass2_meds_sup
+        if weightin4 == "mass3": constr_weight4 = constr_mass3_meds; constrwidth_weight4_inf = constrwidth_mass3_meds_inf; constrwidth_weight4_sup = constrwidth_mass3_meds_sup
+        if weightin4 == "oneoverr": constr_weight4 = constr_oneoverr_meds; constrwidth_weight4_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight4_sup = constrwidth_oneoverr_meds_sup
+        if weightin4 == "zoverr": constr_weight4 = constr_zoverr_meds; constrwidth_weight4_inf = constrwidth_zoverr_meds_inf; constrwidth_weight4_sup = constrwidth_zoverr_meds_sup
+        if weightin4 == "massoverr": constr_weight4 = constr_massoverr_meds; constrwidth_weight4_inf = constrwidth_massoverr_meds_inf; constrwidth_weight4_sup = constrwidth_massoverr_meds_sup
+        if weightin4 == "mass2overr": constr_weight4 = constr_mass2overr_meds; constrwidth_weight4_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight4_sup = constrwidth_mass2overr_meds_sup
+        if weightin4 == "mass3overr": constr_weight4 = constr_mass3overr_meds; constrwidth_weight4_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight4_sup = constrwidth_mass3overr_meds_sup
+        if weightin4 == "mass2rms": constr_weight4 = constr_mass2rms_meds; constrwidth_weight4_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight4_sup = constrwidth_mass2rms_meds_sup
+        if weightin4 == "mass3rms": constr_weight4 = constr_mass3rms_meds; constrwidth_weight4_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight4_sup = constrwidth_mass3rms_meds_sup
+        if weightin4 == "mass2overrrms": constr_weight4 = constr_mass2overrrms_meds; constrwidth_weight4_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight4_sup = constrwidth_mass2overrrms_meds_sup
+        if weightin4 == "mass3overrrms": constr_weight4 = constr_mass3overrrms_meds; constrwidth_weight4_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight4_sup = constrwidth_mass3overrrms_meds_sup
+        if weightin4 == "flexion": constr_weight4 = constr_flexion_meds; constrwidth_weight4_inf = constrwidth_flexion_meds_inf; constrwidth_weight4_sup = constrwidth_flexion_meds_sup
+        if weightin4 == "tidal": constr_weight4 = constr_tidal_meds; constrwidth_weight4_inf = constrwidth_tidal_meds_inf; constrwidth_weight4_sup = constrwidth_tidal_meds_sup
+        if weightin4 == "SIS": constr_weight4 = constr_SIS_meds; constrwidth_weight4_inf = constrwidth_SIS_meds_inf; constrwidth_weight4_sup = constrwidth_SIS_meds_sup
+        if weightin4 == "SIShalo": constr_weight4 = constr_SIShalo_meds; constrwidth_weight4_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight4_sup = constrwidth_SIShalo_meds_sup
+        if weightin4 == "gamma": constr_weight4 = constr_gamma; constrwidth_weight4_inf = constrwidth_gamma_inf; constrwidth_weight4_sup = constrwidth_gamma_sup
 
-if conjoined == 4: constr_weight4, constrwidth_weight4_inf, constrwidth_weight4_sup = declareweight(weightin4)
-if (conjoined == 3) | (conjoined == 4): constr_weight3, constrwidth_weight3_inf, constrwidth_weight3_sup = declareweight(weightin3)
-if (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight2, constrwidth_weight2_inf, constrwidth_weight2_sup = declareweight(weightin2)
-if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight1, constrwidth_weight1_inf, constrwidth_weight1_sup = declareweight(weightin1)
+if (conjoined == 3) | (conjoined == 4):
+        if weightin3 == "gal": constr_weight3 = constr_gal_meds; constrwidth_weight3_inf = constrwidth_gal_meds_inf; constrwidth_weight3_sup = constrwidth_gal_meds_sup
+        if weightin3 == "z": constr_weight3 = constr_z_meds; constrwidth_weight3_inf = constrwidth_z_meds_inf; constrwidth_weight3_sup = constrwidth_z_meds_sup
+        if weightin3 == "mass": constr_weight3 = constr_mass_meds; constrwidth_weight3_inf = constrwidth_mass_meds_inf; constrwidth_weight3_sup = constrwidth_mass_meds_sup
+        if weightin3 == "mass2": constr_weight3 = constr_mass2_meds; constrwidth_weight3_inf = constrwidth_mass2_meds_inf; constrwidth_weight3_sup = constrwidth_mass2_meds_sup
+        if weightin3 == "mass3": constr_weight3 = constr_mass3_meds; constrwidth_weight3_inf = constrwidth_mass3_meds_inf; constrwidth_weight3_sup = constrwidth_mass3_meds_sup
+        if weightin3 == "oneoverr": constr_weight3 = constr_oneoverr_meds; constrwidth_weight3_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight3_sup = constrwidth_oneoverr_meds_sup
+        if weightin3 == "zoverr": constr_weight3 = constr_zoverr_meds; constrwidth_weight3_inf = constrwidth_zoverr_meds_inf; constrwidth_weight3_sup = constrwidth_zoverr_meds_sup
+        if weightin3 == "massoverr": constr_weight3 = constr_massoverr_meds; constrwidth_weight3_inf = constrwidth_massoverr_meds_inf; constrwidth_weight3_sup = constrwidth_massoverr_meds_sup
+        if weightin3 == "mass2overr": constr_weight3 = constr_mass2overr_meds; constrwidth_weight3_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight3_sup = constrwidth_mass2overr_meds_sup
+        if weightin3 == "mass3overr": constr_weight3 = constr_mass3overr_meds; constrwidth_weight3_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight3_sup = constrwidth_mass3overr_meds_sup
+        if weightin3 == "mass2rms": constr_weight3 = constr_mass2rms_meds; constrwidth_weight3_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight3_sup = constrwidth_mass2rms_meds_sup
+        if weightin3 == "mass3rms": constr_weight3 = constr_mass3rms_meds; constrwidth_weight3_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight3_sup = constrwidth_mass3rms_meds_sup
+        if weightin3 == "mass2overrrms": constr_weight3 = constr_mass2overrrms_meds; constrwidth_weight3_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight3_sup = constrwidth_mass2overrrms_meds_sup
+        if weightin3 == "mass3overrrms": constr_weight3 = constr_mass3overrrms_meds; constrwidth_weight3_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight3_sup = constrwidth_mass3overrrms_meds_sup
+        if weightin3 == "flexion": constr_weight3 = constr_flexion_meds; constrwidth_weight3_inf = constrwidth_flexion_meds_inf; constrwidth_weight3_sup = constrwidth_flexion_meds_sup
+        if weightin3 == "tidal": constr_weight3 = constr_tidal_meds; constrwidth_weight3_inf = constrwidth_tidal_meds_inf; constrwidth_weight3_sup = constrwidth_tidal_meds_sup
+        if weightin3 == "SIS": constr_weight3 = constr_SIS_meds; constrwidth_weight3_inf = constrwidth_SIS_meds_inf; constrwidth_weight3_sup = constrwidth_SIS_meds_sup
+        if weightin3 == "SIShalo": constr_weight3 = constr_SIShalo_meds; constrwidth_weight3_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight3_sup = constrwidth_SIShalo_meds_sup
+        if weightin3 == "gamma": constr_weight3 = constr_gamma; constrwidth_weight3_inf = constrwidth_gamma_inf; constrwidth_weight3_sup = constrwidth_gamma_sup
+
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
+        if weightin2 == "gal": constr_weight2 = constr_gal_meds; constrwidth_weight2_inf = constrwidth_gal_meds_inf; constrwidth_weight2_sup = constrwidth_gal_meds_sup
+        if weightin2 == "z": constr_weight2 = constr_z_meds; constrwidth_weight2_inf = constrwidth_z_meds_inf; constrwidth_weight2_sup = constrwidth_z_meds_sup
+        if weightin2 == "mass": constr_weight2 = constr_mass_meds; constrwidth_weight2_inf = constrwidth_mass_meds_inf; constrwidth_weight2_sup = constrwidth_mass_meds_sup
+        if weightin2 == "mass2": constr_weight2 = constr_mass2_meds; constrwidth_weight2_inf = constrwidth_mass2_meds_inf; constrwidth_weight2_sup = constrwidth_mass2_meds_sup
+        if weightin2 == "mass3": constr_weight2 = constr_mass3_meds; constrwidth_weight2_inf = constrwidth_mass3_meds_inf; constrwidth_weight2_sup = constrwidth_mass3_meds_sup
+        if weightin2 == "oneoverr": constr_weight2 = constr_oneoverr_meds; constrwidth_weight2_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight2_sup = constrwidth_oneoverr_meds_sup
+        if weightin2 == "zoverr": constr_weight2 = constr_zoverr_meds; constrwidth_weight2_inf = constrwidth_zoverr_meds_inf; constrwidth_weight2_sup = constrwidth_zoverr_meds_sup
+        if weightin2 == "massoverr": constr_weight2 = constr_massoverr_meds; constrwidth_weight2_inf = constrwidth_massoverr_meds_inf; constrwidth_weight2_sup = constrwidth_massoverr_meds_sup
+        if weightin2 == "mass2overr": constr_weight2 = constr_mass2overr_meds; constrwidth_weight2_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight2_sup = constrwidth_mass2overr_meds_sup
+        if weightin2 == "mass3overr": constr_weight2 = constr_mass3overr_meds; constrwidth_weight2_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight2_sup = constrwidth_mass3overr_meds_sup
+        if weightin2 == "mass2rms": constr_weight2 = constr_mass2rms_meds; constrwidth_weight2_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight2_sup = constrwidth_mass2rms_meds_sup
+        if weightin2 == "mass3rms": constr_weight2 = constr_mass3rms_meds; constrwidth_weight2_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight2_sup = constrwidth_mass3rms_meds_sup
+        if weightin2 == "mass2overrrms": constr_weight2 = constr_mass2overrrms_meds; constrwidth_weight2_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight2_sup = constrwidth_mass2overrrms_meds_sup
+        if weightin2 == "mass3overrrms": constr_weight2 = constr_mass3overrrms_meds; constrwidth_weight2_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight2_sup = constrwidth_mass3overrrms_meds_sup
+        if weightin2 == "flexion": constr_weight2 = constr_flexion_meds; constrwidth_weight2_inf = constrwidth_flexion_meds_inf; constrwidth_weight2_sup = constrwidth_flexion_meds_sup
+        if weightin2 == "tidal": constr_weight2 = constr_tidal_meds; constrwidth_weight2_inf = constrwidth_tidal_meds_inf; constrwidth_weight2_sup = constrwidth_tidal_meds_sup
+        if weightin2 == "SIS": constr_weight2 = constr_SIS_meds; constrwidth_weight2_inf = constrwidth_SIS_meds_inf; constrwidth_weight2_sup = constrwidth_SIS_meds_sup
+        if weightin2 == "SIShalo": constr_weight2 = constr_SIShalo_meds; constrwidth_weight2_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight2_sup = constrwidth_SIShalo_meds_sup
+        if weightin2 == "gamma": constr_weight2 = constr_gamma; constrwidth_weight2_inf = constrwidth_gamma_inf; constrwidth_weight2_sup = constrwidth_gamma_sup
+
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
+        if weightin1 == "gal": constr_weight1 = constr_gal_meds; constrwidth_weight1_inf = constrwidth_gal_meds_inf; constrwidth_weight1_sup = constrwidth_gal_meds_sup
+        if weightin1 == "z": constr_weight1 = constr_z_meds; constrwidth_weight1_inf = constrwidth_z_meds_inf; constrwidth_weight1_sup = constrwidth_z_meds_sup
+        if weightin1 == "mass": constr_weight1 = constr_mass_meds; constrwidth_weight1_inf = constrwidth_mass_meds_inf; constrwidth_weight1_sup = constrwidth_mass_meds_sup
+        if weightin1 == "mass2": constr_weight1 = constr_mass2_meds; constrwidth_weight1_inf = constrwidth_mass2_meds_inf; constrwidth_weight1_sup = constrwidth_mass2_meds_sup
+        if weightin1 == "mass3": constr_weight1 = constr_mass3_meds; constrwidth_weight1_inf = constrwidth_mass3_meds_inf; constrwidth_weight1_sup = constrwidth_mass3_meds_sup
+        if weightin1 == "oneoverr": constr_weight1 = constr_oneoverr_meds; constrwidth_weight1_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight1_sup = constrwidth_oneoverr_meds_sup
+        if weightin1 == "zoverr": constr_weight1 = constr_zoverr_meds; constrwidth_weight1_inf = constrwidth_zoverr_meds_inf; constrwidth_weight1_sup = constrwidth_zoverr_meds_sup
+        if weightin1 == "massoverr": constr_weight1 = constr_massoverr_meds; constrwidth_weight1_inf = constrwidth_massoverr_meds_inf; constrwidth_weight1_sup = constrwidth_massoverr_meds_sup
+        if weightin1 == "mass2overr": constr_weight1 = constr_mass2overr_meds; constrwidth_weight1_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight1_sup = constrwidth_mass2overr_meds_sup
+        if weightin1 == "mass3overr": constr_weight1 = constr_mass3overr_meds; constrwidth_weight1_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight1_sup = constrwidth_mass3overr_meds_sup
+        if weightin1 == "mass2rms": constr_weight1 = constr_mass2rms_meds; constrwidth_weight1_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight1_sup = constrwidth_mass2rms_meds_sup
+        if weightin1 == "mass3rms": constr_weight1 = constr_mass3rms_meds; constrwidth_weight1_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight1_sup = constrwidth_mass3rms_meds_sup
+        if weightin1 == "mass2overrrms": constr_weight1 = constr_mass2overrrms_meds; constrwidth_weight1_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight1_sup = constrwidth_mass2overrrms_meds_sup
+        if weightin1 == "mass3overrrms": constr_weight1 = constr_mass3overrrms_meds; constrwidth_weight1_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight1_sup = constrwidth_mass3overrrms_meds_sup
+        if weightin1 == "flexion": constr_weight1 = constr_flexion_meds; constrwidth_weight1_inf = constrwidth_flexion_meds_inf; constrwidth_weight1_sup = constrwidth_flexion_meds_sup
+        if weightin1 == "tidal": constr_weight1 = constr_tidal_meds; constrwidth_weight1_inf = constrwidth_tidal_meds_inf; constrwidth_weight1_sup = constrwidth_tidal_meds_sup
+        if weightin1 == "SIS": constr_weight1 = constr_SIS_meds; constrwidth_weight1_inf = constrwidth_SIS_meds_inf; constrwidth_weight1_sup = constrwidth_SIS_meds_sup
+        if weightin1 == "SIShalo": constr_weight1 = constr_SIShalo_meds; constrwidth_weight1_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight1_sup = constrwidth_SIShalo_meds_sup
+        if weightin1 == "gamma": constr_weight1 = constr_gamma; constrwidth_weight1_inf = constrwidth_gamma_inf; constrwidth_weight1_sup = constrwidth_gamma_sup
 
 print "Reading..."
 
-if mode == "sum": str1 = "sum"
-if mode == "meds": str1 = "med"
+#if mode == "sum":
+    #str1 = ""
+if mode == "meds":
+    str1 = "med"
 
 if conjoined == 4:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
+    output = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
 if conjoined == 3:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
+    output = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_increments%s_%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
 if conjoined == 2:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,radius,mode,increment1,increment2)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,radius,mode,increment1,increment2)
+    output = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_increments%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,mag,radius,mode,increment1,increment2)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_LOS_increments%s_%s.cat' % (rootout,lens,innermask,weightin1,weightin2,mag,radius,mode,increment1,increment2)
 if conjoined == 1:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,radius,mode,increment1)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_LOS_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,radius,mode,increment1)
+    output = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_increments%s.cat' % (rootout,lens,innermask,weightin1,mag,radius,mode,increment1)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta_%s_%s_%s_%s_LOS_increments%s.cat' % (rootout,lens,innermask,weightin1,mag,radius,mode,increment1)
 
 if conjoined == 1:
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
@@ -246,13 +326,13 @@ if conjoined == 1:
     for j in range(8):
       for i in range(8):
         if weightin1 != "gamma":
-            weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index], unpack=True)
+            weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=[weight1_index], unpack=True)
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3], unpack=True)
+            weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=[2,3], unpack=True)
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
@@ -274,10 +354,10 @@ if conjoined == 1:
     for j in range(8):
       for i in range(8):
         if weightin1 != "gamma":
-            kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index), unpack=True)
+            kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index), unpack=True)
             weight1_ = weight1_ / med_weight1
         else:
-            kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,2,3), unpack=True)
+            kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -301,7 +381,7 @@ if conjoined == 2:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
+            weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=(weight1_index,weight2_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -309,7 +389,7 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,1,2], unpack=True)
+            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=[weight1_index,1,2], unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -337,11 +417,11 @@ if conjoined == 2:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index), unpack=True)
+            kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,weight2_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
         else:
-            kappa_, weight1_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,2,3), unpack=True)
+            kappa_, weight1_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -375,7 +455,7 @@ if conjoined == 3:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
+            weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -385,7 +465,7 @@ if conjoined == 3:
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=(weight1_index,1,2,weight3_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -420,12 +500,12 @@ if conjoined == 3:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index), unpack=True)
+            kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,weight2_index,weight3_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
         else:
-            kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight3_index,2,3), unpack=True)
+            kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,weight3_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -471,7 +551,7 @@ if conjoined == 4:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -483,7 +563,7 @@ if conjoined == 4:
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(j),str(i),radius,innermask), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -525,13 +605,13 @@ if conjoined == 4:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         else:
-            kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
+            kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_%s_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(j),str(i),radius,innermask), usecols=(1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
