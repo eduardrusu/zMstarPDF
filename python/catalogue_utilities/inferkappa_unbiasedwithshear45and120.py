@@ -1,5 +1,5 @@
 # CE Rusu Feb 14 2018
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 45 23 meds gal gamma oneoverr mass
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 23 meds gal gamma oneoverr mass
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
 # weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
@@ -21,28 +21,27 @@ zsup = str(sys.argv[3])
 handpicked = str(sys.argv[4])
 other = str(sys.argv[5]) # refers to an optional suffix for the shear constraint
 innermask = str(sys.argv[6])
-radius = str(sys.argv[7])
-mag = str(sys.argv[8])
-mode = str(sys.argv[9])
-conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
+mag = str(sys.argv[7])
+mode = str(sys.argv[8])
+conjoined = len(sys.argv) - 9 # total number of arguments including code name, minus the number of ones that are not weights
 
 if handpicked == 'yes': handpickedstr = '_handpicked'
 else: handpickedstr = ''
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[10])
+    weightin1 = str(sys.argv[9])
 if conjoined == 2:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
+    weightin1 = str(sys.argv[9])
+    weightin2 = str(sys.argv[10])
 if conjoined == 3:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
+    weightin1 = str(sys.argv[9])
+    weightin2 = str(sys.argv[10])
+    weightin3 = str(sys.argv[11])
 if conjoined == 4:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
+    weightin1 = str(sys.argv[9])
+    weightin2 = str(sys.argv[10])
+    weightin3 = str(sys.argv[11])
+    weightin4 = str(sys.argv[12])
 
 print "conjoined:", conjoined
 root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
@@ -81,16 +80,15 @@ if lens == "WFI2033":
 
 # declare which weights to read
 if mag == "23" and radius == "45":
-    measured_index = 0 # specifies the column index in weightsfile
-    measured_index_inf = 1
-    measured_index_sup = 2
-if mag == "23" and radius == "120":
-    measured_index = 3
-    measured_index_inf = 4
-    measured_index_sup = 5
+    measured_index45 = 0 # specifies the column index in weightsfile
+    measured_index_inf45 = 1
+    measured_index_sup45 = 2
+    measured_index120 = 3
+    measured_index_inf120 = 4
+    measured_index_sup120 = 5
 
 def declareweight(weightin):
-    if weightin == "gal": weight_index = 4
+    if weightin == "gal": weight_index = 4 # column index in the files created by kappamed_insertstarsnobeta.py
     if weightin == "z": weight_index = 5
     if weightin == "mass": weight_index = 6
     if weightin == "mass2": weight_index = 7
@@ -123,104 +121,204 @@ if conjoined >= 2:
                 weight4_index = declareweight(weightin4)
 
 # read weight constraints
-constr_gal_meds = weightsfile[measured_index][0]
-constrwidth_gal_meds_inf = weightsfile[measured_index_inf][0]
-constrwidth_gal_meds_sup = weightsfile[measured_index_sup][0]
+constr_gal_meds45 = weightsfile[measured_index45][0]
+constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
+constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
 
-constr_z_meds = weightsfile[measured_index][1]
-constrwidth_z_meds_inf = weightsfile[measured_index_inf][1]
-constrwidth_z_meds_sup = weightsfile[measured_index_sup][1]
+constr_z_meds45 = weightsfile[measured_index45][1]
+constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
+constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
 
-constr_mass_meds = weightsfile[measured_index][2]
-constrwidth_mass_meds_inf = weightsfile[measured_index_inf][2]
-constrwidth_mass_meds_sup = weightsfile[measured_index_sup][2]
+constr_mass_meds45 = weightsfile[measured_index45][2]
+constrwidth_mass_meds_inf45 = weightsfile[measured_index_inf45][2]
+constrwidth_mass_meds_sup45 = weightsfile[measured_index_sup45][2]
 
-constr_mass2_meds = weightsfile[measured_index][3]
-constrwidth_mass2_meds_inf = weightsfile[measured_index_inf][3]
-constrwidth_mass2_meds_sup = weightsfile[measured_index_sup][3]
+constr_mass2_meds45 = weightsfile[measured_index45][3]
+constrwidth_mass2_meds_inf45 = weightsfile[measured_index_inf45][3]
+constrwidth_mass2_meds_sup45 = weightsfile[measured_index_sup45][3]
 
-constr_mass3_meds = weightsfile[measured_index][4]
-constrwidth_mass3_meds_inf = weightsfile[measured_index_inf][4]
-constrwidth_mass3_meds_sup = weightsfile[measured_index_sup][4]
+constr_mass3_meds45 = weightsfile[measured_index45][4]
+constrwidth_mass3_meds_inf45 = weightsfile[measured_index_inf45][4]
+constrwidth_mass3_meds_sup45 = weightsfile[measured_index_sup45][4]
 
-constr_oneoverr_meds = weightsfile[measured_index][5]
-constrwidth_oneoverr_meds_inf = weightsfile[measured_index_inf][5]
-constrwidth_oneoverr_meds_sup = weightsfile[measured_index_sup][5]
+constr_oneoverr_meds45 = weightsfile[measured_index45][5]
+constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][5]
+constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][5]
 
-constr_zoverr_meds = weightsfile[measured_index][6]
-constrwidth_zoverr_meds_inf = weightsfile[measured_index_inf][6]
-constrwidth_zoverr_meds_sup = weightsfile[measured_index_sup][6]
+constr_zoverr_meds45 = weightsfile[measured_index45][6]
+constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][6]
+constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][6]
 
-constr_massoverr_meds = weightsfile[measured_index][7]
-constrwidth_massoverr_meds_inf = weightsfile[measured_index_inf][7]
-constrwidth_massoverr_meds_sup = weightsfile[measured_index_sup][7]
+constr_massoverr_meds45 = weightsfile[measured_index45][7]
+constrwidth_massoverr_meds_inf45 = weightsfile[measured_index_inf45][7]
+constrwidth_massoverr_meds_sup45 = weightsfile[measured_index_sup45][7]
 
-constr_mass2overr_meds = weightsfile[measured_index][8]
-constrwidth_mass2overr_meds_inf = weightsfile[measured_index_inf][8]
-constrwidth_mass2overr_meds_sup = weightsfile[measured_index_sup][8]
+constr_mass2overr_meds45 = weightsfile[measured_index45][8]
+constrwidth_mass2overr_meds_inf45 = weightsfile[measured_index_inf45][8]
+constrwidth_mass2overr_meds_sup45 = weightsfile[measured_index_sup45][8]
 
-constr_mass3overr_meds = weightsfile[measured_index][9]
-constrwidth_mass3overr_meds_inf = weightsfile[measured_index_inf][9]
-constrwidth_mass3overr_meds_sup = weightsfile[measured_index_sup][9]
+constr_mass3overr_meds45 = weightsfile[measured_index45][9]
+constrwidth_mass3overr_meds_inf45 = weightsfile[measured_index_inf45][9]
+constrwidth_mass3overr_meds_sup45 = weightsfile[measured_index_sup45][9]
 
-constr_mass2rms_meds = weightsfile[measured_index][10]
-constrwidth_mass2rms_meds_inf = weightsfile[measured_index_inf][10]
-constrwidth_mass2rms_meds_sup = weightsfile[measured_index_sup][10]
+constr_mass2rms_meds45 = weightsfile[measured_index45][10]
+constrwidth_mass2rms_meds_inf45 = weightsfile[measured_index_inf45][10]
+constrwidth_mass2rms_meds_sup45 = weightsfile[measured_index_sup45][10]
 
-constr_mass3rms_meds = weightsfile[measured_index][11]
-constrwidth_mass3rms_meds_inf = weightsfile[measured_index_inf][11]
-constrwidth_mass3rms_meds_sup = weightsfile[measured_index_sup][11]
+constr_mass3rms_meds45 = weightsfile[measured_index45][11]
+constrwidth_mass3rms_meds_inf45 = weightsfile[measured_index_inf45][11]
+constrwidth_mass3rms_meds_sup45 = weightsfile[measured_index_sup45][11]
 
-constr_mass2overrrms_meds = weightsfile[measured_index][12]
-constrwidth_mass2overrrms_meds_inf = weightsfile[measured_index_inf][12]
-constrwidth_mass2overrrms_meds_sup = weightsfile[measured_index_sup][12]
+constr_mass2overrrms_meds45 = weightsfile[measured_index45][12]
+constrwidth_mass2overrrms_meds_inf45 = weightsfile[measured_index_inf45][12]
+constrwidth_mass2overrrms_meds_sup45 = weightsfile[measured_index_sup45][12]
 
-constr_mass3overrrms_meds = weightsfile[measured_index][13]
-constrwidth_mass3overrrms_meds_inf = weightsfile[measured_index_inf][13]
-constrwidth_mass3overrrms_meds_sup = weightsfile[measured_index_sup][13]
+constr_mass3overrrms_meds45 = weightsfile[measured_index45][13]
+constrwidth_mass3overrrms_meds_inf45 = weightsfile[measured_index_inf45][13]
+constrwidth_mass3overrrms_meds_sup45 = weightsfile[measured_index_sup45][13]
 
-constr_flexion_meds = weightsfile[measured_index][14]
-constrwidth_flexion_meds_inf = weightsfile[measured_index_inf][14]
-constrwidth_flexion_meds_sup = weightsfile[measured_index_sup][14]
+constr_flexion_meds45 = weightsfile[measured_index45][14]
+constrwidth_flexion_meds_inf45 = weightsfile[measured_index_inf45][14]
+constrwidth_flexion_meds_sup45 = weightsfile[measured_index_sup45][14]
 
-constr_tidal_meds = weightsfile[measured_index][15]
-constrwidth_tidal_meds_inf = weightsfile[measured_index_inf][15]
-constrwidth_tidal_meds_sup = weightsfile[measured_index_sup][15]
+constr_tidal_meds45 = weightsfile[measured_index45][15]
+constrwidth_tidal_meds_inf45 = weightsfile[measured_index_inf45][15]
+constrwidth_tidal_meds_sup45 = weightsfile[measured_index_sup45][15]
 
-constr_SIS_meds = weightsfile[measured_index][16]
-constrwidth_SIS_meds_inf = weightsfile[measured_index_inf][16]
-constrwidth_SIS_meds_sup = weightsfile[measured_index_sup][16]
+constr_SIS_meds45 = weightsfile[measured_index45][16]
+constrwidth_SIS_meds_inf45 = weightsfile[measured_index_inf45][16]
+constrwidth_SIS_meds_sup45 = weightsfile[measured_index_sup45][16]
 
-constr_SIShalo_meds = weightsfile[measured_index][17]
-constrwidth_SIShalo_meds_inf = weightsfile[measured_index_inf][17]
-constrwidth_SIShalo_meds_sup = weightsfile[measured_index_sup][17]
+constr_SIShalo_meds45 = weightsfile[measured_index45][17]
+constrwidth_SIShalo_meds_inf45 = weightsfile[measured_index_inf45][17]
+constrwidth_SIShalo_meds_sup45 = weightsfile[measured_index_sup45][17]
 
-def declareweight(weightin):
-    if weightin == "gal": constr_weight = constr_gal_meds; constrwidth_weight_inf = constrwidth_gal_meds_inf; constrwidth_weight_sup = constrwidth_gal_meds_sup
-    if weightin == "z": constr_weight = constr_z_meds; constrwidth_weight_inf = constrwidth_z_meds_inf; constrwidth_weight_sup = constrwidth_z_meds_sup
-    if weightin == "mass": constr_weight = constr_mass_meds; constrwidth_weight_inf = constrwidth_mass_meds_inf; constrwidth_weight_sup = constrwidth_mass_meds_sup
-    if weightin == "mass2": constr_weight = constr_mass2_meds; constrwidth_weight_inf = constrwidth_mass2_meds_inf; constrwidth_weight_sup = constrwidth_mass2_meds_sup
-    if weightin == "mass3": constr_weight = constr_mass3_meds; constrwidth_weight_inf = constrwidth_mass3_meds_inf; constrwidth_weight_sup = constrwidth_mass3_meds_sup
-    if weightin == "oneoverr": constr_weight = constr_oneoverr_meds; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup
-    if weightin == "zoverr": constr_weight = constr_zoverr_meds; constrwidth_weight_inf = constrwidth_zoverr_meds_inf; constrwidth_weight_sup = constrwidth_zoverr_meds_sup
-    if weightin == "massoverr": constr_weight = constr_massoverr_meds; constrwidth_weight_inf = constrwidth_massoverr_meds_inf; constrwidth_weight_sup = constrwidth_massoverr_meds_sup
-    if weightin == "mass2overr": constr_weight = constr_mass2overr_meds; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup
-    if weightin == "mass3overr": constr_weight = constr_mass3overr_meds; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup
-    if weightin == "mass2rms": constr_weight = constr_mass2rms_meds; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup
-    if weightin == "mass3rms": constr_weight = constr_mass3rms_meds; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup
-    if weightin == "mass2overrrms": constr_weight = constr_mass2overrrms_meds; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup
-    if weightin == "mass3overrrms": constr_weight = constr_mass3overrrms_meds; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup
-    if weightin == "flexion": constr_weight = constr_flexion_meds; constrwidth_weight_inf = constrwidth_flexion_meds_inf; constrwidth_weight_sup = constrwidth_flexion_meds_sup
-    if weightin == "tidal": constr_weight = constr_tidal_meds; constrwidth_weight_inf = constrwidth_tidal_meds_inf; constrwidth_weight_sup = constrwidth_tidal_meds_sup
-    if weightin == "SIS": constr_weight = constr_SIS_meds; constrwidth_weight_inf = constrwidth_SIS_meds_inf; constrwidth_weight_sup = constrwidth_SIS_meds_sup
-    if weightin == "SIShalo": constr_weight = constr_SIShalo_meds; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup
-    if weightin == "gamma": constr_weight = constr_gamma; constrwidth_weight_inf = constrwidth_gamma_inf; constrwidth_weight_sup = constrwidth_gamma_sup
+
+constr_gal_meds120 = weightsfile[measured_index120][0]
+constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
+constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
+
+constr_z_meds120 = weightsfile[measured_index120][1]
+constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
+constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
+
+constr_mass_meds120 = weightsfile[measured_index120][2]
+constrwidth_mass_meds_inf120 = weightsfile[measured_index_inf120][2]
+constrwidth_mass_meds_sup120 = weightsfile[measured_index_sup120][2]
+
+constr_mass2_meds120 = weightsfile[measured_index120][3]
+constrwidth_mass2_meds_inf120 = weightsfile[measured_index_inf120][3]
+constrwidth_mass2_meds_sup120 = weightsfile[measured_index_sup120][3]
+
+constr_mass3_meds120 = weightsfile[measured_index120][4]
+constrwidth_mass3_meds_inf120 = weightsfile[measured_index_inf120][4]
+constrwidth_mass3_meds_sup120 = weightsfile[measured_index_sup120][4]
+
+constr_oneoverr_meds120 = weightsfile[measured_index120][5]
+constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][5]
+constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][5]
+
+constr_zoverr_meds120 = weightsfile[measured_index120][6]
+constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][6]
+constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][6]
+
+constr_massoverr_meds120 = weightsfile[measured_index120][7]
+constrwidth_massoverr_meds_inf120 = weightsfile[measured_index_inf120][7]
+constrwidth_massoverr_meds_sup120 = weightsfile[measured_index_sup120][7]
+
+constr_mass2overr_meds120 = weightsfile[measured_index120][8]
+constrwidth_mass2overr_meds_inf120 = weightsfile[measured_index_inf120][8]
+constrwidth_mass2overr_meds_sup120 = weightsfile[measured_index_sup120][8]
+
+constr_mass3overr_meds120 = weightsfile[measured_index120][9]
+constrwidth_mass3overr_meds_inf120 = weightsfile[measured_index_inf120][9]
+constrwidth_mass3overr_meds_sup120 = weightsfile[measured_index_sup120][9]
+
+constr_mass2rms_meds120 = weightsfile[measured_index120][10]
+constrwidth_mass2rms_meds_inf120 = weightsfile[measured_index_inf120][10]
+constrwidth_mass2rms_meds_sup120 = weightsfile[measured_index_sup120][10]
+
+constr_mass3rms_meds120 = weightsfile[measured_index120][11]
+constrwidth_mass3rms_meds_inf120 = weightsfile[measured_index_inf120][11]
+constrwidth_mass3rms_meds_sup120 = weightsfile[measured_index_sup120][11]
+
+constr_mass2overrrms_meds120 = weightsfile[measured_index120][12]
+constrwidth_mass2overrrms_meds_inf120 = weightsfile[measured_index_inf120][12]
+constrwidth_mass2overrrms_meds_sup120 = weightsfile[measured_index_sup120][12]
+
+constr_mass3overrrms_meds120 = weightsfile[measured_index120][13]
+constrwidth_mass3overrrms_meds_inf120 = weightsfile[measured_index_inf120][13]
+constrwidth_mass3overrrms_meds_sup120 = weightsfile[measured_index_sup120][13]
+
+constr_flexion_meds120 = weightsfile[measured_index120][14]
+constrwidth_flexion_meds_inf120 = weightsfile[measured_index_inf120][14]
+constrwidth_flexion_meds_sup120 = weightsfile[measured_index_sup120][14]
+
+constr_tidal_meds120 = weightsfile[measured_index120][15]
+constrwidth_tidal_meds_inf120 = weightsfile[measured_index_inf120][15]
+constrwidth_tidal_meds_sup120 = weightsfile[measured_index_sup120][15]
+
+constr_SIS_meds120 = weightsfile[measured_index120][16]
+constrwidth_SIS_meds_inf120 = weightsfile[measured_index_inf120][16]
+constrwidth_SIS_meds_sup120 = weightsfile[measured_index_sup120][16]
+
+constr_SIShalo_meds120 = weightsfile[measured_index120][17]
+constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
+constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
+
+def declareweight45(weightin):
+    if weightin == "gal": constr_weight = constr_gal_meds45; constrwidth_weight_inf = constrwidth_gal_meds_inf45; constrwidth_weight_sup = constrwidth_gal_meds_sup45
+    if weightin == "z": constr_weight = constr_z_meds45; constrwidth_weight_inf = constrwidth_z_meds_inf45; constrwidth_weight_sup = constrwidth_z_meds_sup45
+    if weightin == "mass": constr_weight = constr_mass_meds45; constrwidth_weight_inf = constrwidth_mass_meds_inf45; constrwidth_weight_sup = constrwidth_mass_meds_sup45
+    if weightin == "mass2": constr_weight = constr_mass2_meds45; constrwidth_weight_inf = constrwidth_mass2_meds_inf45; constrwidth_weight_sup = constrwidth_mass2_meds_sup45
+    if weightin == "mass3": constr_weight = constr_mass3_meds45; constrwidth_weight_inf = constrwidth_mass3_meds_inf45; constrwidth_weight_sup = constrwidth_mass3_meds_sup45
+    if weightin == "oneoverr": constr_weight = constr_oneoverr_meds45; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf45; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup45
+    if weightin == "zoverr": constr_weight = constr_zoverr_meds45; constrwidth_weight_inf = constrwidth_zoverr_meds_inf45; constrwidth_weight_sup = constrwidth_zoverr_meds_sup45
+    if weightin == "massoverr": constr_weight = constr_massoverr_meds45; constrwidth_weight_inf = constrwidth_massoverr_meds_inf45; constrwidth_weight_sup = constrwidth_massoverr_meds_sup45
+    if weightin == "mass2overr": constr_weight = constr_mass2overr_meds45; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf45; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup45
+    if weightin == "mass3overr": constr_weight = constr_mass3overr_meds45; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf45; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup45
+    if weightin == "mass2rms": constr_weight = constr_mass2rms_meds45; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf45; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup45
+    if weightin == "mass3rms": constr_weight = constr_mass3rms_meds45; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf45; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup45
+    if weightin == "mass2overrrms": constr_weight = constr_mass2overrrms_meds45; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf45; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup45
+    if weightin == "mass3overrrms": constr_weight = constr_mass3overrrms_meds45; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf45; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup45
+    if weightin == "flexion": constr_weight = constr_flexion_meds45; constrwidth_weight_inf = constrwidth_flexion_meds_inf45; constrwidth_weight_sup = constrwidth_flexion_meds_sup45
+    if weightin == "tidal": constr_weight = constr_tidal_meds45; constrwidth_weight_inf = constrwidth_tidal_meds_inf45; constrwidth_weight_sup = constrwidth_tidal_meds_sup45
+    if weightin == "SIS": constr_weight = constr_SIS_meds45; constrwidth_weight_inf = constrwidth_SIS_meds_inf45; constrwidth_weight_sup = constrwidth_SIS_meds_sup45
+    if weightin == "SIShalo": constr_weight = constr_SIShalo_meds45; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf45; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup45
+    if weightin == "gamma": constr_weight = constr_gamma45; constrwidth_weight_inf = constrwidth_gamma_inf45; constrwidth_weight_sup = constrwidth_gamma_sup45
     return constr_weight, constrwidth_weight_inf, constrwidth_weight_sup
 
-if conjoined == 4: constr_weight4, constrwidth_weight4_inf, constrwidth_weight4_sup = declareweight(weightin4)
-if (conjoined == 3) | (conjoined == 4): constr_weight3, constrwidth_weight3_inf, constrwidth_weight3_sup = declareweight(weightin3)
-if (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight2, constrwidth_weight2_inf, constrwidth_weight2_sup = declareweight(weightin2)
-if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight1, constrwidth_weight1_inf, constrwidth_weight1_sup = declareweight(weightin1)
+def declareweight120(weightin):
+    if weightin == "gal": constr_weight = constr_gal_meds120; constrwidth_weight_inf = constrwidth_gal_meds_inf120; constrwidth_weight_sup = constrwidth_gal_meds_sup120
+    if weightin == "z": constr_weight = constr_z_meds120; constrwidth_weight_inf = constrwidth_z_meds_inf120; constrwidth_weight_sup = constrwidth_z_meds_sup120
+    if weightin == "mass": constr_weight = constr_mass_meds120; constrwidth_weight_inf = constrwidth_mass_meds_inf120; constrwidth_weight_sup = constrwidth_mass_meds_sup120
+    if weightin == "mass2": constr_weight = constr_mass2_meds120; constrwidth_weight_inf = constrwidth_mass2_meds_inf120; constrwidth_weight_sup = constrwidth_mass2_meds_sup120
+    if weightin == "mass3": constr_weight = constr_mass3_meds120; constrwidth_weight_inf = constrwidth_mass3_meds_inf120; constrwidth_weight_sup = constrwidth_mass3_meds_sup120
+    if weightin == "oneoverr": constr_weight = constr_oneoverr_meds120; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf120; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup120
+    if weightin == "zoverr": constr_weight = constr_zoverr_meds120; constrwidth_weight_inf = constrwidth_zoverr_meds_inf120; constrwidth_weight_sup = constrwidth_zoverr_meds_sup120
+    if weightin == "massoverr": constr_weight = constr_massoverr_meds120; constrwidth_weight_inf = constrwidth_massoverr_meds_inf120; constrwidth_weight_sup = constrwidth_massoverr_meds_sup120
+    if weightin == "mass2overr": constr_weight = constr_mass2overr_meds120; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf120; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup120
+    if weightin == "mass3overr": constr_weight = constr_mass3overr_meds120; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf120; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup120
+    if weightin == "mass2rms": constr_weight = constr_mass2rms_meds120; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf120; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup120
+    if weightin == "mass3rms": constr_weight = constr_mass3rms_meds120; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf120; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup120
+    if weightin == "mass2overrrms": constr_weight = constr_mass2overrrms_meds120; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf120; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup120
+    if weightin == "mass3overrrms": constr_weight = constr_mass3overrrms_meds120; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf120; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup120
+    if weightin == "flexion": constr_weight = constr_flexion_meds120; constrwidth_weight_inf = constrwidth_flexion_meds_inf120; constrwidth_weight_sup = constrwidth_flexion_meds_sup120
+    if weightin == "tidal": constr_weight = constr_tidal_meds120; constrwidth_weight_inf = constrwidth_tidal_meds_inf120; constrwidth_weight_sup = constrwidth_tidal_meds_sup120
+    if weightin == "SIS": constr_weight = constr_SIS_meds120; constrwidth_weight_inf = constrwidth_SIS_meds_inf120; constrwidth_weight_sup = constrwidth_SIS_meds_sup120
+    if weightin == "SIShalo": constr_weight = constr_SIShalo_meds120; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf120; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup120
+    if weightin == "gamma": constr_weight = constr_gamma120; constrwidth_weight_inf = constrwidth_gamma_inf120; constrwidth_weight_sup = constrwidth_gamma_sup120
+    return constr_weight, constrwidth_weight_inf, constrwidth_weight_sup
+
+if conjoined == 4: constr_weight4_45, constrwidth_weight4_inf45, constrwidth_weight4_sup45 = declareweight45(weightin4)
+if (conjoined == 3) | (conjoined == 4): constr_weight3_45, constrwidth_weight3_inf45, constrwidth_weight3_sup45 = declareweight45(weightin3)
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight2_45, constrwidth_weight2_inf45, constrwidth_weight2_sup45 = declareweight45(weightin2)
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight1_45, constrwidth_weight1_inf45, constrwidth_weight1_sup45 = declareweight45(weightin1)
+
+if conjoined == 4: constr_weight4_120, constrwidth_weight4_inf120, constrwidth_weight4_sup120 = declareweight120(weightin4)
+if (conjoined == 3) | (conjoined == 4): constr_weight3_120, constrwidth_weight3_inf120, constrwidth_weight3_sup120 = declareweight120(weightin3)
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight2_120, constrwidth_weight2_inf120, constrwidth_weight2_sup120 = declareweight120(weightin2)
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4): constr_weight1_120, constrwidth_weight1_inf120, constrwidth_weight1_sup120 = declareweight120(weightin1)
 
 print "Reading..."
 
@@ -228,17 +326,36 @@ if mode == "sum": str1 = "sum"
 if mode == "meds": str1 = "med"
 
 if conjoined == 4:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,radius,mode,increment1,increment2,increment3,increment4)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_45120_%s_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_45120_%s_LOS_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
 if conjoined == 3:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,radius,mode,increment1,increment2,increment3)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_45120_%s_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_45120_%s_LOS_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
 if conjoined == 2:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,radius,mode,increment1,increment2)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,radius,mode,increment1,increment2)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_45120_%s_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_45120_%s_LOS_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
 if conjoined == 1:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,radius,mode,increment1)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_LOS_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,radius,mode,increment1)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_45120_%s_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_45120_%s_LOS_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if conjoined == 1:
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
