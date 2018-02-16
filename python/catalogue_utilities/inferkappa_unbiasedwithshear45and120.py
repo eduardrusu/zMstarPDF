@@ -46,7 +46,7 @@ if conjoined == 4:
 print "conjoined:", conjoined
 root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,type,inner,handpickedstr,zinf,zsup)),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,type,inner,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10

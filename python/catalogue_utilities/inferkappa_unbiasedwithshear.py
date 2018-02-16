@@ -47,7 +47,7 @@ if conjoined == 4:
 print "conjoined:", conjoined
 root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,type,inner,handpickedstr,zinf,zsup)),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -60,19 +60,19 @@ increment4 = 2
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'no' and int(zsup) < 0 and innermask == '5':
+    if other == 'fiducial' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.154
         constrwidth_gamma_inf = 0.139
         constrwidth_gamma_sup = 0.169
-    if other == 'chameleon' and handpicked == 'no' and int(zsup) < 0 and innermask == '5':
+    if other == 'chameleon' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and int(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and int(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
@@ -108,6 +108,7 @@ def declareweight(weightin):
     if weightin == "tidal": weight_index = 19
     if weightin == "SIS": weight_index = 20
     if weightin == "SIShalo": weight_index = 21
+    if weightin == "gamma": weight_index = None
     return weight_index
 
 if mag == "23":

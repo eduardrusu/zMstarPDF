@@ -11,7 +11,7 @@ from os import system
 from scipy import special
 import pandas as pd
 import time
-import distances
+#import distances
 from scipy.interpolate import griddata
 
 ############################
