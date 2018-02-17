@@ -267,11 +267,11 @@ else:
     fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_23_%s_bpz_detir_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
     for i in range(len(fiducial45)):
         print fiducial45[i]
-        if i == 0: f45 = np.loadtxt('%s%s' (rootin,fiducial45[0]), unpack=True)
-        else: f45 = np.c_[f45,np.loadtxt('%s%s' (rootin,fiducial45[i]), unpack=True)]
+        if i == 0: f45 = np.loadtxt('%s%s' %(rootin,fiducial45[0]), unpack=True)
+        else: f45 = np.c_[f45,np.loadtxt('%s%s' %(rootin,fiducial45[i]), unpack=True)]
     for i in range(len(fiducial120)):
-        if i == 0: f120 = np.loadtxt('%s%s' (rootin,fiducial120[0]), unpack=True)
-        else: f120 = np.c_[f120,np.loadtxt('%s%s' (rootin,fiducial120[i]), unpack=True)]
+        if i == 0: f120 = np.loadtxt('%s%s' %(rootin,fiducial120[0]), unpack=True)
+        else: f120 = np.c_[f120,np.loadtxt('%s%s' %(rootin,fiducial120[i]), unpack=True)]
 
     f = open('%s/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,inner,handpicked,zinf,zsup),'w')
     str = '# weight      45_23med    45_23inf  45_23sup 120_23med 120_23inf 120_23sup \n'
