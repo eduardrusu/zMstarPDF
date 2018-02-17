@@ -412,7 +412,9 @@ cell_xpix = -3
 cell_ypix = -2
 cell_sep = -1
 
+print 'shape', np.shape(field)
 field = np.delete(field,np.where(field[z_field] > z_s),axis=1) # eliminate objects at redshifts higher than the source
+print 'shape', np.shape(field)
 field = np.delete(field,np.where((field[z_field] >= zinf) & (field[z_field] <= zsup)),axis=1) # eliminate objects corresponding to the redshift slice
 field[i_field][field[i_field] < 0] = field[y_field][field[i_field] < 0] # for objects with y mags, use those
 field = np.delete(field,np.where(field[i_field] < brightmag),axis = 1) # eliminate objects brighter than the upper brightness limit
