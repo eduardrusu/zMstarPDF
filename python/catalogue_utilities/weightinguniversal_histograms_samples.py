@@ -71,6 +71,7 @@ for nr in range(samples):
             q_W1_50read = np.loadtxt(root+lstW1_50[i], usecols=cols, unpack=True)
         else:
             q_W1_50read = np.r_['1',q_W1_50read,np.loadtxt(root+ lstW1_50[i], usecols=cols, unpack=True)]
+        #print np.shape(q_W1_50read)
     for i in range(len(lstW1_75)):
         if i == 0:
             q_W1_75read = np.loadtxt(root+lstW1_75[i], usecols=cols, unpack=True)
