@@ -262,7 +262,9 @@ def lensprep(lenscat):
     coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5')
     sep_lens = coord_lensinit.separation(center_lens).arcsec
     sep_lens[sep_lens < 10] = 10 # limiting the minimum distance to the lens to 10 arcsec; this does not mean I'm removing those objects, because I use the mask for that below
+    print '_1',np.shape(lenscat)
     lenscat = np.c_['0',lenscat,sep_lens.reshape((1, sep_lens.shape[0]))] # inserting as the last column of the catalogue
+    print '_2',np.shape(lenscat)
     lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # remove the masked objects; I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
     #print msk_lens[0].data[400,485] # testing
     lenscat = np.delete(lenscat,np.where(lenscat[classify] < 0),axis=1) # removes all stars from the catalogue
@@ -413,17 +415,18 @@ cell_ypix = -2
 cell_sep = -1
 
 field = np.delete(field,np.where(field[z_field] > z_s),axis=1) # eliminate objects at redshifts higher than the source
-print 'shape', np.shape(field)
+#print 'shape', np.shape(field)
 field = np.delete(field,np.where((field[z_field] >= zinf) & (field[z_field] <= zsup)),axis=1) # eliminate objects corresponding to the redshift slice
-print 'shape', np.shape(field)
+#print 'shape', np.shape(field)
 field[i_field][field[i_field] < 0] = field[y_field][field[i_field] < 0] # for objects with y mags, use those
 field = np.delete(field,np.where(field[i_field] < brightmag),axis = 1) # eliminate objects brighter than the upper brightness limit
 field[mass_BEST_field][field[mass_BEST_field] < 0] = 9.0 # fix the very rare unphysical masses
 field[mass_MED_field][field[mass_MED_field] < 0] = field[mass_BEST_field][field[mass_MED_field] < 0] # fix the more common unphysical med masses with best masses
 
 # compute halo masses
-
+print '_3',np.shape(field)
 field = np.c_['0',field,np.zeros(field.shape[1]).reshape(1,np.zeros(field.shape[1]).shape[0])] # add one column for halo mass
+print '_4',np.shape(field)
 a = 1 / (1 + field[z_field][field[z_field] <= 1])
 logM1a = M10_ + M1a_ * (a - 1)
 logMs0a = Ms00_ + Ms0a_ * (a-1)
@@ -450,7 +453,9 @@ field[Mhalo_field][field[z_field] > 1] = logM1a + b * (field[mass_MED_field][fie
 #field[Mhalo_field][field[Mhalo_field] - field[mass_MED_field] > 4] = field[mass_MED_field][field[Mhalo_field] - field[mass_MED_field] > 4] + 4 # halo masses can get very large, resulting in negative convergence
 
 fieldpix = np.zeros((3,field.shape[1])) # this will contain the fieldpix[1], fieldpix[0] and the separation in arcsec from the cell center
+print '_5',np.shape(field)
 field = np.c_['0',field,fieldpix.reshape(3,fieldpix.shape[1])] # adding fieldpix as extension to the catalogue
+print '_6',np.shape(field)
 fieldpix = worldfield.wcs_world2pix(field[RA_field], field[DEC_field], 1) # find pixel coordinates of each field galaxy, relative to the fmask .fits file (therefore with CFHTLenS pixel size); first column is the physical image x axis
 field[cell_xpix] = fieldpix[1] # the physical image y axis, in agreement with the lens section above
 field[cell_ypix] = fieldpix[0]
@@ -528,7 +533,9 @@ for k in range(overlap):
                     lenscoords_fieldx = float(xlow)+(1.0 * lenscoords[1]/((2/pixlens.value) * radius))*(float(xhigh)-float(xlow)) # project the lens catalogue onto the field mask; this is good, because it matches the formula for unmaskedfieldx
                     lenscoords_fieldy = float(ylow)+(1.0 * lenscoords[0]/((2/pixlens.value) * radius))*(float(yhigh)-float(ylow))
                     lenscoords_field = msk[0].data[lenscoords_fieldx.astype(int),lenscoords_fieldy.astype(int)]
+                    print '_7',np.shape(lensbpz_masked)
                     lensbpz_masked = np.c_['0',lensbpz,lenscoords_field.reshape(1,lenscoords_field.shape[0])] # check if the lens catalogue objects fall inside field masks; I tested that this expresion gives the correct order of the rows
+                    print '_8',np.shape(lensbpz_masked)
                     lensbpz_masked = np.delete(lensbpz_masked,np.where(lensbpz_masked[-1] != 0),axis=1) # remove objects inside a field mask
                     lensbpz_masked = lensbpz_masked[:-1] # delete the last column
                     
