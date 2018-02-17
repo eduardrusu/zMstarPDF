@@ -104,10 +104,9 @@ fontlegend = 8
 fontsize = 6
 fontordonate = 6
 fontabsciss = 6
-fontlegend = 5
+fontlegend = 7
 fontlabel = 2
-vertlimit = 1
-linewidth = 0.2
+linewidth = 0.5
 
 def plot(mag,radius):
     plt.clf()
@@ -132,49 +131,56 @@ def plot(mag,radius):
         if i == 16: ax=plt.subplot(5,4,18)
         if i == 17: ax=plt.subplot(5,4,19)
         
-        z=np.linspace(0,vertlimit,1000)
+        z=np.linspace(0,1,1000)
         w=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[2]
         plt.plot(w,z,'b-',label='bpz_deti_irac', linewidth=linewidth)
         plt.plot(winf,z,'b--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'b--',label=None, linewidth=linewidth)
+        z=np.linspace(1,2,1000)
         w=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[2]
         plt.plot(w,z,'g-',label='bpz_deti_noirac', linewidth=linewidth)
         plt.plot(winf,z,'g--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'g--',label=None, linewidth=linewidth)
+        z=np.linspace(2,3,1000)
         w=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[2]
         plt.plot(w,z,'k-',label='bpz_detir_irac', linewidth=linewidth)
         plt.plot(winf,z,'k--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'k--',label=None, linewidth=linewidth)
+        z=np.linspace(3,4,1000)
         w=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[2]
         plt.plot(w,z,'r-',label='bpz_detir_noirac', linewidth=linewidth)
         plt.plot(winf,z,'r--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'r--',label=None, linewidth=linewidth)
+        z=np.linspace(4,5,1000)
         w=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[2]
         plt.plot(w,z,'m-',label='eazy_deti_irac', linewidth=linewidth)
         plt.plot(winf,z,'m--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'m--',label=None, linewidth=linewidth)
+        z=np.linspace(5,6,1000)
         w=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[2]
         plt.plot(w,z,'y-',label='eazy_deti_noirac', linewidth=linewidth)
         plt.plot(winf,z,'y--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'y--',label=None, linewidth=linewidth)
+        z=np.linspace(6,7,1000)
         w=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[2]
         plt.plot(w,z,'c-',label='eazy_detir_irac', linewidth=linewidth)
         plt.plot(winf,z,'c--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'c--',label=None, linewidth=linewidth)
+        z=np.linspace(7,8,1000)
         w=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[0]
         wsup=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[2]
@@ -209,7 +215,7 @@ def plot(mag,radius):
     plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
     plt.subplot(5,4,5)
     plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=fontlegend)
-    plt.savefig('%s/weightedcountshist_%sarcsec_%sinner_%s_%s%s_zgap%s_%s_10samples.png' % (rootout, radius, inner, mag, mode, handpicked, zinf, zsup), dpi=1000)
+    plt.savefig('%s/weightedcountshist_%sarcsec_%sinner_%s_%s%s_zgap%s_%s_10samples.png' % (rootout, radius, inner, mag, mode, handpicked, zinf, zsup), dpi=500)
 
 bpz_deti_irac = bpz_deti_irac45
 bpz_deti_noirac = bpz_deti_noirac45
