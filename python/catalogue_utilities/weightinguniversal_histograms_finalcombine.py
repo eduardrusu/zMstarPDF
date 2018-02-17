@@ -262,9 +262,11 @@ if local == 'global':
     f.close()
 
 else:
+    print "fiducial:"
     fiducial45 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_45arcsec_%sinner_23_%s_bpz_detir_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mag,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)] # this will contain W1-W4 and 50/75; CHOOSE WHAT YOU WANT HERE
     fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_23_%s_bpz_detir_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mag,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
     for i in range(len(fiducial45)):
+        print fiducial45[i]
         if i == 0: f45 = np.loadtxt(fiducial45[0], unpack=True)
         else: f45 = np.c_[f45,np.loadtxt(fiducial45[i], unpack=True)]
     for i in range(len(fiducial120)):
