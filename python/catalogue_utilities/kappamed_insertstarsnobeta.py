@@ -254,10 +254,14 @@ if lens == "J1206":
     z_s = 1.79
     pln = 34
 
-rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
-rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
-rootstars = "/lfs08/rusucs/insertstars/"
+#rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+rootwghtratios = "/Volumes/LaCieSubaru/MSweights/" % lens
+#rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
+rootgals = "/Volumes/LaCieSubaru/%s/MSgals/" % lens
+#rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
+rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
+#rootstars = "/lfs08/rusucs/insertstars/"
+rootstars = "/Volumes/LaCieSubaru/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
