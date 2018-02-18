@@ -255,9 +255,9 @@ if lens == "J1206":
     pln = 34
 
 #rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-rootwghtratios = "/Volumes/LaCieSubaru/MSweights/" % lens
+rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
 #rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
-rootgals = "/Volumes/LaCieSubaru/%s/MSgals/" % lens
+rootgals = "/Volumes/LaCieSubaru/%s/MSgals/"
 #rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
 rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
 #rootstars = "/lfs08/rusucs/insertstars/"
