@@ -269,12 +269,10 @@ if conjoined == 1:
         med1[j] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
       print j
     med_weight1 = np.mean(med1) # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
-    if weightin1 == "gamma":
-        constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights, so that it is meaningful to multiply by med_weight1
-        constrwidth_weight1_inf = constrwidth_weight1_inf / med_weight1
-        constrwidth_weight1_sup = constrwidth_weight1_sup / med_weight1
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))]) # absolute number, e.g. of galaxies within the lower width
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
+    if weightin1 == "gamma":
+        constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights
     
     ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
     for j in range(8):
@@ -333,14 +331,12 @@ if conjoined == 2:
       print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
-        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
+    if weightin2 == "gamma":
+        constr_weight2 = constr_weight2 / med_weight2
 
     for j in range(8):
       for i in range(8):
@@ -416,16 +412,14 @@ if conjoined == 3:
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
-        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
     E_w3_inf = np.max([1, round(med_weight1 * (constr_weight3 - constrwidth_weight3_inf))])
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
+    if weightin2 == "gamma":
+        constr_weight2 = constr_weight2 / med_weight2
 
     for j in range(8):
       for i in range(8):
@@ -521,10 +515,6 @@ if conjoined == 4:
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
     med_weight4 = np.mean(med4)
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
-        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
@@ -533,6 +523,8 @@ if conjoined == 4:
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
+    if weightin2 == "gamma":
+        constr_weight2 = constr_weight2 / med_weight2
 
     for j in range(8):
       for i in range(8):
