@@ -1,10 +1,10 @@
-# CE Rusu Feb 14 2018
+# CE Rusu Feb 19 2018
 # Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 23 meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
-# weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
-# the code is written such that, if shear is used as overdensity, it should be the second weight used (unless only one weight is used);
+# for each redius, weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
+# the code is written such that, if shear is used as overdensity, it should be the second weight used in either radius
 
 import sys
 import os
@@ -350,7 +350,7 @@ if conjoined == 1:
     output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
     outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_LOS_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
             
-def readconjoined1_ugriz(radius,constr_weight1):
+def readconjoined1_ugriz(radius,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup):
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
     med1 = np.zeros(8)
     for j in range(8):
@@ -381,9 +381,9 @@ def readconjoined1_ugriz(radius,constr_weight1):
         constrwidth_weight1_sup = constrwidth_weight1_sup / med_weight1
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))]) # absolute number, e.g. of galaxies within the lower width
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
-    return constr_weight1,med_weight1,E_w1_inf,E_w1_sup
+    return constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup
 
-def readconjoined2_ugriz(radius,constr_weight2):
+def readconjoined2_ugriz(radius,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
     med1 = np.zeros(8)
     med2 = np.zeros(8)
     for j in range(8):
@@ -423,9 +423,9 @@ def readconjoined2_ugriz(radius,constr_weight2):
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
-    return constr_weight2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup
 
-def readconjoined3_ugriz(radius,constr_weight2):
+def readconjoined3_ugriz(radius,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
     med1 = np.zeros(8)
     med2 = np.zeros(8)
     med3 = np.zeros(8)
@@ -475,9 +475,9 @@ def readconjoined3_ugriz(radius,constr_weight2):
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
     E_w3_inf = np.max([1, round(med_weight1 * (constr_weight3 - constrwidth_weight3_inf))])
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
-    return constr_weight2,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup
 
-def readconjoined4_ugriz(radius,constr_weight2):
+def readconjoined4_ugriz(radius,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
     med1 = np.zeros(8)
     med2 = np.zeros(8)
     med3 = np.zeros(8)
@@ -537,7 +537,7 @@ def readconjoined4_ugriz(radius,constr_weight2):
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
-    return constr_weight2,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
 
 
 def readconjoined1_ugrizJHK(radius):
@@ -747,271 +747,289 @@ def readconjoined4_ugrizJHK(radius):
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
             
 if conjoined == 1:
-            constr_weight1,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1) # the final argument is used in case it refers to 'gamma', in which case the constraint needs to be computed
+    constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup) # the final three arguments are necessary in case of 'gamma'
     id,ind1,ind2,kappa,weight1 = readconjoined1_ugrizJHK(weightin1.split('_')[0])
     del id,ind1,ind2
 
 if conjoined == 2:
     if weightin1.split('_')[0] == weightin2.split('_')[0]:
-        constr_weight2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2)
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2 = readconjoined2_ugrizJHK(weightin1.split('_')[0])
         del id,ind1,ind2
     else:
-        constr_weight1,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1)
-        constr_weight2,med_weight2,E_w2_inf,E_w2_sup = readconjoined1_ugriz(weightin2.split('_')[0],constr_weight2)
-        id_rad1_,ind1_rad1_,ind2_rad1_,kapparad1_,weight1_rad1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
-        id_rad2_,ind1_rad2_,ind2_rad2_,kapparad2_,weight1_rad2_ = readconjoined1_ugrizJHK(weightin2.split('_')[0])
+        constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+        id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight2,E_w2_inf,E_w2_sup = readconjoined1_ugriz(weightin2.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+        for j in range(8):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight2_ij = weight2_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+            
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+            
+                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                else:
+                    kappa = np.append(kappa_rad1,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+        del weight1_ij
+        del weight2_ij
             
 if conjoined == 3:
     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
-        constr_weight2,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2)
+        constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2,weight3 = readconjoined3_ugrizJHK(weightin1.split('_')[0])
         del id,ind1,ind2
+    else:
+        if weightin1.split('_')[0] == weightin2.split('_')[0]:
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0])
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight3,E_w3_inf,E_w3_sup = readconjoined1_ugriz(weightin3.split('_')[0],constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_ = readconjoined1_ugrizJHK(weightin3.split('_')[0])
+        if weightin2.split('_')[0] == weightin3.split('_')[0]:
+            constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined2_ugriz(weightin2.split('_')[0],constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_ = readconjoined1_ugrizJHK(weightin2.split('_')[0])
+        for j in range(8):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+            
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+            
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+            
+                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+            
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                else:
+                    kappa = np.append(kappa_rad1,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+        del weight1_ij,weight1_
+        del weight2_ij,weight2_
+        del weight3_ij,weight3_
             
 if conjoined == 4:
     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
-        constr_weight2,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],constr_weight2)
+        constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2,weight3,weight4 = readconjoined4_ugrizJHK(weightin1.split('_')[0])
         del id,ind1,ind2
+    else:
+        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3_ugrizJHK(weightin1.split('_')[0])
+            constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight4,E_w4_inf,E_w4_sup = readconjoined1_ugriz(weightin4.split('_')[0],constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+            id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_ = readconjoined1_ugrizJHK(weightin4.split('_')[0])
+        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+            constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight4_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,med_weight4,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined3_ugriz(weightin2.split('_')[0],constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_ = readconjoined3_ugrizJHK(weightin2.split('_')[0])
+        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0])
+            constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined2_ugriz(weightin3.split('_')[0],constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+            id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2_ugrizJHK(weightin3.split('_')[0])
+        for j in range(8):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight4_ij = weight4_[(ind1_rad2 == j) & (ind2_rad2 == i)]
             
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight4_ij = weight4_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+            
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+            
+                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+            
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                    weight4 = weight4_ij
+                else:
+                    kappa = np.append(kappa_rad1,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+                    weight4 = np.append(weight4,weight4_ij)
+        del weight1_ij,weight1_
+        del weight2_ij,weight2_
+        del weight3_ij,weight3_
+        del weight4_ij,weight4_
+       
 if conjoined == 5:
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_,weight4_ = readconjoined4_ugrizJHK(weightin1.split('_')[0])
+        constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup,med_weight5,E_w5_inf,E_w5_sup = readconjoined1_ugriz(weightin5.split('_')[0],constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight5_ = readconjoined1_ugrizJHK(weightin5.split('_')[0])
+    if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+        id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+        constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,med_weight4,med_weight5,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined4_ugriz(weightin2.split('_')[0],constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+        id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_,weight5_ = readconjoined4_ugrizJHK(weightin2.split('_')[0])
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3_ugrizJHK(weightin1.split('_')[0])
+        constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup,med_weight4,med_weight5,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined2_ugriz(weightin4.split('_')[0],constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_,weight5_ = readconjoined2_ugrizJHK(weightin4.split('_')[0])
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0])
+        constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined3_ugriz(weightin3.split('_')[0],constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+        id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_,weight5_ = readconjoined3_ugrizJHK(weightin3.split('_')[0])
             
+        for j in range(8):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight4_ij = weight4_[(ind1_rad2 == j) & (ind2_rad2 == i)]
             
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight4_ij = weight4_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight5_ij = weight5_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
             
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                    weight4_ij = weight4_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
             
+                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
             
-            
-            
-            
-      if weightin1.split('_')[0] == "45":
-    constr_weight1_120,med_weight1_120,E_w1_inf120,E_w1_sup120 = readconjoined1_ugriz('120',constr_weight1_120)
-    id45_,ind1_45_,ind2_45_,kappa45_,weight1_45_ = readconjoined1_ugrizJHK('45')
-    id120_,ind1_120_,ind2_120_,kappa120_,weight1_120_ = readconjoined1_ugrizJHK('120')
-    for j in range(8):
-        for i in range(8):
-            id45_ij = id45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind1_45_ij = ind1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind2_45_ij = ind2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            kappa45_ij = kappa45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight1_45_ij = weight1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            id120_ij = id120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind1_120_ij = ind1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind2_120_ij = ind2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            kappa120_ij = kappa120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight1_120_ij = weight1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                    weight4 = weight4_ij
+                    weight5 = weight5_ij
+                else:
+                    kappa = np.append(kappa_rad1,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+                    weight4 = np.append(weight4,weight4_ij)
+                    weight5 = np.append(weight5,weight5_ij)
+        del weight1_ij,weight1_
+        del weight2_ij,weight2_
+        del weight3_ij,weight3_
+        del weight4_ij,weight4_
+        del weight5_ij,weight5_
 
-            ind1_120_ij = ind1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]] # keep only the '120' data with id inside '45'
-            ind2_120_ij = ind2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            kappa120_ij = kappa120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight1_120_ij = weight1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            id120_ij = id120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind1_45_ij = ind1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]] # keep only the '45' data with id inside '`120'
-            ind2_45_ij = ind2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            kappa45_ij = kappa45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight1_45_ij = weight1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            id45_ij = id45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            if id45_ij != id120_ij: print "error id" # testing sanity
-            if kappa45_ij != kappa120_ij: print "error kappa"
-            if (i == 0) and (j == 0):
-                kappa = kappa45_ij
-                weight1_45 = weight1_45_ij
-                weight1_120 = weight1_120_ij
-            else:
-                kappa = np.append(kappa45,kappa45_ij)
-                weight1_45 = np.append(weight1_45,weight1_45_ij)
-                weight1_120 = np.append(weight1_120,weight1_120_ij)
-    del weight1_45_,weight1_45_ij
-    del weight1_120_,weight1_120_ij
-
-if conjoined == 2:
-    constr_weight2_45,med_weight1_45,med_weight2_45,E_w1_inf45,E_w1_sup45,E_w2_inf45,E_w2_sup45 = readconjoined2_ugriz('45',constr_weight2_45)
-    constr_weight2_120,med_weight1_120,med_weight2_120,E_w1_inf120,E_w1_sup120,E_w2_inf120,E_w2_sup120 = readconjoined2_ugriz('120',constr_weight2_120)
-    id45_,ind1_45_,ind2_45_,kappa45_,weight1_45_,weight2_45_ = readconjoined2_ugrizJHK('45')
-    id120_,ind1_120_,ind2_120_,kappa120_,weight1_120_,weight2_120_ = readconjoined2_ugrizJHK('120')
-    for j in range(8):
-        for i in range(8):
-            id45_ij = id45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind1_45_ij = ind1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind2_45_ij = ind2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            kappa45_ij = kappa45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight1_45_ij = weight1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight2_45_ij = weight2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            id120_ij = id120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind1_120_ij = ind1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind2_120_ij = ind2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            kappa120_ij = kappa120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight1_120_ij = weight1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight2_120_ij = weight2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-
-            ind1_120_ij = ind1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind2_120_ij = ind2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            kappa120_ij = kappa120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight1_120_ij = weight1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight2_120_ij = weight2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            id120_ij = id120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind1_45_ij = ind1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            ind2_45_ij = ind2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            kappa45_ij = kappa45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight1_45_ij = weight1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight2_45_ij = weight2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            id45_ij = id45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            if id45_ij != id120_ij: print "error id" # testing sanity
-            if kappa45_ij != kappa120_ij: print "error kappa"
-            if (i == 0) and (j == 0):
-                kappa = kappa45_ij
-                weight1_45 = weight1_45_ij
-                weight1_120 = weight1_120_ij
-                weight2_45 = weight2_45_ij
-                weight2_120 = weight2_120_ij
-            else:
-                kappa = np.append(kappa45,kappa45_ij)
-                weight1_45 = np.append(weight1_45,weight1_45_ij)
-                weight1_120 = np.append(weight1_120,weight1_120_ij)
-                weight2_45 = np.append(weight2_45,weight2_45_ij)
-                weight2_120 = np.append(weight2_120,weight2_120_ij)
-    del weight1_45_,weight1_45_ij
-    del weight1_120_,weight1_120_ij
-    del weight2_45_,weight2_45_ij
-    del weight2_120_,weight2_120_ij
-
-if conjoined == 3:
-    constr_weight2_45,med_weight1_45,med_weight2_45,med_weight3_45,E_w1_inf45,E_w1_sup45,E_w2_inf45,E_w2_sup45,E_w3_inf45,E_w3_sup45 = readconjoined3_ugriz('45',constr_weight2_45)
-    constr_weight2_120,med_weight1_120,med_weight2_120,med_weight3_120,E_w1_inf120,E_w1_sup120,E_w2_inf120,E_w2_sup120,E_w3_inf120,E_w3_sup120 = readconjoined3_ugriz('120',constr_weight2_120)
-    id45_,ind1_45_,ind2_45_,kappa45_,weight1_45_,weight2_45_,weight3_45_ = readconjoined3_ugrizJHK('45')
-    id120_,ind1_120_,ind2_120_,kappa120_,weight1_120_,weight2_120_,weight3_120_ = readconjoined3_ugrizJHK('120')
-    for j in range(8):
-        for i in range(8):
-            id45_ij = id45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind1_45_ij = ind1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind2_45_ij = ind2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            kappa45_ij = kappa45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight1_45_ij = weight1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight2_45_ij = weight2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight3_45_ij = weight3_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            id120_ij = id120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind1_120_ij = ind1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind2_120_ij = ind2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            kappa120_ij = kappa120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight1_120_ij = weight1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight2_120_ij = weight2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight3_120_ij = weight3_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-
-            ind1_120_ij = ind1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind2_120_ij = ind2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            kappa120_ij = kappa120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight1_120_ij = weight1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight2_120_ij = weight2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight3_120_ij = weight3_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            id120_ij = id120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind1_45_ij = ind1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            ind2_45_ij = ind2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            kappa45_ij = kappa45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight1_45_ij = weight1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight2_45_ij = weight2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight3_45_ij = weight3_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            id45_ij = id45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            if id45_ij != id120_ij: print "error id" # testing sanity
-            if kappa45_ij != kappa120_ij: print "error kappa"
-            if (i == 0) and (j == 0):
-                kappa = kappa45_ij
-                weight1_45 = weight1_45_ij
-                weight1_120 = weight1_120_ij
-                weight2_45 = weight2_45_ij
-                weight2_120 = weight2_120_ij
-                weight3_45 = weight3_45_ij
-                weight3_120 = weight3_120_ij
-            else:
-                kappa = np.append(kappa45,kappa45_ij)
-                weight1_45 = np.append(weight1_45,weight1_45_ij)
-                weight1_120 = np.append(weight1_120,weight1_120_ij)
-                weight2_45 = np.append(weight2_45,weight2_45_ij)
-                weight2_120 = np.append(weight2_120,weight2_120_ij)
-                weight3_45 = np.append(weight3_45,weight3_45_ij)
-                weight3_120 = np.append(weight3_120,weight3_120_ij)
-    del weight1_45_,weight1_45_ij
-    del weight1_120_,weight1_120_ij
-    del weight2_45_,weight2_45_ij
-    del weight2_120_,weight2_120_ij
-    del weight3_45_,weight3_45_ij
-    del weight3_120_,weight3_120_ij
-
-if conjoined == 4:
-    constr_weight2_45,med_weight1_45,med_weight2_45,med_weight3_45,med_weight4_45,E_w1_inf45,E_w1_sup45,E_w2_inf45,E_w2_sup45,E_w3_inf45,E_w3_sup45,E_w4_inf45,E_w4_sup45 = readconjoined4_ugriz('45',constr_weight2_45)
-    constr_weight2_120,med_weight1_120,med_weight2_120,med_weight3_120,med_weight4_120,E_w1_inf120,E_w1_sup120,E_w2_inf120,E_w2_sup120,E_w3_inf120,E_w3_sup120,E_w4_inf120,E_w4_sup120 = readconjoined4_ugriz('120',constr_weight2_120)
-    id45_,ind1_45_,ind2_45_,kappa45_,weight1_45_,weight2_45_,weight3_45_,weight4_45_ = readconjoined4_ugrizJHK('45')
-    id120_,ind1_120_,ind2_120_,kappa120_,weight1_120_,weight2_120_,weight3_120_,weight4_120_ = readconjoined4_ugrizJHK('120')
-    for j in range(8):
-        for i in range(8):
-            id45_ij = id45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind1_45_ij = ind1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            ind2_45_ij = ind2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            kappa45_ij = kappa45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight1_45_ij = weight1_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight2_45_ij = weight2_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            weight3_45_ij = weight3_45_[(ind1_45_ == j) & (ind2_45_ == i)]
-            id120_ij = id120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind1_120_ij = ind1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            ind2_120_ij = ind2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            kappa120_ij = kappa120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight1_120_ij = weight1_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight2_120_ij = weight2_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight3_120_ij = weight3_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-            weight4_120_ij = weight4_120_[(ind1_120_ == j) & (ind2_120_ == i)]
-
-            ind1_120_ij = ind1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind2_120_ij = ind2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            kappa120_ij = kappa120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight1_120_ij = weight1_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight2_120_ij = weight2_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            weight3_120_ij = weight3_120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            id120_ij = id120_ij[np.where(np.in1d(id120_ij, id45_ij))[0]]
-            ind1_45_ij = ind1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            ind2_45_ij = ind2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            kappa45_ij = kappa45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight1_45_ij = weight1_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight2_45_ij = weight2_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight3_45_ij = weight3_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            weight4_45_ij = weight4_45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            id45_ij = id45_ij[np.where(np.in1d(id45_ij, id120_ij))[0]]
-            if id45_ij != id120_ij: print "error id" # testing sanity
-            if kappa45_ij != kappa120_ij: print "error kappa"
-            if (i == 0) and (j == 0):
-                kappa = kappa45_ij
-                weight1_45 = weight1_45_ij
-                weight1_120 = weight1_120_ij
-                weight2_45 = weight2_45_ij
-                weight2_120 = weight2_120_ij
-                weight3_45 = weight3_45_ij
-                weight3_120 = weight3_120_ij
-                weight4_45 = weight4_45_ij
-                weight4_120 = weight4_120_ij
-            else:
-                kappa = np.append(kappa45,kappa45_ij)
-                weight1_45 = np.append(weight1_45,weight1_45_ij)
-                weight1_120 = np.append(weight1_120,weight1_120_ij)
-                weight2_45 = np.append(weight2_45,weight2_45_ij)
-                weight2_120 = np.append(weight2_120,weight2_120_ij)
-                weight3_45 = np.append(weight3_45,weight3_45_ij)
-                weight3_120 = np.append(weight3_120,weight3_120_ij)
-                weight4_45 = np.append(weight4_45,weight4_45_ij)
-                weight4_120 = np.append(weight4_120,weight4_120_ij)
-    del weight1_45_,weight1_45_ij
-    del weight1_120_,weight1_120_ij
-    del weight2_45_,weight2_45_ij
-    del weight2_120_,weight2_120_ij
-    del weight3_45_,weight3_45_ij
-    del weight3_120_,weight3_120_ij
-    del weight4_45_,weight4_45_ij
-    del weight4_120_,weight4_120_ij
-
-del id45_,id45_ij,id45
-del id120_,id120_ij,id120
-del ind1_45_,ind1_45_ij,ind1_45
-del ind1_120_,ind1_120_ij,ind1_120
-del ind2_45_,ind2_45_ij,ind2_45
-del ind2_120_,ind2_120_ij,ind2_120
-del kappa45_,kappa45_ij
-del kappa120_,kappa120_ij
+del id_rad1_ij,id_rad1
+del id_rad2_ij,id_rad2
+del ind1_rad1_ij,ind1_rad1
+del ind1_rad2_ij,ind1_rad2
+del ind2_rad1_ij,ind2_rad1
+del ind2_rad2_ij,ind2_rad2
+del kappa1_ij
+del kappa2_ij
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
@@ -1019,6 +1037,32 @@ gauss = sp.stats.norm(0, 1)
 start1 = time.time()
 LOS = 0
 
+if conjoined == 4:
+    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                    for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight1 >= round(constr_weight5 * med_weight1) + E5 - increment5/2.0) & (weight5 * med_weight1 < round(constr_weight5 * med_weight1) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                        if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                        else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                        if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                        else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
+            
 if conjoined == 4:
     for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
         for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
