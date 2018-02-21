@@ -790,7 +790,9 @@ if conjoined == 2:
                 weight1_ij = weight1_ij[sort1]
                 sort2 = np.argsort(id_rad2_ij)
                 weight2_ij = weight2_ij[sort2]
-                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
                 
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -870,7 +872,9 @@ if conjoined == 3:
                 if weightin1.split('_')[0] == weightin2.split('_')[0]:
                     weight2_ij = weight2_ij[sort1]
                 weight3_ij = weight3_ij[sort2]
-                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -970,7 +974,9 @@ if conjoined == 4:
                 if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
                     weight3_ij = weight3_ij[sort1]
                 weight4_ij = weight4_ij[sort2]
-                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -1088,7 +1094,9 @@ if conjoined == 5:
                 if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
                     weight4_ij = weight4_ij[sort1]
                 weight5_ij = weight5_ij[sort2]
-                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
