@@ -912,7 +912,7 @@ if conjoined == 4:
             id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_ = readconjoined1_ugrizJHK(weightin4.split('_')[0])
         if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
             constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
-            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight4_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
+            id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
             constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,med_weight4,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined3_ugriz(weightin2.split('_')[0],constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
             id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_ = readconjoined3_ugrizJHK(weightin2.split('_')[0])
         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
