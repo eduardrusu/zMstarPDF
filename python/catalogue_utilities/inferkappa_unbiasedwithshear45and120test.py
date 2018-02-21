@@ -1245,8 +1245,8 @@ if conjoined == 1:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
 
-np.savetxt(output,unbiased_kappa_constrained,fmt='%s',#delimiter='\t',newline='\n')
-np.savetxt(outputLOS,np.array([LOS]),fmt='%s',#delimiter='\t',newline='\n')
+np.savetxt(output,unbiased_kappa_constrained,fmt='%s', delimiter='\t',newline='\n')
+np.savetxt(outputLOS,np.array([LOS]),fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 
 if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
