@@ -784,9 +784,14 @@ if conjoined == 2:
                 kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
                 weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
                 id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
-            
-                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
-                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+                
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                weight2_ij = weight2_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
+                
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
                     weight1 = weight1_ij
@@ -795,6 +800,7 @@ if conjoined == 2:
                     kappa = np.append(kappa,kappa_rad1_ij)
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
+        del sort
         del weight1_ij
         del weight2_ij
         del id_rad1_ij,id_rad1
@@ -855,8 +861,16 @@ if conjoined == 3:
                     weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
                 id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
             
-                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
-                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                    weight2_ij = weight2_ij[sort2]
+                if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                    weight2_ij = weight2_ij[sort1]
+                weight3_ij = weight3_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -868,6 +882,7 @@ if conjoined == 3:
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
+        del sort
         del weight1_ij,weight1_
         del weight2_ij,weight2_
         del weight3_ij,weight3_
@@ -942,8 +957,20 @@ if conjoined == 4:
                     weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
                 id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
             
-                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
-                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                    weight2_ij = weight2_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight2_ij = weight2_ij[sort1]
+                if ((weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight3_ij = weight3_ij[sort2]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    weight3_ij = weight3_ij[sort1]
+                weight4_ij = weight4_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -957,6 +984,7 @@ if conjoined == 4:
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
+        del sort
         del weight1_ij,weight1_
         del weight2_ij,weight2_
         del weight3_ij,weight3_
@@ -1043,8 +1071,24 @@ if conjoined == 5:
                     weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
                 id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
             
-                if id_rad1_ij != id_rad2_ij: print "error id" # testing sanity
-                if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                    weight2_ij = weight2_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight2_ij = weight2_ij[sort1]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[sort1]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight4_ij = weight4_ij[sort2]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                    weight4_ij = weight4_ij[sort1]
+                weight5_ij = weight5_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]; if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
                     kappa = kappa_rad1_ij
@@ -1060,6 +1104,7 @@ if conjoined == 5:
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
                     weight5 = np.append(weight5,weight5_ij)
+    del sort
     del weight1_ij,weight1_
     del weight2_ij,weight2_
     del weight3_ij,weight3_
