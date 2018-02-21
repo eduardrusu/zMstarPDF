@@ -552,7 +552,7 @@ def readconjoined1_ugrizJHK(radius):
       id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-      del weight
+      #del weight
       if (i == 0) and (j == 0):
           id = id_
           kappa = kappa_
@@ -587,13 +587,13 @@ def readconjoined2_ugrizJHK(radius):
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight2_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-      del weight
+      #del weight
       if (i == 0) and (j == 0):
           id = id_
           kappa = kappa_
@@ -633,21 +633,21 @@ def readconjoined3_ugrizJHK(radius):
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight2_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight3_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-      del weight
+      #del weight
       if (i == 0) and (j == 0):
           id = id_
           kappa = kappa_
@@ -692,7 +692,7 @@ def readconjoined4_ugrizJHK(radius):
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight2_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
@@ -700,7 +700,7 @@ def readconjoined4_ugrizJHK(radius):
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
       weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight3_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
@@ -708,14 +708,14 @@ def readconjoined4_ugrizJHK(radius):
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
       weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-      del weight
+      #del weight
       weight = np.copy(weight4_)
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
       weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
       weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
       weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
-      del weight
+      #del weight
       if (i == 0) and (j == 0):
           id = id_
           kappa = kappa_
@@ -741,13 +741,13 @@ j = 0
 if conjoined == 1:
     constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup) # the final three arguments are necessary in case of 'gamma', because they will be modified by the code
     id,ind1,ind2,kappa,weight1 = readconjoined1_ugrizJHK(weightin1.split('_')[0])
-    del id,ind1,ind2
+    #del id,ind1,ind2
 
 if conjoined == 2:
     if weightin1.split('_')[0] == weightin2.split('_')[0]:
         constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2 = readconjoined2_ugrizJHK(weightin1.split('_')[0])
-        del id,ind1,ind2
+        #del id,ind1,ind2
     else:
         constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
         id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0])
@@ -793,22 +793,22 @@ if conjoined == 2:
                     kappa = np.append(kappa,kappa_rad1_ij)
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
-        del weight1_ij
-        del weight2_ij
-        del id_rad1_ij,id_rad1
-        del id_rad2_ij,id_rad2
-        del ind1_rad1_ij,ind1_rad1
-        del ind1_rad2_ij,ind1_rad2
-        del ind2_rad1_ij,ind2_rad1
-        del ind2_rad2_ij,ind2_rad2
-        del kappa_rad1_ij,kappa_rad1
-        del kappa_rad2_ij,kappa_rad2
+        #del weight1_ij
+        #del weight2_ij
+        #del id_rad1_ij,id_rad1
+        #del id_rad2_ij,id_rad2
+        #del ind1_rad1_ij,ind1_rad1
+        #del ind1_rad2_ij,ind1_rad2
+        #del ind2_rad1_ij,ind2_rad1
+        #del ind2_rad2_ij,ind2_rad2
+        #del kappa_rad1_ij,kappa_rad1
+        #del kappa_rad2_ij,kappa_rad2
 
 if conjoined == 3:
     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
         constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2,weight3 = readconjoined3_ugrizJHK(weightin1.split('_')[0])
-        del id,ind1,ind2
+        #del id,ind1,ind2
     else:
         if weightin1.split('_')[0] == weightin2.split('_')[0]:
             constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
@@ -875,23 +875,23 @@ if conjoined == 3:
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
-        del weight1_ij,weight1_
-        del weight2_ij,weight2_
-        del weight3_ij,weight3_
-        del id_rad1_ij,id_rad1
-        del id_rad2_ij,id_rad2
-        del ind1_rad1_ij,ind1_rad1
-        del ind1_rad2_ij,ind1_rad2
-        del ind2_rad1_ij,ind2_rad1
-        del ind2_rad2_ij,ind2_rad2
-        del kappa_rad1_ij,kappa_rad1
-        del kappa_rad2_ij,kappa_rad2
+        #del weight1_ij,weight1_
+        #del weight2_ij,weight2_
+        #del weight3_ij,weight3_
+        #del id_rad1_ij,id_rad1
+        #del id_rad2_ij,id_rad2
+        #del ind1_rad1_ij,ind1_rad1
+        #del ind1_rad2_ij,ind1_rad2
+        #del ind2_rad1_ij,ind2_rad1
+        #del ind2_rad2_ij,ind2_rad2
+        #del kappa_rad1_ij,kappa_rad1
+        #del kappa_rad2_ij,kappa_rad2
 
 if conjoined == 4:
     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
         constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],constr_weight2,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id,ind1,ind2,kappa,weight1,weight2,weight3,weight4 = readconjoined4_ugrizJHK(weightin1.split('_')[0])
-        del id,ind1,ind2
+        #del id,ind1,ind2
     else:
         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
             constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
@@ -977,18 +977,18 @@ if conjoined == 4:
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
-        del weight1_ij,weight1_
-        del weight2_ij,weight2_
-        del weight3_ij,weight3_
-        del weight4_ij,weight4_
-        del id_rad1_ij,id_rad1
-        del id_rad2_ij,id_rad2
-        del ind1_rad1_ij,ind1_rad1
-        del ind1_rad2_ij,ind1_rad2
-        del ind2_rad1_ij,ind2_rad1
-        del ind2_rad2_ij,ind2_rad2
-        del kappa_rad1_ij,kappa_rad1
-        del kappa_rad2_ij,kappa_rad2
+        #del weight1_ij,weight1_
+        #del weight2_ij,weight2_
+        #del weight3_ij,weight3_
+        #del weight4_ij,weight4_
+        #del id_rad1_ij,id_rad1
+        #del id_rad2_ij,id_rad2
+        #del ind1_rad1_ij,ind1_rad1
+        #del ind1_rad2_ij,ind1_rad2
+        #del ind2_rad1_ij,ind2_rad1
+        #del ind2_rad2_ij,ind2_rad2
+        #del kappa_rad1_ij,kappa_rad1
+        #del kappa_rad2_ij,kappa_rad2
 
 if conjoined == 5:
     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
@@ -1097,19 +1097,19 @@ if conjoined == 5:
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
                     weight5 = np.append(weight5,weight5_ij)
-    del weight1_ij,weight1_
-    del weight2_ij,weight2_
-    del weight3_ij,weight3_
-    del weight4_ij,weight4_
-    del weight5_ij,weight5_
-    del id_rad1_ij,id_rad1
-    del id_rad2_ij,id_rad2
-    del ind1_rad1_ij,ind1_rad1
-    del ind1_rad2_ij,ind1_rad2
-    del ind2_rad1_ij,ind2_rad1
-    del ind2_rad2_ij,ind2_rad2
-    del kappa_rad1_ij,kappa_rad1
-    del kappa_rad2_ij,kappa_rad2
+    #del weight1_ij,weight1_
+    #del weight2_ij,weight2_
+    #del weight3_ij,weight3_
+    #del weight4_ij,weight4_
+    #del weight5_ij,weight5_
+    #del id_rad1_ij,id_rad1
+    #del id_rad2_ij,id_rad2
+    #del ind1_rad1_ij,ind1_rad1
+    #del ind1_rad2_ij,ind1_rad2
+    #del ind2_rad1_ij,ind2_rad1
+    #del ind2_rad2_ij,ind2_rad2
+    #del kappa_rad1_ij,kappa_rad1
+    #del kappa_rad2_ij,kappa_rad2
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
@@ -1245,8 +1245,8 @@ if conjoined == 1:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
 
-np.savetxt(output,unbiased_kappa_constrained,fmt='%s',delimiter='\t',newline='\n')
-np.savetxt(outputLOS,np.array([LOS]),fmt='%s',delimiter='\t',newline='\n')
+np.savetxt(output,unbiased_kappa_constrained,fmt='%s',#delimiter='\t',newline='\n')
+np.savetxt(outputLOS,np.array([LOS]),fmt='%s',#delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 
 if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
