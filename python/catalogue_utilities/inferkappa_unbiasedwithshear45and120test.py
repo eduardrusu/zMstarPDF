@@ -962,7 +962,7 @@ if conjoined == 4:
                     weight3_ij = weight3_ij[sort1]
                 weight4_ij = weight4_ij[sort2]
                 kappa_rad2_ij = kappa_rad2_ij[sort2]
-å
+
                 if kappa_rad1_ij != kappa_rad2_ij: print "error kappa"  # testing sanity
             
                 if (i == 0) and (j == 0):
