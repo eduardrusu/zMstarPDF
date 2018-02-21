@@ -1,5 +1,6 @@
 # CE Rusu Feb 14 2018
 # Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 45 23 meds gal gamma oneoverr mass
+# when a single radius is used (not mixing different radii constraints) this code is faster than inferkappa_unbiasedwithshear45and120.py because it doesn't read the id column
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
 # weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
