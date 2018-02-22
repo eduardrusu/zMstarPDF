@@ -541,6 +541,7 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1):
       if weightin1.split('_')[1] != "gamma":
           id_,kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_0_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index), unpack=True)
           weight1_ = weight1_ / med_weight1
+          print 'shape1',np.shape(id_)
       else:
           id_,kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_0_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3), unpack=True)
           gamma1 = gamma1_
@@ -550,6 +551,7 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1):
           weight1_ = gamma / med_weight1
       weight = np.copy(weight1_)
       id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+      print 'shape2',np.shape(id_)
       kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
       weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
       #del weight
