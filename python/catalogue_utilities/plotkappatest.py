@@ -111,7 +111,7 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
-kappa_0  = np.loadtxt("%skappahistallLOS_plane35.cat" % root, usecols=[0], unpack=True)
+kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_45_gal_45_gamma_23_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
