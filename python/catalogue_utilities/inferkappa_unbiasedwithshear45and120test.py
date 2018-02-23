@@ -1256,14 +1256,16 @@ np.savetxt(output,unbiased_kappa_constrained,fmt='%s', delimiter='\t',newline='\
 np.savetxt(outputLOS,np.array([LOS]),fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 
-if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
     print "increment1 = ", increment1
-if (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
     print "increment2 = ", increment2
-if (conjoined == 3) | (conjoined == 4):
+if (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
     print "increment3 = ", increment3
-if conjoined == 4:
+if (conjoined == 4) | (conjoined == 4):
     print "increment4 = ", increment4
+if conjoined == 5:
+    print "increment5 = ", increment5
 
 print(" Total time --- %s seconds ---" % (time.time() - start_time))
 
