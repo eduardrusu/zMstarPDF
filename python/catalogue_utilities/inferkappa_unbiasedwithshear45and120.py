@@ -128,7 +128,7 @@ if conjoined >= 2:
     if conjoined >= 3:
         if mag == "23":
             weight3_index = declareweight(weightin3)
-        if conjoined == 4:
+        if conjoined >= 4:
             if mag == "23":
                 weight4_index = declareweight(weightin4)
             if conjoined == 5:
