@@ -803,7 +803,7 @@ if conjoined == 2:
                     kappa = np.append(kappa,kappa_rad1_ij)
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
-        del sort
+        del sort1,sort2
         del weight1_ij
         del weight2_ij
         del id_rad1_ij,id_rad1
@@ -888,7 +888,7 @@ if conjoined == 3:
                     weight1 = np.append(weight1,weight1_ij)
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
-        del sort
+        del sort1,sort2
         del weight1_ij,weight1_
         del weight2_ij,weight2_
         del weight3_ij,weight3_
@@ -993,7 +993,7 @@ if conjoined == 4:
                     weight2 = np.append(weight2,weight2_ij)
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
-        del sort
+        del sort1,sort2
         del weight1_ij,weight1_
         del weight2_ij,weight2_
         del weight3_ij,weight3_
@@ -1116,7 +1116,7 @@ if conjoined == 5:
                     weight3 = np.append(weight3,weight3_ij)
                     weight4 = np.append(weight4,weight4_ij)
                     weight5 = np.append(weight5,weight5_ij)
-    del sort
+    del sort1,sort2
     del weight1_ij,weight1_
     del weight2_ij,weight2_
     del weight3_ij,weight3_

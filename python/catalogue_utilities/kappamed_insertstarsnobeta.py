@@ -101,6 +101,11 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             index = griddata(posxy.T, cells, (cat[:,index_posx], cat[:,index_posy]), method='nearest')
             sep = np.sqrt((posxy[0][index.astype(int)]-cat[:,index_posx])**2 + (posxy[1][index.astype(int)]-cat[:,index_posy])**2)*1/degree*3600
             cat_msk = np.c_[cat,index,sep]
+            
+            
+            catinner = cat_msk[cat_msk[:,index_sep] > innermsk] # inner mask
+            innergal = np.bincount(cat_msk[:,index_index].astype(int)) #
+
             cat_msk = cat_msk[cat_msk[:,index_sep] <= radius] # mask objects at distance larger than the aperture from the center
             cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # inner mask
             cat_msk[:,index_sep][cat_msk[:,index_sep] < 10] = 10
