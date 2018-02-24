@@ -101,13 +101,10 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             index = griddata(posxy.T, cells, (cat[:,index_posx], cat[:,index_posy]), method='nearest')
             sep = np.sqrt((posxy[0][index.astype(int)]-cat[:,index_posx])**2 + (posxy[1][index.astype(int)]-cat[:,index_posy])**2)*1/degree*3600
             cat_msk = np.c_[cat,index,sep]
-            
-            
-            catinner = cat_msk[cat_msk[:,index_sep] > innermsk] # inner mask
-            innergal = np.bincount(cat_msk[:,index_index].astype(int)) #
-
+            catinner = cat_msk[cat_msk[:,index_sep] <= innermsk] # so that I can count how many objects are inside the inner mask
+            galinner = np.bincount(cat_msk[:,index_index].astype(int)) # counts objects inside the inner mask
             cat_msk = cat_msk[cat_msk[:,index_sep] <= radius] # mask objects at distance larger than the aperture from the center
-            cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # inner mask
+            cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # uses the inner mask
             cat_msk[:,index_sep][cat_msk[:,index_sep] < 10] = 10
             #cat = np.c_[z,posx,posy,mstar,imag...]
             
@@ -146,16 +143,16 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 w_mass2overrms_2X = np.sqrt(w_mass2overr_2X)
                 w_mass3overrms_2X = scipy.special.cbrt(w_mass3overr_2X)
             
-                cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X]
+                cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X,galinner]
                 if initialized == 0:
                     os.system('rm -f %snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap))
                     f=open('%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap),'ab') # open in binary
-                    output = "# ID kappa gamma1 gamma2 w_gal_%s w_zweight_%s w_mass_%s w_mass2_%s w_mass3_%s w_oneoverr_%s w_zoverr_%s w_massoverr_%s w_mass2overr_%s w_mass3overr_%s w_mass2rms_%s w_mass3rms_%s w_mass2overrms_%s w_mass3overrms_%s w_flexion_%s w_tidal_%s w_SIS_%s w_SIShalo_%s \n" % (limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag)
+                    output = "# ID kappa gamma1 gamma2 w_gal_%s w_zweight_%s w_mass_%s w_mass2_%s w_mass3_%s w_oneoverr_%s w_zoverr_%s w_massoverr_%s w_mass2overr_%s w_mass3overr_%s w_mass2rms_%s w_mass3rms_%s w_mass2overrms_%s w_mass3overrms_%s w_flexion_%s w_tidal_%s w_SIS_%s w_SIShalo_%s galinner_%s \n" % (limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag,limmag)
                     f.write(output) # needs to be done inside the loop because otherwise it crashes
                     initialized = 1
                 output = ""
                 for k in range(cellkappagamma.shape[0]):
-                    output = output + str('%.1d' % cellkappagamma[k][1])+ "\t" + str('%.5e' % cellkappagamma[k][2])+ "\t" + str('%.5e' % cellkappagamma[k][3])+ "\t" + str('%.5e' % cellkappagamma[k][4])+ "\t" + str('%.1d' % cellkappagamma[k][5])+ "\t" + str('%.5e' % cellkappagamma[k][6])+ "\t" + str('%.4e' % cellkappagamma[k][7])+ "\t" + str('%.4e' % cellkappagamma[k][8])+ "\t" + str('%.4e' % cellkappagamma[k][9])+ "\t" + str('%.4e' % cellkappagamma[k][10])+ "\t" + str('%.4e' % cellkappagamma[k][11])+ "\t" + str('%.4e' % cellkappagamma[k][12])+ "\t" + str('%.4e' % cellkappagamma[k][13])+ "\t" + str('%.4e' % cellkappagamma[k][14])+ "\t" + str('%.4e' % cellkappagamma[k][15])+ "\t" + str('%.4e' % cellkappagamma[k][16])+ "\t" + str('%.4e' % cellkappagamma[k][17])+ "\t" + str('%.4e' % cellkappagamma[k][18])+ "\t" + str('%.4e' % cellkappagamma[k][19])+ "\t" + str('%.4e' % cellkappagamma[k][20])+ "\t" + str('%.4e' % cellkappagamma[k][21])+ "\t" + str('%.4e' % cellkappagamma[k][22])+ "\n"
+                    output = output + str('%.1d' % cellkappagamma[k][1])+ "\t" + str('%.5e' % cellkappagamma[k][2])+ "\t" + str('%.5e' % cellkappagamma[k][3])+ "\t" + str('%.5e' % cellkappagamma[k][4])+ "\t" + str('%.1d' % cellkappagamma[k][5])+ "\t" + str('%.5e' % cellkappagamma[k][6])+ "\t" + str('%.4e' % cellkappagamma[k][7])+ "\t" + str('%.4e' % cellkappagamma[k][8])+ "\t" + str('%.4e' % cellkappagamma[k][9])+ "\t" + str('%.4e' % cellkappagamma[k][10])+ "\t" + str('%.4e' % cellkappagamma[k][11])+ "\t" + str('%.4e' % cellkappagamma[k][12])+ "\t" + str('%.4e' % cellkappagamma[k][13])+ "\t" + str('%.4e' % cellkappagamma[k][14])+ "\t" + str('%.4e' % cellkappagamma[k][15])+ "\t" + str('%.4e' % cellkappagamma[k][16])+ "\t" + str('%.4e' % cellkappagamma[k][17])+ "\t" + str('%.4e' % cellkappagamma[k][18])+ "\t" + str('%.4e' % cellkappagamma[k][19])+ "\t" + str('%.4e' % cellkappagamma[k][20])+ "\t" + str('%.4e' % cellkappagamma[k][21])+ "\t" + str('%.4e' % cellkappagamma[k][22])+ "\t" + str('%.1d' % cellkappagamma[k][23]) "\n"
                 f.write(output)
     f.close()
 
