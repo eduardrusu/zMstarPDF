@@ -102,7 +102,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             sep = np.sqrt((posxy[0][index.astype(int)]-cat[:,index_posx])**2 + (posxy[1][index.astype(int)]-cat[:,index_posy])**2)*1/degree*3600
             cat_msk = np.c_[cat,index,sep]
             catinner = cat_msk[cat_msk[:,index_sep] <= innermsk] # so that I can count how many objects are inside the inner mask
-            galinner = np.bincount(cat_msk[:,index_index].astype(int)) # counts objects inside the inner mask
+            galinner = np.bincount(catinner[:,index_index].astype(int)) # counts objects inside the inner mask
             cat_msk = cat_msk[cat_msk[:,index_sep] <= radius] # mask objects at distance larger than the aperture from the center
             cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # uses the inner mask
             cat_msk[:,index_sep][cat_msk[:,index_sep] < 10] = 10
