@@ -1211,10 +1211,6 @@ if conjoined == 2:
                     LOS = LOS + data.size
 
 if conjoined == 1:
-    if weightin1.split('_')[1] == "gamma":
-        E_w1_inf = E_w1_inf45
-        E_w1_sup = E_w1_inf45
-        med_weight1 = med_weight1_45
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
                     print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                     data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0)] # this is equation 3 in Greene et al.
@@ -1226,30 +1222,6 @@ if conjoined == 1:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
-                    LOS = LOS + data.size
-    else:
-        E_w1_inf = E_w1_inf45
-        E_w1_sup = E_w1_inf45
-        E_w2_inf = E_w1_inf120
-        E_w2_sup = E_w1_inf120
-        med_weight1 = med_weight1_45
-        med_weight2 = med_weight1_120
-        constr_weight1 = constr_weight1_45
-        constr_weight2 = constr_weight1_120
-        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
-            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
-                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
-                    data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0)] # this is equation 3 in Greene et al.
-                    if data.size > 0:
-                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
-                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
-                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
-                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
-                        if LOS == 0:
-                            unbiased_kappa_constrained = kappa_constrained
-                        else:
-                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
 
 np.savetxt(output,unbiased_kappa_constrained,fmt='%s', delimiter='\t',newline='\n')
