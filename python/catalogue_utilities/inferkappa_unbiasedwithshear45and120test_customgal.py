@@ -329,6 +329,10 @@ if (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight3, const
 if (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight2, constrwidth_weight2_inf, constrwidth_weight2_sup = declareweight(weightin2)
 if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight1, constrwidth_weight1_inf, constrwidth_weight1_sup = declareweight(weightin1)
 
+constr_weight1 = 3
+constrwidth_weight1_inf = 2.8
+constrwidth_weight1_sup = 3.2
+
 print "Reading..."
 
 if mode == "sum": str1 = "sum"
