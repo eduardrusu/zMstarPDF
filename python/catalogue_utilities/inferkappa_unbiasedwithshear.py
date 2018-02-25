@@ -1,5 +1,5 @@
 # CE Rusu Feb 14 2018
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 yes fiducial 5 45 23 meds gal gamma oneoverr mass
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear.py WFI2033 -1.0 -1.0 handpicked fiducial 5 45 23 meds gal gamma oneoverr mass
 # when a single radius is used (not mixing different radii constraints) this code is faster than inferkappa_unbiasedwithshear45and120.py because it doesn't read the id column
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
@@ -27,7 +27,7 @@ mag = str(sys.argv[8])
 mode = str(sys.argv[9])
 conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
 
-if handpicked == 'yes': handpickedstr = '_handpicked'
+if handpicked == 'handpicked': handpickedstr = '_handpicked'
 else: handpickedstr = ''
 
 if conjoined == 1:
@@ -64,19 +64,19 @@ increment4 = 2
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
+    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.154
         constrwidth_gamma_inf = 0.139
         constrwidth_gamma_sup = 0.169
-    if other == 'chameleon' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
+    if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15') and float(zsup) < 0:
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15') and float(zsup) < 0:
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
