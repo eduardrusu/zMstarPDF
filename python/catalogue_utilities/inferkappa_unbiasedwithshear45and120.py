@@ -1,5 +1,5 @@
 # CE Rusu Feb 19 2018
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120.py WFI2033 -1.0 -1.0 yes fiducial 5 23 meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 23 meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
@@ -26,7 +26,7 @@ mag = str(sys.argv[7])
 mode = str(sys.argv[8])
 conjoined = len(sys.argv) - 9 # total number of arguments including code name, minus the number of ones that are not weights
 
-if handpicked == 'yes': handpickedstr = '_handpicked'
+if handpicked == 'handpicked': handpickedstr = '_handpicked'
 else: handpickedstr = ''
 
 if conjoined == 1:
@@ -70,19 +70,19 @@ increment5 = 2
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
+    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.154
         constrwidth_gamma_inf = 0.139
         constrwidth_gamma_sup = 0.169
-    if other == 'chameleon' and handpicked == 'no' and float(zsup) < 0 and innermask == '5':
+    if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'yes' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
@@ -1224,10 +1224,6 @@ if conjoined == 2:
                     LOS = LOS + data.size
 
 if conjoined == 1:
-    if weightin1.split('_')[1] == "gamma":
-        E_w1_inf = E_w1_inf45
-        E_w1_sup = E_w1_inf45
-        med_weight1 = med_weight1_45
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
                     print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                     data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0)] # this is equation 3 in Greene et al.
@@ -1239,30 +1235,6 @@ if conjoined == 1:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
-                    LOS = LOS + data.size
-    else:
-        E_w1_inf = E_w1_inf45
-        E_w1_sup = E_w1_inf45
-        E_w2_inf = E_w1_inf120
-        E_w2_sup = E_w1_inf120
-        med_weight1 = med_weight1_45
-        med_weight2 = med_weight1_120
-        constr_weight1 = constr_weight1_45
-        constr_weight2 = constr_weight1_120
-        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
-            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
-                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
-                    data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0)] # this is equation 3 in Greene et al.
-                    if data.size > 0:
-                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
-                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
-                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
-                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
-                        if LOS == 0:
-                            unbiased_kappa_constrained = kappa_constrained
-                        else:
-                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
 
 np.savetxt(output,unbiased_kappa_constrained,fmt='%s',delimiter='\t',newline='\n')

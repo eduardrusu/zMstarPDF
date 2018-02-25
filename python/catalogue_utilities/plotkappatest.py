@@ -14,7 +14,7 @@ max_kappa_plot = 0.30
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
-root = "/Volumes/LaCieSubaru/kapparesults/"
+root = "/Users/cerusu/Dropbox/"
 
 def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
     a, kappa_values = np.histogram([0], bins = bin_stat_, range=(min_kappa_,max_kappa_)) # create an empty histogram of the correct shape
@@ -111,22 +111,22 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
-kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_45_gal_45_gamma_23_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_chameleon_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat" % root, usecols=[0], unpack=True)
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_23_45_meds_increments2.cat" % root, usecols=[0], unpack=True)
-kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_45_gal_45_gamma_23_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_chameleon_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_2_2_2.cat" % root, usecols=[0], unpack=True)
 median1,stddev1,kappa_values = statistics(kappa_1,bin_stat,min_kappa,max_kappa)
 kappa_1 = kappa_1 / np.sum(kappa_1 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_oneoverr_23_45_meds_increments2_2.cat" % root, usecols=[0], unpack=True)
-kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_45_gal_23_meds_increments2_2.cat" % root, usecols=[0], unpack=True)
+kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat" % root, usecols=[0], unpack=True)
 median2,stddev2,kappa_values = statistics(kappa_2,bin_stat,min_kappa,max_kappa)
 kappa_2 = kappa_2 / np.sum(kappa_2 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_gamma_oneoverr_23_45_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
-kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_45_gal_45_gamma_45_mass_23_meds_increments2_2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_2_2_2.cat" % root, usecols=[0], unpack=True)
 median3,stddev3,kappa_values = statistics(kappa_3,bin_stat,min_kappa,max_kappa)
 kappa_3 = kappa_3 / np.sum(kappa_3 * np.abs((kappa_values[:-1]+halfwidth)))
 
