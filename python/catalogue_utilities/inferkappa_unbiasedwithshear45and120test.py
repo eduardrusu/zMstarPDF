@@ -386,7 +386,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
     med2 = np.zeros(8)
     for i in range(8):
       if type(weight2_index) == int:
-          weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_0_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,len,str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
+          weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_0_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
           if i == 0:
               weight1 = weight1_
               weight2 = weight2_
