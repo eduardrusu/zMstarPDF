@@ -360,13 +360,13 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
       for i in np.linspace(4,7,4).astype(int):
         if type(weight1_index) == int:
             weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index], unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
             weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3], unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
             else:
@@ -393,7 +393,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
       for i in np.linspace(4,7,4).astype(int):
         if type(weight2_index) == int:
             weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2 = weight2_
             else:
@@ -401,7 +401,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight2 = np.append(weight2,weight2_)
         else:
             weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,1,2], unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
                 weight2_2 = weight2_2_
@@ -436,7 +436,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
       for i in np.linspace(4,7,4).astype(int):
         if type(weight2_index) == int:
             weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2 = weight2_
                 weight3 = weight3_
@@ -446,7 +446,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight3 = np.append(weight3,weight3_)
         else:
             weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index), unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
                 weight2_2 = weight2_2_
@@ -489,7 +489,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
       for i in np.linspace(4,7,4).astype(int):
         if type(weight2_index) == int:
             weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2 = weight2_
                 weight3 = weight3_
@@ -501,7 +501,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight4 = np.append(weight4,weight4_)
         else:
             weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
-            if i == 0:
+            if i == 4:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
                 weight2_2 = weight2_2_
@@ -562,7 +562,7 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         del weight
-        if (i == 0) and (j == 0):
+        if (i == 4) and (j == 4):
             id = id_
             kappa = kappa_
             weight1 = weight1_
@@ -604,7 +604,7 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         del weight
-        if (i == 0) and (j == 0):
+        if (i == 4) and (j == 4):
             id = id_
             kappa = kappa_
             weight1 = weight1_
@@ -659,7 +659,7 @@ def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,con
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         del weight
-        if (i == 0) and (j == 0):
+        if (i == 4) and (j == 4):
             id = id_
             kappa = kappa_
             weight1 = weight1_
@@ -728,7 +728,7 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
         weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         del weight
-        if (i == 0) and (j == 0):
+        if (i == 4) and (j == 4):
             id = id_
             kappa = kappa_
             weight1 = weight1_
@@ -799,7 +799,7 @@ if conjoined == 2:
                 diff = kappa_rad1_ij - kappa_rad2_ij
                 if diff.any()!=0: print "error kappa"  # testing sanity
                 
-                if (i == 0) and (j == 0):
+                if (i == 4) and (j == 4):
                     kappa = kappa_rad1_ij
                     weight1 = weight1_ij
                     weight2 = weight2_ij
@@ -882,7 +882,7 @@ if conjoined == 3:
                 diff = kappa_rad1_ij - kappa_rad2_ij
                 if diff.any()!=0: print "error kappa"  # testing sanity
             
-                if (i == 0) and (j == 0):
+                if (i == 4) and (j == 4):
                     kappa = kappa_rad1_ij
                     weight1 = weight1_ij
                     weight2 = weight2_ij
@@ -985,7 +985,7 @@ if conjoined == 4:
                 diff = kappa_rad1_ij - kappa_rad2_ij
                 if diff.any()!=0: print "error kappa"  # testing sanity
             
-                if (i == 0) and (j == 0):
+                if (i == 4) and (j == 4):
                     kappa = kappa_rad1_ij
                     weight1 = weight1_ij
                     weight2 = weight2_ij
@@ -1106,7 +1106,7 @@ if conjoined == 5:
                 diff = kappa_rad1_ij - kappa_rad2_ij
                 if diff.any()!=0: print "error kappa"  # testing sanity
             
-                if (i == 0) and (j == 0):
+                if (i == 4) and (j == 4):
                     kappa = kappa_rad1_ij
                     weight1 = weight1_ij
                     weight2 = weight2_ij
