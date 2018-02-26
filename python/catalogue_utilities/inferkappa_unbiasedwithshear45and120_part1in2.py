@@ -338,26 +338,26 @@ print "Reading..."
 if mode == "sum": str1 = "sum"
 if mode == "meds": str1 = "med"
 if conjoined == 5:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5)
 if conjoined == 4:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4)
 if conjoined == 3:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3)
 if conjoined == 2:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2)
 if conjoined == 1:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_LOS_increments%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
+    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
+    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_LOS_increments%s_part1.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1)
             
 def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup):
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
-    med1 = np.zeros(8)
-    for j in range(8):
-      for i in range(8):
+    med1 = np.zeros(4)
+    for j in range(4):
+      for i in range(4):
         if type(weight1_index) == int:
             weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index], unpack=True)
             if i == 0:
@@ -387,10 +387,10 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
     return constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup
 
 def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
-    for j in range(8):
-      for i in range(8):
+    med1 = np.zeros(4)
+    med2 = np.zeros(4)
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
             if i == 0:
@@ -429,11 +429,11 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
     return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup
 
 def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup):
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
-    med3 = np.zeros(8)
-    for j in range(8):
-      for i in range(8):
+    med1 = np.zeros(4)
+    med2 = np.zeros(4)
+    med3 = np.zeros(4)
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
             if i == 0:
@@ -481,12 +481,12 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
     return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup
 
 def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup):
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
-    med3 = np.zeros(8)
-    med4 = np.zeros(8)
-    for j in range(8):
-      for i in range(8):
+    med1 = np.zeros(4)
+    med2 = np.zeros(4)
+    med3 = np.zeros(4)
+    med4 = np.zeros(4)
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             if i == 0:
@@ -545,8 +545,8 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
 
 def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
     ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
-    for j in range(8):
-      for i in range(8):
+    for j in range(4):
+      for i in range(4):
         if type(weight1_index) == int:
             id_,kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index), unpack=True)
             weight1_ = weight1_ / med_weight1
@@ -578,8 +578,8 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
-    for j in range(8):
-      for i in range(8):
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             id_,kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index), unpack=True)
             weight1_ = weight1_ / med_weight1
@@ -622,8 +622,8 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
-    for j in range(8):
-      for i in range(8):
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             id_,kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index), unpack=True)
             weight1_ = weight1_ / med_weight1
@@ -679,8 +679,8 @@ def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,con
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
-    for j in range(8):
-      for i in range(8):
+    for j in range(4):
+      for i in range(4):
         if type(weight2_index) == int:
             id_,kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             weight1_ = weight1_ / med_weight1
@@ -764,8 +764,8 @@ if conjoined == 2:
         id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
         constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight2,E_w2_inf,E_w2_sup = readconjoined1_ugriz(weightin2.split('_')[0],weight2_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
         id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_ = readconjoined1_ugrizJHK(weightin2.split('_')[0],weight2_index,constr_weight2,increment2,med_weight2,E_w2_inf,E_w2_sup)
-        for j in range(8):
-            for i in range(8):
+        for j in range(4):
+            for i in range(4):
                 id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
                 id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
                 ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
@@ -835,8 +835,8 @@ if conjoined == 3:
             id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
             constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined2_ugriz(weightin2.split('_')[0],weight2_index,weight3_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
             id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_ = readconjoined2_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,constr_weight2,constr_weight3,increment2,increment3,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
-        for j in range(8):
-            for i in range(8):
+        for j in range(4):
+            for i in range(4):
                 id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
                 id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
                 ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
@@ -926,8 +926,8 @@ if conjoined == 4:
             id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
             constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined2_ugriz(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
             id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
-        for j in range(8):
-            for i in range(8):
+        for j in range(4):
+            for i in range(4):
                 id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
                 id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
                 ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
@@ -1035,8 +1035,8 @@ if conjoined == 5:
         constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined3_ugriz(weightin3.split('_')[0],weight3_index,weight4_index,weight5_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
         id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_,weight5_ = readconjoined3_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,weight5_index,constr_weight3,constr_weight4,constr_weight5,increment3,increment4,increment5,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
     
-    for j in range(8):
-        for i in range(8):
+    for j in range(4):
+        for i in range(4):
                 id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
                 id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
                 ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
