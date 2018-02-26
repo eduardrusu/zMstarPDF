@@ -373,9 +373,9 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
       if type(weight1_index) == int:
-        med1[j] = np.median(weight1)
+        med1[j-4] = np.median(weight1)
       else:
-        med1[j] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
+        med1[j-4] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
       print j
     med_weight1 = np.mean(med1) # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
     if type(weight1_index) != int:
@@ -410,11 +410,11 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
       if type(weight2_index) == int:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(weight2)
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(weight2)
       else:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
       print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
@@ -457,13 +457,13 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
       if type(weight2_index) == int:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(weight2)
-        med3[j] = np.median(weight3)
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(weight2)
+        med3[j-4] = np.median(weight3)
       else:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-        med3[j] = np.median(weight3)
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+        med3[j-4] = np.median(weight3)
       print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
@@ -514,15 +514,15 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
       if type(weight2_index) == int:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(weight2)
-        med3[j] = np.median(weight3)
-        med4[j] = np.median(weight4)
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(weight2)
+        med3[j-4] = np.median(weight3)
+        med4[j-4] = np.median(weight4)
       else:
-        med1[j] = np.median(weight1)
-        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-        med3[j] = np.median(weight3)
-        med4[j] = np.median(weight4)
+        med1[j-4] = np.median(weight1)
+        med2[j-4] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+        med3[j-4] = np.median(weight3)
+        med4[j-4] = np.median(weight4)
       print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
