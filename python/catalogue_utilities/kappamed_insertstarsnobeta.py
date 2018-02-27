@@ -113,6 +113,20 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
             galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
             
+            try:
+                p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
+                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] need all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
+            except:
+                missing = np.array([])
+                cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
+                for k in range(np.max(index_all)):
+                    if k not in cat_msk_unique:
+                        missing = np.append(missing,np.array([k]))
+                for k in range(len(missing)):
+                    insert = np.copy(cat_msk[0]) # any entry would do
+                    insert[index_index] = missing[k]
+                    cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
+            
             p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
             p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
             p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
@@ -126,16 +140,8 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             p_tidal = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'tidal':cat_msk[:,index_mstar] / (cat_msk[:,index_sep] ** 2)})
             p_SIS = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIS':np.sqrt(cat_msk[:,index_mstar]) / cat_msk[:,index_sep]})
             p_SIShalo = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIShalo':np.sqrt(cat_msk[:,index_Mhalo]) / cat_msk[:,index_sep]})
-            
-            try: w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] need all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
-            except:
-                missing = np.array([])
-                cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
-                for k in range(np.max(index_all)):
-                    if k not in cat_msk_unique:
-                        missing = np.append(missing,np.array([i]))
-                for k in range(len(missing)):
-            
+            #for k in range(len(missing)):
+                #cat_msk = np.delete(cat_msk,-1,axis = 0) # delete the last line I inserted above; actually this is not necessary because cat_msk is no longer used
             
             w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
             w_mass_2X = p_mass.groupby(['cell']).median().values[:,0] * w_gal_2X
@@ -269,17 +275,17 @@ if lens == "J1206":
     pln = 34
 
 #rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-#rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
-rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
+rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+#rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
 #rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
-#rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
-rootgals = "/Volumes/LaCieSubaru/MSgals/"
+rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
+#rootgals = "/Volumes/LaCieSubaru/MSgals/"
 #rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
-#rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
-rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
+rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
+#rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
 #rootstars = "/lfs08/rusucs/insertstars/"
-rootstars = "/Volumes/LaCieSubaru/insertstars/"
-#rootstars = "/mnt/scratch/rusucs/insertstars/"
+#rootstars = "/Volumes/LaCieSubaru/insertstars/"
+rootstars = "/mnt/scratch/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
