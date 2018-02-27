@@ -47,11 +47,15 @@ if conjoined == 4:
 
 print "conjoined:", conjoined
 #root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-root = "/Volumes/LaCieSubaru/MSweights/"
+root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+rootcode = "/mnt/scratch/rusucs/code/"
+#root = "/Volumes/LaCieSubaru/MSweights/"
 #rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-rootout = "/Volumes/LaCieSubaru/kapparesults/"
+#rootout = "/Volumes/LaCieSubaru/kapparesults/"
+rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/WFI2033/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+#weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/WFI2033/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -72,11 +76,11 @@ if lens == "WFI2033":
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15') and float(zsup) < 0:
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
