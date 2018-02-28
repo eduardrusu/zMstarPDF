@@ -103,7 +103,7 @@ def smooth(x,window_len=11,window='hanning'):
         return x
     s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
     if window == 'flat': #moving average
-        w=numpy.ones(window_len,'d')
+        w=np.ones(window_len,'d')
     else:
         w=eval('np.'+window+'(window_len)')
     y=np.convolve(w/w.sum(),s,mode='valid')
@@ -111,22 +111,22 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
-kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_8_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2_part2.cat" % root, usecols=[0], unpack=True)
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_23_45_meds_increments2.cat" % root, usecols=[0], unpack=True)
-kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_8_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2_part2.cat" % root, usecols=[0], unpack=True)
 median1,stddev1,kappa_values = statistics(kappa_1,bin_stat,min_kappa,max_kappa)
 kappa_1 = kappa_1 / np.sum(kappa_1 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_oneoverr_23_45_meds_increments2_2.cat" % root, usecols=[0], unpack=True)
-kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_16_8_2.cat" % root, usecols=[0], unpack=True)
+kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2_part1.cat" % root, usecols=[0], unpack=True)
 median2,stddev2,kappa_values = statistics(kappa_2,bin_stat,min_kappa,max_kappa)
 kappa_2 = kappa_2 / np.sum(kappa_2 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_gal_gamma_oneoverr_23_45_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
-kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_handpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_16_8_2.cat" % root, usecols=[0], unpack=True)
+kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2_part1.cat" % root, usecols=[0], unpack=True)
 median3,stddev3,kappa_values = statistics(kappa_3,bin_stat,min_kappa,max_kappa)
 kappa_3 = kappa_3 / np.sum(kappa_3 * np.abs((kappa_values[:-1]+halfwidth)))
 
@@ -146,14 +146,14 @@ plt.plot(kappa_values[:-1][::1],kappa_1[::1],color='b', linewidth=2, label ='$1$
 ax.text(0.4, 0.8, s1, fontsize=15, color='b',transform=ax.transAxes)
 plt.plot(kappa_values[:-1][::1],kappa_2[::1],color='g', linewidth=2, label ='$1 + 1/r$', linestyle='--') # every 10th point
 ax.text(0.4, 0.7, s2, fontsize=15, color='g',transform=ax.transAxes)
-winlen = 36
+winlen = 12
 #smooth(kappa_3,winlen,'flat')
 #smooth(kappa_3,winlen,'hanning')
 #smooth(kappa_3,winlen,'hamming')
 #smooth(kappa_3,winlen,'bartlett')
 #smooth(kappa_3,winlen,'blackman')
-#plt.plot(kappa_values[:-1],smooth(kappa_3,winlen,'hanning')[(winlen/2-1):-(winlen/2)],color='k', linewidth=2, label ='$1 + 1/r + \gamma$') # every 10th point
-plt.plot(kappa_values[:-1][::1],kappa_3[::1],color='k', linewidth=2, label ='$1 + 1/r + \gamma$') # every 10th point
+plt.plot(kappa_values[:-1],smooth(kappa_3,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='k', linewidth=2, label ='$1 + 1/r + \gamma$')
+#plt.plot(kappa_values[:-1][::1],kappa_3[::1],color='k', linewidth=2, label ='$1 + 1/r + \gamma$') # every 10th point
 ax.text(0.4, 0.6, s3, fontsize=15, color='k',transform=ax.transAxes)
 plt.xlabel(r'$\kappa$', fontsize=20)
 plt.ylabel(r'normalized counts', fontsize=20)
