@@ -372,11 +372,11 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
             else:
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
+        print j,i
       if type(weight1_index) == int:
         med1[j] = np.median(weight1)
       else:
         med1[j] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
-      print j
     med_weight1 = np.mean(med1) # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
     if type(weight1_index) != int:
         constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights, so that it is meaningful to multiply later by the median number of galaxies
@@ -409,13 +409,13 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight1 = np.append(weight1,weight1_)
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
+        print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
       else:
         med1[j] = np.median(weight1)
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     if type(weight2_index) != int:
@@ -456,6 +456,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
+        print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -464,7 +465,6 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
         med1[j] = np.median(weight1)
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
         med3[j] = np.median(weight3)
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
@@ -513,6 +513,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
+        print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -523,7 +524,6 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
         med3[j] = np.median(weight3)
         med4[j] = np.median(weight4)
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
@@ -574,7 +574,7 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
             ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
-      print j
+        print j,i
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
@@ -618,7 +618,7 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
-      print j
+        print j,i
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
@@ -675,7 +675,7 @@ def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,con
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
-      print j
+        print j,i
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
@@ -746,7 +746,7 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
             weight4 = np.append(weight4,weight4_)
-      print j
+        print j,i
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
             
 if conjoined == 1:

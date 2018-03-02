@@ -268,11 +268,11 @@ if conjoined == 1:
             else:
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
+        print j,i
       if weightin1 != "gamma":
         med1[j] = np.median(weight1)
       else:
         med1[j] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
-      print j
     med_weight1 = np.mean(med1) # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
     if weightin1 == "gamma":
         constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights, so that it is meaningful to multiply by med_weight1
@@ -304,7 +304,7 @@ if conjoined == 1:
         else:
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
-      print j
+        print j,i
 
 if conjoined == 2:
     med1 = np.zeros(8)
@@ -329,13 +329,13 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
+        print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
       else:
         med1[j] = np.median(weight1)
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     if weightin2 == "gamma":
@@ -379,7 +379,7 @@ if conjoined == 2:
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
-      print j
+        print j,i
 
 if conjoined == 3:
     med1 = np.zeros(8)
@@ -409,6 +409,7 @@ if conjoined == 3:
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
+        print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -417,7 +418,6 @@ if conjoined == 3:
         med1[j] = np.median(weight1)
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
         med3[j] = np.median(weight3)
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
@@ -476,7 +476,7 @@ if conjoined == 3:
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
-      print j
+        print j,i
 
 if conjoined == 4:
     med1 = np.zeros(8)
@@ -511,6 +511,7 @@ if conjoined == 4:
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
+        print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -521,7 +522,6 @@ if conjoined == 4:
         med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
         med3[j] = np.median(weight3)
         med4[j] = np.median(weight4)
-      print j
     med_weight1 = np.mean(med1)
     med_weight2 = np.mean(med2)
     med_weight3 = np.mean(med3)
@@ -597,7 +597,7 @@ if conjoined == 4:
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
             weight4 = np.append(weight4,weight4_)
-      print j
+        print j,i
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
