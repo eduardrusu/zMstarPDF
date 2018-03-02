@@ -128,13 +128,13 @@ kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiduc
 median3,stddev3,kappa_values = statistics(kappa_3,bin_stat,min_kappa,max_kappa)
 kappa_3 = kappa_3 / np.sum(kappa_3 * np.abs((kappa_values[:-1]+halfwidth)))
 
-#kappa_4  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat" % root, usecols=[0], unpack=True)
-#median4,stddev4,kappa_values = statistics(kappa_4,bin_stat,min_kappa,max_kappa)
-#kappa_4 = kappa_4 / np.sum(kappa_4 * np.abs((kappa_values[:-1]+halfwidth)))
+kappa_4  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_45_gal_45_gamma_45_oneoverr_120_gal_23_meds_increments2_2_2_2.cat" % root, usecols=[0], unpack=True)
+median4,stddev4,kappa_values = statistics(kappa_4,bin_stat,min_kappa,max_kappa)
+kappa_4 = kappa_4 / np.sum(kappa_4 * np.abs((kappa_values[:-1]+halfwidth)))
 
-#kappa_5  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_120_gal_23_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
-#median5,stddev5,kappa_values = statistics(kappa_5,bin_stat,min_kappa,max_kappa)
-#kappa_5 = kappa_5 / np.sum(kappa_5 * np.abs((kappa_values[:-1]+halfwidth)))
+kappa_5  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_8_2_2.cat" % root, usecols=[0], unpack=True)
+median5,stddev5,kappa_values = statistics(kappa_5,bin_stat,min_kappa,max_kappa)
+kappa_5 = kappa_5 / np.sum(kappa_5 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #kappa_6  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_45_oneoverr_120_gal_23_meds_increments2_2_2_2.cat" % root, usecols=[0], unpack=True)
 #median6,stddev6,kappa_values = statistics(kappa_6,bin_stat,min_kappa,max_kappa)
@@ -145,8 +145,8 @@ s0 = "med=%.3f std=%.3f" % (median0,stddev0)
 s1 = "med=%.3f std=%.3f" % (median1,stddev1)
 s2 = "med=%.3f std=%.3f" % (median2,stddev2)
 s3 = "med=%.3f std=%.3f" % (median3,stddev3)
-#s4 = "med=%.3f std=%.3f" % (median4,stddev4)
-#s5 = "med=%.3f std=%.3f" % (median5,stddev5)
+s4 = "med=%.3f std=%.3f" % (median4,stddev4)
+s5 = "med=%.3f std=%.3f" % (median5,stddev5)
 #s6 = "med=%.3f std=%.3f" % (median6,stddev6)
 plt.subplot(1,1,1)
 ax = plt.subplot(1,1,1)
@@ -162,10 +162,10 @@ plt.plot(kappa_values[:-1][::1],kappa_2[::1], linewidth=2, label ='$120: 1 + \ga
 ax.text(0.6, 0.80, s2, fontsize=10, transform=ax.transAxes)
 plt.plot(kappa_values[:-1][::1],kappa_3[::1], linewidth=2, label ='$120: 1 + 1/r + \gamma$; 45: 1') # every 1th point
 ax.text(0.6, 0.75, s3, fontsize=10,transform=ax.transAxes)
-#plt.plot(kappa_values[:-1][::1],kappa_4[::1],linewidth=2, label ='$120: 1 + 1/r + \gamma$; 45: 1 + 1/r') # every 1th point
-#ax.text(0.6, 0.70, s4, fontsize=10,transform=ax.transAxes)
-#plt.plot(kappa_values[:-1][::1],kappa_5[::1],linewidth=2, label ='$45: 1 + \gamma$; 120: 1') # every 1th point
-#ax.text(0.6, 0.65, s5, fontsize=10,transform=ax.transAxes)
+plt.plot(kappa_values[:-1][::1],kappa_4[::1],linewidth=2, label ='$45: 1 + 1/r + \gamma$; 120: 1') # every 1th point
+ax.text(0.6, 0.70, s4, fontsize=10,transform=ax.transAxes)
+plt.plot(kappa_values[:-1][::1],kappa_5[::1],linewidth=2, label ='$120: 1 + 1/r + \gamma$; 45: 1 + 1/r') # every 1th point
+ax.text(0.6, 0.65, s5, fontsize=10,transform=ax.transAxes)
 #plt.plot(kappa_values[:-1][::1],kappa_6[::1],linewidth=2, label ='$45: 1 + 1/r + \gamma$; 120: 1') # every 1th point
 #ax.text(0.6, 0.60, s6, fontsize=10,transform=ax.transAxes)
 
