@@ -1220,8 +1220,8 @@ if conjoined == 4:
             if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
             else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
             constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined2_ugriz(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
-            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2galinner_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
-            else:
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2galinner_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
         for j in range(8):
             for i in range(8):
                 id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
