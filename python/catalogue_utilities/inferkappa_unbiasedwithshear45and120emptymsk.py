@@ -909,6 +909,8 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
             weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
             weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
             galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            print np.shape(id_)
+            print np.shape(galinner_)
             del weight
             if (i == 0) and (j == 0):
                 id = id_
@@ -928,6 +930,8 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
                 galinner = np.append(galinner,galinner_)
+            print np.shape(id_)
+            print np.shape(galinner_)
             print j,i
             id = id[galinner == 0]
             ind1 = ind1[galinner == 0]
