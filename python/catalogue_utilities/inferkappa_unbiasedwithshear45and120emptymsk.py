@@ -855,12 +855,12 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
                 weight2 = np.append(weight2,weight2_)
                 galinner = np.append(galinner,galinner_)
             print j,i
-                id = id[galinner == 0]
-                ind1 = ind1[galinner == 0]
-                ind2 = ind2[galinner == 0]
-                kappa = kappa[galinner == 0]
-                weight1 = weight1[galinner == 0]
-                weight2 = weight2[galinner == 0]
+            id = id[galinner == 0]
+            ind1 = ind1[galinner == 0]
+            ind2 = ind2[galinner == 0]
+            kappa = kappa[galinner == 0]
+            weight1 = weight1[galinner == 0]
+            weight2 = weight2[galinner == 0]
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
@@ -929,13 +929,13 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight3 = np.append(weight3,weight3_)
                 galinner = np.append(galinner,galinner_)
             print j,i
-                id = id[galinner == 0]
-                ind1 = ind1[galinner == 0]
-                ind2 = ind2[galinner == 0]
-                kappa = kappa[galinner == 0]
-                weight1 = weight1[galinner == 0]
-                weight2 = weight2[galinner == 0]
-                weight3 = weight3[galinner == 0]
+            id = id[galinner == 0]
+            ind1 = ind1[galinner == 0]
+            ind2 = ind2[galinner == 0]
+            kappa = kappa[galinner == 0]
+            weight1 = weight1[galinner == 0]
+            weight2 = weight2[galinner == 0]
+            weight3 = weight3[galinner == 0]
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
