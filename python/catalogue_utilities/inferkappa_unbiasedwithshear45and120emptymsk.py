@@ -1031,8 +1031,8 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
 
 if conjoined == 1:
     constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup) # the constr argument representing 'gamma' (if 'gamma' is used) needs to be used here, so that it can be updated by the code. In addition, all constr arguments must be used because, as I am using multiple radii, global arguments such as constr_weight1 for one radius will correspond to a different global argument for another radius
-        if empty != 'empty': id,ind1,ind2,kappa,weight1 = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
-        else: id,ind1,ind2,kappa,weight1 = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+    if empty != 'empty': id,ind1,ind2,kappa,weight1 = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+    else: id,ind1,ind2,kappa,weight1 = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
     del id,ind1,ind2
 
 if conjoined == 2:
