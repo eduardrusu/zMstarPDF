@@ -781,11 +781,13 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
             weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
             galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
             del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
             if (i == 0) and (j == 0):
                 id = id_
                 kappa = kappa_
                 weight1 = weight1_
-                galinner = galinner_
                 ind1 = np.ones(np.shape(id_)) * j # this is to record the field name, and will be used together with id when matching different apertures
                 ind2 = np.ones(np.shape(id_)) * i
             else:
@@ -794,13 +796,7 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
                 ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
-                galinner = np.append(galinner,galinner_)
             print j,i
-            id = id[galinner == 0]
-            ind1 = ind1[galinner == 0]
-            ind2 = ind2[galinner == 0]
-            kappa = kappa[galinner == 0]
-            weight1 = weight1[galinner == 0]
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
@@ -838,12 +834,15 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
             weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
             galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
             del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
             if (i == 0) and (j == 0):
                 id = id_
                 kappa = kappa_
                 weight1 = weight1_
                 weight2 = weight2_
-                galinner = galinner_
                 ind1 = np.ones(np.shape(id_)) * j
                 ind2 = np.ones(np.shape(id_)) * i
             else:
@@ -853,14 +852,7 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
-                galinner = np.append(galinner,galinner_)
             print j,i
-            id = id[galinner == 0]
-            ind1 = ind1[galinner == 0]
-            ind2 = ind2[galinner == 0]
-            kappa = kappa[galinner == 0]
-            weight1 = weight1[galinner == 0]
-            weight2 = weight2[galinner == 0]
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
@@ -909,16 +901,18 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
             weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
             weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
             galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-            print np.shape(id_)
-            print np.shape(galinner_)
             del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
+            weight3_ = weight3_[galinner_ == 0]
             if (i == 0) and (j == 0):
                 id = id_
                 kappa = kappa_
                 weight1 = weight1_
                 weight2 = weight2_
                 weight3 = weight3_
-                galinner = galinner_
                 ind1 = np.ones(np.shape(id_)) * j
                 ind2 = np.ones(np.shape(id_)) * i
             else:
@@ -929,17 +923,6 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
-                galinner = np.append(galinner,galinner_)
-            print np.shape(id_)
-            print np.shape(galinner_)
-            print j,i
-            id = id[galinner == 0]
-            ind1 = ind1[galinner == 0]
-            ind2 = ind2[galinner == 0]
-            kappa = kappa[galinner == 0]
-            weight1 = weight1[galinner == 0]
-            weight2 = weight2[galinner == 0]
-            weight3 = weight3[galinner == 0]
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
@@ -1002,6 +985,12 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
             weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
+            weight3_ = weight3_[galinner_ == 0]
+            weight4_ = weight4_[galinner_ == 0]
             if (i == 0) and (j == 0):
                 id = id_
                 kappa = kappa_
@@ -1009,7 +998,6 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight2 = weight2_
                 weight3 = weight3_
                 weight4 = weight4_
-                galinner = galinner_
                 ind1 = np.ones(np.shape(id_)) * j
                 ind2 = np.ones(np.shape(id_)) * i
             else:
@@ -1021,16 +1009,7 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
-                galinner = np.append(galinner,galinner_)
             print j,i
-            id = id[galinner == 0]
-            ind1 = ind1[galinner == 0]
-            ind2 = ind2[galinner == 0]
-            kappa = kappa[galinner == 0]
-            weight1 = weight1[galinner == 0]
-            weight2 = weight2[galinner == 0]
-            weight3 = weight3[galinner == 0]
-            weight4 = weight4[galinner == 0]
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
 
 if conjoined == 1:
