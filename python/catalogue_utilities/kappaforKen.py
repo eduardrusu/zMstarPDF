@@ -105,7 +105,7 @@ def smooth(x,window_len=11,window='hanning'):
     y=np.convolve(w/w.sum(),s,mode='valid')
     return y
 
-kappa  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_chameleon_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat" % root, usecols=[0], unpack=True)
 median,stddev,kappa_values = statistics(kappa,bin_stat,min_kappa,max_kappa)
 kappa = kappa / np.sum(kappa * np.abs((kappa_values[:-1]+halfwidth)))
 
@@ -116,4 +116,4 @@ winlen = 12
 #smooth(kappa_3,winlen,'bartlett')
 #smooth(kappa_3,winlen,'blackman')
 data = np.c_[kappa_values[:-1],kappa,smooth(kappa,winlen,'flat')[(winlen/2-1):-(winlen/2)]]
-np.savetxt('%skappaforKen_WFI2033_5innermask_nobeta_zgap0.61_0.71_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_2_2_2.cat' % root, data, fmt='%.3f %.3e %.3e')
+np.savetxt('%skappaforKen_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_chameleon_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat' % root, data, fmt='%.4f %.3e %.3e')
