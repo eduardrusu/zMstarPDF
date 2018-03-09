@@ -118,6 +118,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 listk = []
                 for k in range(len(index_all)):
                     if k not in index_all: listk = np.append(listk,k)
+                cellkappagamma = np.delete(cellkappagamma,listk,0)
                 w_gal_2X = np.delete(w_gal_2X,listk)
                 galinner = np.delete(galinner,listk)
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
