@@ -91,7 +91,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
     initialized = 0
     for i in range(spacing):
         for j in range(spacing):
-            print "(",i+1,",",j+1,")/(",spacing,",",spacing,") for radius", radius
+            print "(%s,%s)/(%s,%s) for radius %s" % (i+1,j+1,spacing,spacing,radius)
             grid_x, grid_y = np.mgrid[lim1D + i:4096 - lim1D - (4096 - 2 * lim1D) % spacing - spacing + i:complex(0,cells_on_a_side), lim1D + j:4096 - lim1D - (4096 - 2 * lim1D) % spacing - spacing + j:complex(0,cells_on_a_side)] # the grid containing the kappa pixel at the center of cells
             cellx = grid_x.flatten()
             celly = grid_y.flatten()
