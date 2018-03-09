@@ -91,7 +91,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
     initialized = 0
     for i in range(spacing):
         for j in range(spacing):
-            print "(",i+1,",",j+1,") / (",spacing,",",spacing, ") for radius", radius
+            print "(",i+1,",",j+1,")/(",spacing,",",spacing,") for radius", radius
             grid_x, grid_y = np.mgrid[lim1D + i:4096 - lim1D - (4096 - 2 * lim1D) % spacing - spacing + i:complex(0,cells_on_a_side), lim1D + j:4096 - lim1D - (4096 - 2 * lim1D) % spacing - spacing + j:complex(0,cells_on_a_side)] # the grid containing the kappa pixel at the center of cells
             cellx = grid_x.flatten()
             celly = grid_y.flatten()
@@ -109,9 +109,19 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             
             w_gal_2X = np.bincount(cat_msk[:,index_index].astype(int)) # 2X stands for 23 or 24 limmag
             galinner = np.bincount(catinner[:,index_index].astype(int)) # counts objects inside the inner mask
-            index_all = np.unique(index.astype(int)) # sorts all unique entries; galinner and w_gal_2X may contain fewer elements, because in some indexed cells (largest index only) there may be no galaxies, so I need to expand them to include all indices
-            w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
-            galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
+            index_all = np.unique(index.astype(int)) # sorts all unique entries; galinner and w_gal_2X may contain fewer elements, because in some indexed cells (it seems largest index only) there may be no galaxies, so I need to expand them to include all indices
+            #print len(index_all),len(w_gal_2X),len(galinner)
+            try:
+                w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X))) # in rare cases, for the 45" aperture, index will have missing fields (it will miss one of the integers from 0 to len(index)). So this assignment will not work, because np.zeros(len(index_all)-len(w_gal_2X))is a negative number
+                galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
+            except:
+                listk = []
+                for k in range(len(index_all)):
+                    if k not in index_all: listk = np.append(listk,k)
+                w_gal_2X = np.delete(w_gal_2X,listk)
+                galinner = np.delete(galinner,listk)
+                w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
+                galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
             
             try:
                 p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
