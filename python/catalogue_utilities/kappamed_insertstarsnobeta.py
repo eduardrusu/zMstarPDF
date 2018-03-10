@@ -115,18 +115,20 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X))) # in rare cases, for the 45" aperture, index will have missing fields (it will miss one of the integers from 0 to len(index)). So this assignment will not work, because np.zeros(len(index_all)-len(w_gal_2X))is a negative number
                 galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
             except:
-                listk = []
+                missing = []
                 for k in range(len(index_all)):
-                    if k not in index_all: listk = np.append(listk,k)
-                cellkappagamma = np.delete(cellkappagamma,listk,0)
-                w_gal_2X = np.delete(w_gal_2X,listk)
-                galinner = np.delete(galinner,listk)
+                    if k not in index_all: missing = np.append(missing,k)
+                for k in range(len(missing)):
+                    insert = np.copy(cat_msk[0]) # any entry would do
+                    insert[index_index] = missing[k]
+                    cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                index_all = np.unique(cat_msk[:,index_index].astype(int))
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
                 galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
             
             try:
                 p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
-                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] need all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
+                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] needs all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
             except:
                 missing = np.array([])
                 cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
@@ -286,17 +288,17 @@ if lens == "J1206":
     pln = 34
 
 #rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
-#rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
+#rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
 #rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
-rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
-#rootgals = "/Volumes/LaCieSubaru/MSgals/"
+#rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
+rootgals = "/Volumes/LaCieSubaru/MSgals/"
 #rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
-rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
-#rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
+#rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
+rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
 #rootstars = "/lfs08/rusucs/insertstars/"
-#rootstars = "/Volumes/LaCieSubaru/insertstars/"
-rootstars = "/mnt/scratch/rusucs/insertstars/"
+rootstars = "/Volumes/LaCieSubaru/insertstars/"
+#rootstars = "/mnt/scratch/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
