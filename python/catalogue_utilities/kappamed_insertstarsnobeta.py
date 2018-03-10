@@ -121,8 +121,8 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 for k in range(len(missing)):
                     insert = np.copy(cat_msk[0]) # any entry would do
                     insert[index_index] = missing[k]
-                    cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
-                index_all = np.unique(cat_msk[:,index_index].astype(int))
+                    cat_msk = np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                index_all = np.append(index_all,missing)
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
                 galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
             
@@ -132,7 +132,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             except:
                 missing = np.array([])
                 cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
-                for k in range(np.max(index_all)):
+                for k in range(int(np.max(index_all))):
                     if k not in cat_msk_unique:
                         missing = np.append(missing,np.array([k]))
                 for k in range(len(missing)):
