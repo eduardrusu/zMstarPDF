@@ -56,7 +56,8 @@ print "conjoined:", conjoined
 #root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 root = "/Volumes/LaCieSubaru/MSweights/"
-rootcode = "/mnt/scratch/rusucs/code/"
+#rootcode = "/mnt/scratch/rusucs/code/"
+rootcode = "/Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/"
 #rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
