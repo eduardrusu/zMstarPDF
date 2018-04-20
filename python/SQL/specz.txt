@@ -1,0 +1,7 @@
+# searches for all specz objects around given coordinates and a radius of 14.6 arcmin; Remember to run on the latest data release
+
+SELECT TOP 100 
+s.ra,s.dec,s.zWarning
+FROM ..SpecObj as s 
+JOIN dbo.fGetNearbySpecObjEq(181.6235,43.5382,14.6) AS b ON  b.SpecobjID = S.SpecobjID 
+WHERE s.zWarning = 0
