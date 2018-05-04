@@ -27,8 +27,8 @@ mag = str(sys.argv[8])
 mode = str(sys.argv[9])
 conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
 
-if handpicked == 'handpicked': handpickedstr = '_handpicked'
-else: handpickedstr = ''
+if handpicked == 'nohandpicked': handpickedstr = ''
+else: handpickedstr = '_'+str(sys.argv[4])
 
 if conjoined == 1:
     weightin1 = str(sys.argv[10])

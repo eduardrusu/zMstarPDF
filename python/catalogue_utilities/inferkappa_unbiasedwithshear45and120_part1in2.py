@@ -26,8 +26,8 @@ mag = str(sys.argv[7])
 mode = str(sys.argv[8])
 conjoined = len(sys.argv) - 9 # total number of arguments including code name, minus the number of ones that are not weights
 
-if handpicked == 'handpicked': handpickedstr = '_handpicked'
-else: handpickedstr = ''
+if handpicked == 'nohandpicked': handpickedstr = ''
+else: handpickedstr = '_'+str(sys.argv[4])
 
 if conjoined == 1:
     weightin1 = str(sys.argv[9])
@@ -82,11 +82,11 @@ if lens == "WFI2033":
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
+    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
+    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.09
         constrwidth_gamma_inf = 0.075
         constrwidth_gamma_sup = 0.105

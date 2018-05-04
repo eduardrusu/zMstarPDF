@@ -3,6 +3,7 @@
 #python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 15 23 meds eazy detir IRAC -1.0 -1.0 100
 #python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 120 15 23 meds eazy detir IRAC -1.0 -1.0 100
 #python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds eazy detir IRAC -1.0 -1.0 100 handpicked
-python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 120 5 23 meds eazy detir IRAC -1.0 -1.0 100 handpicked
-python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds eazy detir IRAC 0.61 0.71 100
-python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 120 5 23 meds eazy detir IRAC 0.61 0.71 100
+#python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 120 5 23 meds eazy detir IRAC -1.0 -1.0 100 removegrouphandpicked
+python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds eazy detir IRAC -1.0 -1.0 100 removegrouphandpicked
+#python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds eazy detir IRAC 0.61 0.71 100
+#python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 120 5 23 meds eazy detir IRAC 0.61 0.71 100

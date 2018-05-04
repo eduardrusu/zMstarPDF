@@ -29,9 +29,9 @@ if handpicked == '':
     lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x)
          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 else:
-    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' in x)
+    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
-    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' in x)
+    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
           and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 
 # read the samples and classify by photoz, type, and detection
