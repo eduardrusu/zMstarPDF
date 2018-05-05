@@ -4,7 +4,7 @@
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
 # for each redius, weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
-# the code is written such that, if shear is used as overdensity, it should be the second weight used in either radius
+# !!!!!!!!!!!the code is written such that, if shear is used as overdensity, it should be the second weight used in either radius
 
 import sys
 import os
@@ -66,9 +66,9 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 2 # refers to the E interval from Greene et al. 2014
-increment2 = 2
-increment3 = 2
+increment1 = 4 # refers to the E interval from Greene et al. 2014
+increment2 = 10
+increment3 = 4
 increment4 = 2
 increment5 = 2
 
