@@ -1,6 +1,6 @@
 # CE Rusu, Feb 13 2018
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles, using the 10 samples
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked testduplicatesamples/testothersamples
 # After running this code, combine the results into a final text file with the final distributions and widths, using weightinguniversal_histograms_finalcombine.py
 # If desired, run weightinguniversal_histograms_samples_publicationqualitynotext.py to produce a publication quality plot
 
@@ -23,6 +23,8 @@ zsup = str(sys.argv[10])
 bin = int(str(sys.argv[11]))
 try: handpicked = '_'+str(sys.argv[12])
 except: handpicked = ''
+try: specialtest = '_'+str(sys.argv[13])
+except: specialtest = ''
 
 plt.clf()
 
@@ -51,14 +53,14 @@ medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
     print '%s/9' %nr
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
 
     if mag == "24" and photz == "bpz": cols=[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38]
     if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
@@ -289,26 +291,26 @@ for i in range(18):
     subplot = i+1
     #print "finished subplot %d/18; fraction of points inside the < %s cut: \n W1_50 %.3f\n W2_50 %.3f\n W3_50 %.3f\n W4_50 %.3f" % (subplot, limit, float(q_W1_50.size)/q_W1_50read[0].size, float(q_W2_50.size)/q_W2_50read[0].size, float(q_W3_50.size)/q_W3_50read[0].size, float(q_W4_50.size)/q_W4_50read[0].size)
 
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_50.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum50W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_75.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum75W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_50.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum50W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_75.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum75W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_50.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum50W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_75.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum75W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_50.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum50W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_75.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), medsum75W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_50%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_75%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_50%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_75%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_50%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_75%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_50%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_75%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 
 plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
 plt.subplot(5,4,5)
 plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=10)
-plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamples.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples), dpi=500)
+plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamples%s.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), dpi=500)
             
 # compute the number of fields used
 total50 = 0
 total75 = 0
 good50 = 0
 good75 = 0
-lst = [x for x in os.listdir(root) if ('_24galphotmstar_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_count.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked) in x)]
+lst = [x for x in os.listdir(root) if ('_24galphotmstar_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_count%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,specialtest) in x)]
 for i in range(len(lst)):
     str = open('%s/%s' %(root,lst[i]),'r').read()
     str = [x.strip() for x in str.split(" ")]
