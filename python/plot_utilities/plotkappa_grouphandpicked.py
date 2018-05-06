@@ -112,7 +112,7 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
-kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_23_45_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_23_45_meds_increments4_10_4.cat" % root, usecols=[0], unpack=True)
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
@@ -128,15 +128,15 @@ kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpick
 median3,stddev3,kappa_values = statistics(kappa_3,bin_stat,min_kappa,max_kappa)
 kappa_3 = kappa_3 / np.sum(kappa_3 * np.abs((kappa_values[:-1]+halfwidth)))
 
-kappa_4  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_23_120_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_4  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_23_120_meds_increments4_10_4.cat" % root, usecols=[0], unpack=True)
 median4,stddev4,kappa_values = statistics(kappa_4,bin_stat,min_kappa,max_kappa)
 kappa_4 = kappa_4 / np.sum(kappa_4 * np.abs((kappa_values[:-1]+halfwidth)))
 
-#kappa_5  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_120_gal_23_meds_increments2_2_2.cat" % root, usecols=[0], unpack=True)
+#kappa_5  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_120_gal_23_meds_increments4_10_4.cat" % root, usecols=[0], unpack=True)
 #median5,stddev5,kappa_values = statistics(kappa_5,bin_stat,min_kappa,max_kappa)
 #kappa_5 = kappa_5 / np.sum(kappa_5 * np.abs((kappa_values[:-1]+halfwidth)))
 
-#kappa_6  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_45_oneoverr_120_gal_23_meds_increments2_2_2_2.cat" % root, usecols=[0], unpack=True)
+#kappa_6  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_45_gal_45_gamma_45_oneoverr_120_gal_23_meds_increments4_10_4_2.cat" % root, usecols=[0], unpack=True)
 #median6,stddev6,kappa_values = statistics(kappa_6,bin_stat,min_kappa,max_kappa)
 #kappa_6 = kappa_6 / np.sum(kappa_6 * np.abs((kappa_values[:-1]+halfwidth)))
 
