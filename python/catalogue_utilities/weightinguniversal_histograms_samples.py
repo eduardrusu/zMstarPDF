@@ -34,7 +34,7 @@ fontordonate = 4
 fontabsciss = 8
 fontlabel = 2
 pltrange = 3
-samples = 10
+samples = 1
 limit = 10**30
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
