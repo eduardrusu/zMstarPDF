@@ -116,15 +116,15 @@ kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpick
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
-kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_mass_23_120_meds_increments2_16_2_8.cat" % root, usecols=[0], unpack=True)
+kappa_1  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_gal_gamma_oneoverr_mass_23_120_meds_increments4_10_4_2.cat" % root, usecols=[0], unpack=True)
 median1,stddev1,kappa_values = statistics(kappa_1,bin_stat,min_kappa,max_kappa)
 kappa_1 = kappa_1 / np.sum(kappa_1 * np.abs((kappa_values[:-1]+halfwidth)))
 
-kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments2_16_8_2.cat" % root, usecols=[0], unpack=True)
+kappa_2  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_23_meds_increments4_10_4_2.cat" % root, usecols=[0], unpack=True)
 median2,stddev2,kappa_values = statistics(kappa_2,bin_stat,min_kappa,max_kappa)
 kappa_2 = kappa_2 / np.sum(kappa_2 * np.abs((kappa_values[:-1]+halfwidth)))
 
-kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_16_8_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_3  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_removegrouphandpicked_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments4_10_4_2_2.cat" % root, usecols=[0], unpack=True)
 median3,stddev3,kappa_values = statistics(kappa_3,bin_stat,min_kappa,max_kappa)
 kappa_3 = kappa_3 / np.sum(kappa_3 * np.abs((kappa_values[:-1]+halfwidth)))
 
