@@ -34,7 +34,7 @@ fontordonate = 4
 fontabsciss = 8
 fontlabel = 2
 pltrange = 3
-samples = 1
+samples = 10
 limit = 10**30
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
@@ -52,7 +52,7 @@ medsum50W4 = np.zeros((18,samples))
 medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
-    print '%s/9' %nr
+    print '%s/%s' %(nr,samples-1)
     lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
     lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
     lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
