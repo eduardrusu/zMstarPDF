@@ -190,7 +190,7 @@ if lensID == "J1206":
     z_l = 0.75
     brightmag = 18.05
     pixnr = 1283
-    pixlens = 0.2625 * u.arcsec
+    pixlens = 0.187 * u.arcsec
 
 #dist = distances.Distance()
 #dist.OMEGA_M = 0.25 # change to the cosmology used by the Millennium Simulation
