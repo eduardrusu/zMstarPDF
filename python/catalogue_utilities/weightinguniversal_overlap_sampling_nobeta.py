@@ -596,7 +596,11 @@ for k in range(overlap):
                     field_masked[cell_ypix] = (field_masked[cell_ypix] - (centerfieldspix[k][l][1] - radius * (u.arcsec / pixCFHT).value)) * (pixCFHT / pixlens).value
                     field_masked[cell_sep] = np.sqrt((field_masked[cell_xpix] - (radius * 2/pixlens.value)/2) ** 2 + (field_masked[cell_ypix] - (radius * 2/pixlens.value)/2) ** 2) * (pixlens / u.arcsec).value # separation in arcsec from the center of the cell
                     field_masked[cell_sep][field_masked[cell_sep] < 10] = 10
-                    field_masked_24 = np.delete(field_masked,np.where(msk_lens[0].data[np.array([field_masked[cell_xpix] + (pixnr - (2/pixlens.value) * radius)/2]).astype(int),np.array([field_masked[cell_ypix] + (pixnr - (2/pixlens.value) * radius)/2]).astype(int)] != 0),axis=1) # remove field objects falling inside the lens mask; needed to account for the fact that the mask is always pixnr pixels on a side
+                    temp1 = np.array([field_masked[cell_xpix] + (pixnr - (2/pixlens.value) * radius)/2]).astype(int)
+                    temp2 = np.array([field_masked[cell_ypix] + (pixnr - (2/pixlens.value) * radius)/2]).astype(int)
+                    temp1[temp1==pixnr]=pixnr-1
+                    temp2[temp2==pixnr]=pixnr-1
+                    field_masked_24 = np.delete(field_masked,np.where(msk_lens[0].data[temp1,temp2] != 0),axis=1) # remove field objects falling inside the lens mask; needed to account for the fact that the mask is always pixnr pixels on a side
                     #if np.max(field_masked_24[cell_sep]) > radius: print "a", np.max(field_masked_24[cell_sep]) # testing; due to the pixelated mask, there are objects very close to the radius limit but just very slightly (subarcsec) away; I will not do anything about this
                     field_masked_23 = np.delete(field_masked_24,np.where(field_masked_24[i_field] > 23),axis=1)
                     w_gal_24 = np.shape(field_masked_24)[1]
