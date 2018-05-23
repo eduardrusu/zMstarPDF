@@ -245,6 +245,8 @@ if lensID == "RX1131":
     center_lens = SkyCoord('11:31:51.435 -12:31:58.24', frame='fk5', unit=(u.hourangle, u.deg))
 if lensID == "WFI2033":
     center_lens = SkyCoord('20:33:42.080 -47:23:43.00', frame='fk5', unit=(u.hourangle, u.deg))
+if lensID == "J1206":
+    center_lens = SkyCoord('12:06:29.650 +43:32:19.90', frame='fk5', unit=(u.hourangle, u.deg))
 
 lensbpz = np.loadtxt('%s/%s%sbpz_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
 lenseazy = np.loadtxt('%s/%s%seazy_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
