@@ -18,32 +18,36 @@ def lim_mag(image,zpt,scale,xpix,ypix):
             list=list+[y[listx[x],listy[x]]]
         lim=zpt-2.5*np.log10(5*np.sqrt(len(list))*np.std(np.asarray(list))) # 5 sigma
         print lim
-    return lim
+        return lim
 
-zeropt = 24.74 + 2.5*np.log10(1020)
-image ="g.fits"
-scale = 0.25
+zeropt = 23.43 #+ 2.5*np.log10(1020) # do I use the exposure time?
+#image ="J1206_NIRI_nativescale_weightedmedian.fits"
+#scale = 0.1164 # arcsec
+#image ="J1206_NIRI_GMOSscale_weightedmedian.fits"
+#scale = 0.1618 # arcsec
+image ="J1206_NIRI_CFHTLSscale_weightedmedian.fits"
+scale = 0.187 # arcsec
 
 limmag = np.array([])
-x = lim_mag(image,zeropt,scale,390,480)
+x = lim_mag(image,zeropt,scale,160,830)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,290,420)
+x = lim_mag(image,zeropt,scale,390,960)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,330,270)
+x = lim_mag(image,zeropt,scale,810,830)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,230,170)
+x = lim_mag(image,zeropt,scale,1190,1080)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,200,350)
+x = lim_mag(image,zeropt,scale,880,80)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,210,490)
+x = lim_mag(image,zeropt,scale,980,420)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,300,550)
+x = lim_mag(image,zeropt,scale,130,250)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,100,220)
+x = lim_mag(image,zeropt,scale,470,120)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,430,280)
+x = lim_mag(image,zeropt,scale,760,470)
 limmag = np.append(limmag,x)
-x = lim_mag(image,zeropt,scale,650,90)
+x = lim_mag(image,zeropt,scale,530,620)
 limmag = np.append(limmag,x)
 
 print np.median(limmag),np.std(limmag)
