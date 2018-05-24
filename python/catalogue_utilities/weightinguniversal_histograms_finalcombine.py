@@ -25,71 +25,71 @@ rootout = "/Users/cerusu/Dropbox/Davis_work/code/%s" % lens
 # edit the conditions as desired, to restrict the included criteria:
 if handpicked == '':
     lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x)
-         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
+         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
     lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x)
-         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
+         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 else:
     lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
-         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
+         and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
     lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
-          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('deti' in x) | ('detir' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
+          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 
 # read the samples and classify by photoz, type, and detection
-bpz_deti_irac45 = 0
-bpz_deti_noirac45 = 0
-bpz_detir_irac45 = 0
-bpz_detir_noirac45 = 0
-eazy_deti_irac45 = 0
-eazy_deti_noirac45 = 0
-eazy_detir_irac45 = 0
-eazy_detir_noirac45 = 0
-bpz_deti_irac120 = 0
-bpz_deti_noirac120 = 0
-bpz_detir_irac120 = 0
-bpz_detir_noirac120 = 0
-eazy_deti_irac120 = 0
-eazy_deti_noirac120 = 0
-eazy_detir_irac120 = 0
-eazy_detir_noirac120 = 0
+bpz_iconv_irac45 = 0
+bpz_iconv_noirac45 = 0
+bpz_iunconv_irac45 = 0
+bpz_iunconv_noirac45 = 0
+eazy_iconv_irac45 = 0
+eazy_iconv_noirac45 = 0
+eazy_iunconv_irac45 = 0
+eazy_iunconv_noirac45 = 0
+bpz_iconv_irac120 = 0
+bpz_iconv_noirac120 = 0
+bpz_iunconv_irac120 = 0
+bpz_iunconv_noirac120 = 0
+eazy_iconv_irac120 = 0
+eazy_iconv_noirac120 = 0
+eazy_iunconv_irac120 = 0
+eazy_iunconv_noirac120 = 0
 for i in range(len(lst45)):
     print lst45[i]
     if i == 0: x45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
     else: x45 = np.c_[x45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)] # I checked using np.shape that if I use unpack=True I need to use np.c_
-    if ('bpz' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_deti_irac45) == int): bpz_deti_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('bpz' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_deti_noirac45) == int): bpz_deti_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('bpz' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_detir_irac45) == int): bpz_detir_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('bpz' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_detir_noirac45) == int): bpz_detir_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('eazy' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_deti_irac45) == int): eazy_deti_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('eazy' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_deti_noirac45) == int): eazy_deti_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('eazy' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_detir_irac45) == int): eazy_detir_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('eazy' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_detir_noirac45) == int): eazy_detir_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
-    if ('bpz' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_deti_irac45) != int): bpz_deti_irac45 = np.c_[bpz_deti_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('bpz' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_deti_noirac45) != int): bpz_deti_noirac45 = np.c_[bpz_deti_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('bpz' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_detir_irac45) != int): bpz_detir_irac45 = np.c_[bpz_detir_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('bpz' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_detir_noirac45) != int): bpz_detir_noirac45 = np.c_[bpz_detir_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('eazy' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_deti_irac45) != int): eazy_deti_irac45 = np.c_[eazy_deti_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('eazy' in lst45[i]) and ('detir' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_deti_noirac45) != int): eazy_deti_noirac45 = np.c_[eazy_deti_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('eazy' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_detir_irac45) != int): eazy_detir_irac45 = np.c_[eazy_detir_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
-    if ('eazy' in lst45[i]) and ('detir' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_detir_noirac45) != int): eazy_detir_noirac45 = np.c_[eazy_detir_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('bpz' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_iconv_irac45) == int): bpz_iconv_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('bpz' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_iconv_noirac45) == int): bpz_iconv_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('bpz' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_iunconv_irac45) == int): bpz_iunconv_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('bpz' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_iunconv_noirac45) == int): bpz_iunconv_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('eazy' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_iconv_irac45) == int): eazy_iconv_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('eazy' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_iconv_noirac45) == int): eazy_iconv_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('eazy' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_iunconv_irac45) == int): eazy_iunconv_irac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('eazy' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_iunconv_noirac45) == int): eazy_iunconv_noirac45 = np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)
+    if ('bpz' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_iconv_irac45) != int): bpz_iconv_irac45 = np.c_[bpz_iconv_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('bpz' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_iconv_noirac45) != int): bpz_iconv_noirac45 = np.c_[bpz_iconv_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('bpz' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(bpz_iunconv_irac45) != int): bpz_iunconv_irac45 = np.c_[bpz_iunconv_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('bpz' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(bpz_iunconv_noirac45) != int): bpz_iunconv_noirac45 = np.c_[bpz_iunconv_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('eazy' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_iconv_irac45) != int): eazy_iconv_irac45 = np.c_[eazy_iconv_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('eazy' in lst45[i]) and ('iunconv' not in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_iconv_noirac45) != int): eazy_iconv_noirac45 = np.c_[eazy_iconv_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('eazy' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' not in lst45[i]) and (type(eazy_iunconv_irac45) != int): eazy_iunconv_irac45 = np.c_[eazy_iunconv_irac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
+    if ('eazy' in lst45[i]) and ('iunconv' in lst45[i]) and ('noIRAC' in lst45[i]) and (type(eazy_iunconv_noirac45) != int): eazy_iunconv_noirac45 = np.c_[eazy_iunconv_noirac45,np.loadtxt('%s%s' %(rootin,lst45[i]), unpack=True)]
 for i in range(len(lst120)):
     if i == 0: x120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
     else: x120 = np.c_[x120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('bpz' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_deti_irac120) == int): bpz_deti_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('bpz' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_deti_noirac120) == int): bpz_deti_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('bpz' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_detir_irac120) == int): bpz_detir_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('bpz' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_detir_noirac120) == int): bpz_detir_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('eazy' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_deti_irac120) == int): eazy_deti_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('eazy' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_deti_noirac120) == int): eazy_deti_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('eazy' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_detir_irac120) == int): eazy_detir_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('eazy' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_detir_noirac120) == int): eazy_detir_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
-    if ('bpz' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_deti_irac120) != int): bpz_deti_irac120 = np.c_[bpz_deti_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('bpz' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_deti_noirac120) != int): bpz_deti_noirac120 = np.c_[bpz_deti_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('bpz' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_detir_irac120) != int): bpz_detir_irac120 = np.c_[bpz_detir_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('bpz' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_detir_noirac120) != int): bpz_detir_noirac120 = np.c_[bpz_detir_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('eazy' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_deti_irac120) != int): eazy_deti_irac120 = np.c_[eazy_deti_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('eazy' in lst120[i]) and ('detir' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_deti_noirac120) != int): eazy_deti_noirac120 = np.c_[eazy_deti_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('eazy' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_detir_irac120) != int): eazy_detir_irac120 = np.c_[eazy_detir_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
-    if ('eazy' in lst120[i]) and ('detir' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_detir_noirac120) != int): eazy_detir_noirac120 = np.c_[eazy_detir_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('bpz' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_iconv_irac120) == int): bpz_iconv_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('bpz' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_iconv_noirac120) == int): bpz_iconv_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('bpz' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_iunconv_irac120) == int): bpz_iunconv_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('bpz' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_iunconv_noirac120) == int): bpz_iunconv_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('eazy' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_iconv_irac120) == int): eazy_iconv_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('eazy' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_iconv_noirac120) == int): eazy_iconv_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('eazy' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_iunconv_irac120) == int): eazy_iunconv_irac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('eazy' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_iunconv_noirac120) == int): eazy_iunconv_noirac120 = np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)
+    if ('bpz' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_iconv_irac120) != int): bpz_iconv_irac120 = np.c_[bpz_iconv_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('bpz' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_iconv_noirac120) != int): bpz_iconv_noirac120 = np.c_[bpz_iconv_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('bpz' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(bpz_iunconv_irac120) != int): bpz_iunconv_irac120 = np.c_[bpz_iunconv_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('bpz' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(bpz_iunconv_noirac120) != int): bpz_iunconv_noirac120 = np.c_[bpz_iunconv_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('eazy' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_iconv_irac120) != int): eazy_iconv_irac120 = np.c_[eazy_iconv_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('eazy' in lst120[i]) and ('iunconv' not in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_iconv_noirac120) != int): eazy_iconv_noirac120 = np.c_[eazy_iconv_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('eazy' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' not in lst120[i]) and (type(eazy_iunconv_irac120) != int): eazy_iunconv_irac120 = np.c_[eazy_iunconv_irac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
+    if ('eazy' in lst120[i]) and ('iunconv' in lst120[i]) and ('noIRAC' in lst120[i]) and (type(eazy_iunconv_noirac120) != int): eazy_iunconv_noirac120 = np.c_[eazy_iunconv_noirac120,np.loadtxt('%s%s' %(rootin,lst120[i]), unpack=True)]
 
 def percentile(a,b,c):
     str_a = '%.2f' %a
@@ -132,59 +132,59 @@ def plot(mag,radius):
         if i == 17: ax=plt.subplot(5,4,19)
         
         z=np.linspace(0,1,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_deti_irac[i]),np.percentile(bpz_deti_irac[i], 16),np.percentile(bpz_deti_irac[i], 84))[2]
-        plt.plot(w,z,'b-',label='bpz_deti_irac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[2]
+        plt.plot(w,z,'b-',label='bpz_iconv_irac', linewidth=linewidth)
         plt.plot(winf,z,'b--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'b--',label=None, linewidth=linewidth)
         z=np.linspace(1,2,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_deti_noirac[i]),np.percentile(bpz_deti_noirac[i], 16),np.percentile(bpz_deti_noirac[i], 84))[2]
-        plt.plot(w,z,'g-',label='bpz_deti_noirac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(bpz_iconv_noirac[i]),np.percentile(bpz_iconv_noirac[i], 16),np.percentile(bpz_iconv_noirac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(bpz_iconv_noirac[i]),np.percentile(bpz_iconv_noirac[i], 16),np.percentile(bpz_iconv_noirac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(bpz_iconv_noirac[i]),np.percentile(bpz_iconv_noirac[i], 16),np.percentile(bpz_iconv_noirac[i], 84))[2]
+        plt.plot(w,z,'g-',label='bpz_iconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,'g--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'g--',label=None, linewidth=linewidth)
         z=np.linspace(2,3,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_detir_irac[i]),np.percentile(bpz_detir_irac[i], 16),np.percentile(bpz_detir_irac[i], 84))[2]
-        plt.plot(w,z,'k-',label='bpz_detir_irac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[2]
+        plt.plot(w,z,'k-',label='bpz_iunconv_irac', linewidth=linewidth)
         plt.plot(winf,z,'k--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'k--',label=None, linewidth=linewidth)
         z=np.linspace(3,4,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_detir_noirac[i]),np.percentile(bpz_detir_noirac[i], 16),np.percentile(bpz_detir_noirac[i], 84))[2]
-        plt.plot(w,z,'r-',label='bpz_detir_noirac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(bpz_iunconv_noirac[i]),np.percentile(bpz_iunconv_noirac[i], 16),np.percentile(bpz_iunconv_noirac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(bpz_iunconv_noirac[i]),np.percentile(bpz_iunconv_noirac[i], 16),np.percentile(bpz_iunconv_noirac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(bpz_iunconv_noirac[i]),np.percentile(bpz_iunconv_noirac[i], 16),np.percentile(bpz_iunconv_noirac[i], 84))[2]
+        plt.plot(w,z,'r-',label='bpz_iunconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,'r--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'r--',label=None, linewidth=linewidth)
         z=np.linspace(4,5,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_deti_irac[i]),np.percentile(eazy_deti_irac[i], 16),np.percentile(eazy_deti_irac[i], 84))[2]
-        plt.plot(w,z,'m-',label='eazy_deti_irac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[2]
+        plt.plot(w,z,'m-',label='eazy_iconv_irac', linewidth=linewidth)
         plt.plot(winf,z,'m--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'m--',label=None, linewidth=linewidth)
         z=np.linspace(5,6,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_deti_noirac[i]),np.percentile(eazy_deti_noirac[i], 16),np.percentile(eazy_deti_noirac[i], 84))[2]
-        plt.plot(w,z,'y-',label='eazy_deti_noirac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[2]
+        plt.plot(w,z,'y-',label='eazy_iconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,'y--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'y--',label=None, linewidth=linewidth)
         z=np.linspace(6,7,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_detir_irac[i]),np.percentile(eazy_detir_irac[i], 16),np.percentile(eazy_detir_irac[i], 84))[2]
-        plt.plot(w,z,'c-',label='eazy_detir_irac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[2]
+        plt.plot(w,z,'c-',label='eazy_iunconv_irac', linewidth=linewidth)
         plt.plot(winf,z,'c--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'c--',label=None, linewidth=linewidth)
         z=np.linspace(7,8,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_detir_noirac[i]),np.percentile(eazy_detir_noirac[i], 16),np.percentile(eazy_detir_noirac[i], 84))[2]
-        plt.plot(w,z,linestyle='-',color='grey',label='eazy_detir_noirac', linewidth=linewidth)
+        w=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[1]
+        winf=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[0]
+        wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[2]
+        plt.plot(w,z,linestyle='-',color='grey',label='eazy_iunconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
         plt.plot(wsup,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
         #plt.xlim(0, 2.5)
@@ -217,23 +217,23 @@ def plot(mag,radius):
     plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=fontlegend)
     plt.savefig('%s/weightedcountshist_%sarcsec_%sinner_%s_%s%s_zgap%s_%s_10samples.png' % (rootout, radius, inner, mag, mode, handpicked, zinf, zsup), dpi=500)
 
-bpz_deti_irac = bpz_deti_irac45
-bpz_deti_noirac = bpz_deti_noirac45
-bpz_detir_irac = bpz_detir_irac45
-bpz_detir_noirac = bpz_detir_noirac45
-eazy_deti_irac = eazy_deti_irac45
-eazy_deti_noirac = eazy_deti_noirac45
-eazy_detir_irac = eazy_detir_irac45
-eazy_detir_noirac = eazy_detir_noirac45
+bpz_iconv_irac = bpz_iconv_irac45
+bpz_iconv_noirac = bpz_iconv_noirac45
+bpz_iunconv_irac = bpz_iunconv_irac45
+bpz_iunconv_noirac = bpz_iunconv_noirac45
+eazy_iconv_irac = eazy_iconv_irac45
+eazy_iconv_noirac = eazy_iconv_noirac45
+eazy_iunconv_irac = eazy_iunconv_irac45
+eazy_iunconv_noirac = eazy_iunconv_noirac45
 plot('23','45')
-bpz_deti_irac = bpz_deti_irac120
-bpz_deti_noirac = bpz_deti_noirac120
-bpz_detir_irac = bpz_detir_irac120
-bpz_detir_noirac = bpz_detir_noirac120
-eazy_deti_irac = eazy_deti_irac120
-eazy_deti_noirac = eazy_deti_noirac120
-eazy_detir_irac = eazy_detir_irac120
-eazy_detir_noirac = eazy_detir_noirac120
+bpz_iconv_irac = bpz_iconv_irac120
+bpz_iconv_noirac = bpz_iconv_noirac120
+bpz_iunconv_irac = bpz_iunconv_irac120
+bpz_iunconv_noirac = bpz_iunconv_noirac120
+eazy_iconv_irac = eazy_iconv_irac120
+eazy_iconv_noirac = eazy_iconv_noirac120
+eazy_iunconv_irac = eazy_iunconv_irac120
+eazy_iunconv_noirac = eazy_iunconv_noirac120
 plot('23','120')
 
 # output the final summary file
@@ -263,8 +263,8 @@ if local == 'global':
 
 else:
     print "fiducial:"
-    fiducial45 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_45arcsec_%sinner_23_%s_bpz_detir_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)] # this will contain W1-W4 and 50/75; CHOOSE WHAT YOU WANT HERE
-    fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_23_%s_bpz_detir_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
+    fiducial45 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_45arcsec_%sinner_23_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)] # this will contain W1-W4 and 50/75; CHOOSE WHAT YOU WANT HERE
+    fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_23_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
     for i in range(len(fiducial45)):
         print fiducial45[i]
         if i == 0: f45 = np.loadtxt('%s%s' %(rootin,fiducial45[0]), unpack=True)
