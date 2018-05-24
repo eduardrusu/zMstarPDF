@@ -1,7 +1,6 @@
 # CE Rusu, Feb 13 2018
 # Combines the results produced by weightinguniversal_histograms_samples.py into a final text file with the final distributions and widths
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_finalcombine.py WFI2033 meds 5 -1.0 -1.0 global handpicked
-# At the moment the code only works for mag 23 (WFI2033)
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_finalcombine.py WFI2033 meds 5 -1.0 -1.0 global 23 handpicked
 # It can be used to compute not only standard deviation around the global mean ("global"), but around a given ("local") point as well
 
 import numpy as np
@@ -16,7 +15,8 @@ inner = str(sys.argv[3])
 zinf = str(sys.argv[4])
 zsup = str(sys.argv[5])
 local = str(sys.argv[6])
-try: handpicked = '_'+str(sys.argv[7])
+maglim = str(sys.argv[7])
+try: handpicked = '_'+str(sys.argv[8])
 except: handpicked = ''
 rootin = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 rootout = "/Users/cerusu/Dropbox/Davis_work/code/%s" % lens
@@ -24,14 +24,14 @@ rootout = "/Users/cerusu/Dropbox/Davis_work/code/%s" % lens
 # select the desired files
 # edit the conditions as desired, to restrict the included criteria:
 if handpicked == '':
-    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x)
+    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x) and (maglim in x)
          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
-    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x)
+    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and ('handpicked' not in x) and (maglim in x)
          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 else:
-    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
+    lst45 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('45arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x) and (maglim in x)
          and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] #  # CHOOSE WHAT YOU WANT HERE
-    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x)
+    lst120 = [x for x in os.listdir(rootin) if ('samples' in x) and ('.lst' in x) and ('%s_weightedcountshist_' %lens in x) and ('120arcsec' in x) and ('_%sinner' %inner in x) and ('%s' %mode in x) and ('%s' %zinf in x) and ('%s' %zsup in x) and (handpicked in x) and (maglim in x)
           and (('W1' in x) | ('W2' in x) | ('W3' in x) | ('W4' in x)) and (('50' in x) | ('75' in x)) and (('bpz' in x) | ('eazy' in x)) and (('IRAC' in x) | ('noIRAC' in x)) and (('iconv' in x) | ('iunconv' in x)) ] # and ('%s' %handpicked in x) # CHOOSE WHAT YOU WANT HERE
 
 # read the samples and classify by photoz, type, and detection
@@ -225,7 +225,7 @@ eazy_iconv_irac = eazy_iconv_irac45
 eazy_iconv_noirac = eazy_iconv_noirac45
 eazy_iunconv_irac = eazy_iunconv_irac45
 eazy_iunconv_noirac = eazy_iunconv_noirac45
-plot('23','45')
+plot(maglim,'45')
 bpz_iconv_irac = bpz_iconv_irac120
 bpz_iconv_noirac = bpz_iconv_noirac120
 bpz_iunconv_irac = bpz_iunconv_irac120
@@ -234,12 +234,12 @@ eazy_iconv_irac = eazy_iconv_irac120
 eazy_iconv_noirac = eazy_iconv_noirac120
 eazy_iunconv_irac = eazy_iunconv_irac120
 eazy_iunconv_noirac = eazy_iunconv_noirac120
-plot('23','120')
+plot(maglim,'120')
 
 # output the final summary file
 if local == 'global':
     f = open('%s/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,inner,handpicked,zinf,zsup),'w')
-    str = '# weight      45_23med    45_23inf  45_23sup 120_23med 120_23inf 120_23sup \n'
+    str = '# weight      45_%smed    45_%sinf  45_%ssup 120_%smed 120_%sinf 120_%ssup \n' %(maglim,maglim,maglim,maglim,maglim,maglim)
     str += 'gal           %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[1],percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[0],percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[2],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[1],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[0],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[2])
     str += 'z             %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[1],percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[0],percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[2],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[1],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[0],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[2])
     str += 'mass          %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(x45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[1],percentile(np.median(x45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[0],percentile(np.median(x45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[2],percentile(np.median(x120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[1],percentile(np.median(x120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[0],percentile(np.median(x120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[2])
@@ -263,8 +263,8 @@ if local == 'global':
 
 else:
     print "fiducial:"
-    fiducial45 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_45arcsec_%sinner_23_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)] # this will contain W1-W4 and 50/75; CHOOSE WHAT YOU WANT HERE
-    fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_23_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
+    fiducial45 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_45arcsec_%sinner_%s_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,maglim,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)] # this will contain W1-W4 and 50/75; CHOOSE WHAT YOU WANT HERE
+    fiducial120 = [x for x in os.listdir(rootin) if ('%s_weightedcountshist_120arcsec_%sinner_%s_%s_bpz_iunconv_IRAC%s_zgap%s_%s_10samples' % (lens,inner,maglim,mode,handpicked,zinf,zsup) in x) and ('.lst' in x)]
     for i in range(len(fiducial45)):
         print fiducial45[i]
         if i == 0: f45 = np.loadtxt('%s%s' %(rootin,fiducial45[0]), unpack=True)
@@ -273,8 +273,8 @@ else:
         if i == 0: f120 = np.loadtxt('%s%s' %(rootin,fiducial120[0]), unpack=True)
         else: f120 = np.c_[f120,np.loadtxt('%s%s' %(rootin,fiducial120[i]), unpack=True)]
 
-    f = open('%s/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,inner,handpicked,zinf,zsup),'w')
-    str = '# weight      45_23med    45_23inf  45_23sup 120_23med 120_23inf 120_23sup \n'
+    f = open('%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,maglim,inner,handpicked,zinf,zsup),'w')
+    str = '# weight      45_%smed    45_%sinf  45_%ssup 120_%smed 120_%sinf 120_%ssup \n' %(maglim,maglim,maglim,maglim,maglim,maglim)
     str += 'gal           %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(f45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[1],percentile(np.median(f45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[0],percentile(np.median(f45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[2],percentile(np.median(f120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[1],percentile(np.median(f120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[0],percentile(np.median(f120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[2])
     str += 'z             %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(f45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[1],percentile(np.median(f45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[0],percentile(np.median(f45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[2],percentile(np.median(f120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[1],percentile(np.median(f120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[0],percentile(np.median(f120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[2])
     str += 'mass          %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(f45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[1],percentile(np.median(f45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[0],percentile(np.median(f45[2]),np.percentile(x45[2], 16),np.percentile(x45[2], 84))[2],percentile(np.median(f120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[1],percentile(np.median(f120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[0],percentile(np.median(f120[2]),np.percentile(x120[2], 16),np.percentile(x120[2], 84))[2])
