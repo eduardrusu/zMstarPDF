@@ -131,13 +131,13 @@ def plot(mag,radius):
         if i == 16: ax=plt.subplot(5,4,18)
         if i == 17: ax=plt.subplot(5,4,19)
         
-        z=np.linspace(0,1,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[2]
-        plt.plot(w,z,'b-',label='bpz_iconv_irac', linewidth=linewidth)
-        plt.plot(winf,z,'b--',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,'b--',label=None, linewidth=linewidth)
+        #z=np.linspace(0,1,1000)
+        #w=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(bpz_iconv_irac[i]),np.percentile(bpz_iconv_irac[i], 16),np.percentile(bpz_iconv_irac[i], 84))[2]
+        #plt.plot(w,z,'b-',label='bpz_iconv_irac', linewidth=linewidth)
+        #plt.plot(winf,z,'b--',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,'b--',label=None, linewidth=linewidth)
         z=np.linspace(1,2,1000)
         w=np.ones(1000) * percentile(np.median(bpz_iconv_noirac[i]),np.percentile(bpz_iconv_noirac[i], 16),np.percentile(bpz_iconv_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_iconv_noirac[i]),np.percentile(bpz_iconv_noirac[i], 16),np.percentile(bpz_iconv_noirac[i], 84))[0]
@@ -145,13 +145,13 @@ def plot(mag,radius):
         plt.plot(w,z,'g-',label='bpz_iconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,'g--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'g--',label=None, linewidth=linewidth)
-        z=np.linspace(2,3,1000)
-        w=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[2]
-        plt.plot(w,z,'k-',label='bpz_iunconv_irac', linewidth=linewidth)
-        plt.plot(winf,z,'k--',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,'k--',label=None, linewidth=linewidth)
+        #z=np.linspace(2,3,1000)
+        #w=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(bpz_iunconv_irac[i]),np.percentile(bpz_iunconv_irac[i], 16),np.percentile(bpz_iunconv_irac[i], 84))[2]
+        #plt.plot(w,z,'k-',label='bpz_iunconv_irac', linewidth=linewidth)
+        #plt.plot(winf,z,'k--',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,'k--',label=None, linewidth=linewidth)
         z=np.linspace(3,4,1000)
         w=np.ones(1000) * percentile(np.median(bpz_iunconv_noirac[i]),np.percentile(bpz_iunconv_noirac[i], 16),np.percentile(bpz_iunconv_noirac[i], 84))[1]
         winf=np.ones(1000) * percentile(np.median(bpz_iunconv_noirac[i]),np.percentile(bpz_iunconv_noirac[i], 16),np.percentile(bpz_iunconv_noirac[i], 84))[0]
@@ -159,34 +159,34 @@ def plot(mag,radius):
         plt.plot(w,z,'r-',label='bpz_iunconv_noirac', linewidth=linewidth)
         plt.plot(winf,z,'r--',label=None, linewidth=linewidth)
         plt.plot(wsup,z,'r--',label=None, linewidth=linewidth)
-        z=np.linspace(4,5,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[2]
-        plt.plot(w,z,'m-',label='eazy_iconv_irac', linewidth=linewidth)
-        plt.plot(winf,z,'m--',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,'m--',label=None, linewidth=linewidth)
-        z=np.linspace(5,6,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[2]
-        plt.plot(w,z,'y-',label='eazy_iconv_noirac', linewidth=linewidth)
-        plt.plot(winf,z,'y--',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,'y--',label=None, linewidth=linewidth)
-        z=np.linspace(6,7,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[2]
-        plt.plot(w,z,'c-',label='eazy_iunconv_irac', linewidth=linewidth)
-        plt.plot(winf,z,'c--',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,'c--',label=None, linewidth=linewidth)
-        z=np.linspace(7,8,1000)
-        w=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[1]
-        winf=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[0]
-        wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[2]
-        plt.plot(w,z,linestyle='-',color='grey',label='eazy_iunconv_noirac', linewidth=linewidth)
-        plt.plot(winf,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
-        plt.plot(wsup,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
+        #z=np.linspace(4,5,1000)
+        #w=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(eazy_iconv_irac[i]),np.percentile(eazy_iconv_irac[i], 16),np.percentile(eazy_iconv_irac[i], 84))[2]
+        #plt.plot(w,z,'m-',label='eazy_iconv_irac', linewidth=linewidth)
+        #plt.plot(winf,z,'m--',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,'m--',label=None, linewidth=linewidth)
+        #z=np.linspace(5,6,1000)
+        #w=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(eazy_iconv_noirac[i]),np.percentile(eazy_iconv_noirac[i], 16),np.percentile(eazy_iconv_noirac[i], 84))[2]
+        #plt.plot(w,z,'y-',label='eazy_iconv_noirac', linewidth=linewidth)
+        #plt.plot(winf,z,'y--',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,'y--',label=None, linewidth=linewidth)
+        #z=np.linspace(6,7,1000)
+        #w=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_irac[i]),np.percentile(eazy_iunconv_irac[i], 16),np.percentile(eazy_iunconv_irac[i], 84))[2]
+        #plt.plot(w,z,'c-',label='eazy_iunconv_irac', linewidth=linewidth)
+        #plt.plot(winf,z,'c--',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,'c--',label=None, linewidth=linewidth)
+        #z=np.linspace(7,8,1000)
+        #w=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[1]
+        #winf=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[0]
+        #wsup=np.ones(1000) * percentile(np.median(eazy_iunconv_noirac[i]),np.percentile(eazy_iunconv_noirac[i], 16),np.percentile(eazy_iunconv_noirac[i], 84))[2]
+        #plt.plot(w,z,linestyle='-',color='grey',label='eazy_iunconv_noirac', linewidth=linewidth)
+        #plt.plot(winf,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
+        #plt.plot(wsup,z,linestyle='--',color='grey',label=None, linewidth=linewidth)
         #plt.xlim(0, 2.5)
         #plt.ylim(0, vertlimit)
         
