@@ -56,7 +56,7 @@ rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/WFI2033/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/%s/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -87,6 +87,10 @@ if lens == "WFI2033":
         constrwidth_gamma_sup = 0.105
     filters = "ugrizJHK"
     print 'shear: ',constr_gamma
+if lens == "J1206":
+    constr_gamma = 0.04
+    constrwidth_gamma_inf = 0.03
+    constrwidth_gamma_sup = 0.05
 
 # declare which weights to read
 if mag == "23" and radius == "45":
