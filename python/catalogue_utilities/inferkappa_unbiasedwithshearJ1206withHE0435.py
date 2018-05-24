@@ -47,16 +47,18 @@ if conjoined == 4:
 
 print "conjoined:", conjoined
 #root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+root = "/lfs08/rusucs/HE0435/"
 #root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
-root = "/Volumes/LaCieSubaru/MSweights/"
+#root = "/Volumes/LaCieSubaru/MSweights/"
 #rootcode = "/mnt/scratch/rusucs/code/"
-rootcode = "/Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/"
-#rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-rootout = "/Volumes/LaCieSubaru/kapparesults/"
+rootcode = "/lfs08/rusucs/code/"
+#rootcode = "/Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/"
+rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
+#rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-#weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+#weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -88,54 +90,72 @@ if lens == "WFI2033":
     filters = "ugrizJHK"
     print 'shear: ',constr_gamma
 if lens == "J1206":
-    filters = "ugrizJHK"
     constr_gamma = 0.04
     constrwidth_gamma_inf = 0.03
     constrwidth_gamma_sup = 0.05
 
 # declare which weights to read
-if mag == "23" and radius == "45":
+if radius == "45":
     measured_index = 0 # specifies the column index in weightsfile
     measured_index_inf = 1
     measured_index_sup = 2
-if mag == "23" and radius == "120":
+if radius == "120":
     measured_index = 3
     measured_index_inf = 4
     measured_index_sup = 5
 
-def declareweight(weightin):
-    if weightin == "gal": weight_index = 4
-    if weightin == "z": weight_index = 5
-    if weightin == "mass": weight_index = 6
-    if weightin == "mass2": weight_index = 7
-    if weightin == "mass3": weight_index = 8
-    if weightin == "oneoverr": weight_index = 9
-    if weightin == "zoverr": weight_index = 10
-    if weightin == "massoverr": weight_index = 11
-    if weightin == "mass2overr": weight_index = 12
-    if weightin == "mass3overr": weight_index = 13
-    if weightin == "mass2rms": weight_index = 14
-    if weightin == "mass3rms": weight_index = 15
-    if weightin == "mass2overrrms": weight_index = 16
-    if weightin == "mass3overrrms": weight_index = 17
-    if weightin == "flexion": weight_index = 18
-    if weightin == "tidal": weight_index = 19
-    if weightin == "SIS": weight_index = 20
-    if weightin == "SIShalo": weight_index = 21
-    if weightin == "gamma": weight_index = None
-    return weight_index
+if mag == '24':
+    def declareweight(weightin):
+        if weightin == "gal": weight_index = 4
+        if weightin == "z": weight_index = 6
+        if weightin == "mass": weight_index = 8
+        if weightin == "mass2": weight_index = 10
+        if weightin == "mass3": weight_index = 12
+        if weightin == "oneoverr": weight_index = 14
+        if weightin == "zoverr": weight_index = 16
+        if weightin == "massoverr": weight_index = 18
+        if weightin == "mass2overr": weight_index = 20
+        if weightin == "mass3overr": weight_index = 22
+        if weightin == "mass2rms": weight_index = 24
+        if weightin == "mass3rms": weight_index = 26
+        if weightin == "mass2overrrms": weight_index = 28
+        if weightin == "mass3overrrms": weight_index = 30
+        if weightin == "flexion": weight_index = 32
+        if weightin == "tidal": weight_index = 34
+        if weightin == "SIS": weight_index = 36
+        if weightin == "SIShalo": weight_index = 38
+        if weightin == "gamma": weight_index = None
+        return weight_index
+if mag == '23':
+    def declareweight(weightin):
+        if weightin == "gal": weight_index = 5
+        if weightin == "z": weight_index = 7
+        if weightin == "mass": weight_index = 9
+        if weightin == "mass2": weight_index = 11
+        if weightin == "mass3": weight_index = 13
+        if weightin == "oneoverr": weight_index = 15
+        if weightin == "zoverr": weight_index = 17
+        if weightin == "massoverr": weight_index = 19
+        if weightin == "mass2overr": weight_index = 21
+        if weightin == "mass3overr": weight_index = 23
+        if weightin == "mass2rms": weight_index = 25
+        if weightin == "mass3rms": weight_index = 27
+        if weightin == "mass2overrrms": weight_index = 29
+        if weightin == "mass3overrrms": weight_index = 31
+        if weightin == "flexion": weight_index = 33
+        if weightin == "tidal": weight_index = 35
+        if weightin == "SIS": weight_index = 37
+        if weightin == "SIShalo": weight_index = 39
+        if weightin == "gamma": weight_index = None
+        return weight_index
 
-if mag == "23":
-    weight1_index = declareweight(weightin1)
+weight1_index = declareweight(weightin1)
 if conjoined >= 2:
-    if mag == "23":
-        weight2_index = declareweight(weightin2)
+    weight2_index = declareweight(weightin2)
     if conjoined >= 3:
-        if mag == "23":
-            weight3_index = declareweight(weightin3)
+        weight3_index = declareweight(weightin3)
         if conjoined == 4:
-            if mag == "23":
-                weight4_index = declareweight(weightin4)
+            weight4_index = declareweight(weightin4)
 
 # read weight constraints
 constr_gal_meds = weightsfile[measured_index][0]
@@ -261,13 +281,13 @@ if conjoined == 1:
     for j in range(8):
       for i in range(8):
         if weightin1 != "gamma":
-            weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index], unpack=True)
+            weight1_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=[weight1_index], unpack=True)
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3], unpack=True)
+            weight1_1_,weight1_2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=[2,3], unpack=True)
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
@@ -291,10 +311,10 @@ if conjoined == 1:
     for j in range(8):
       for i in range(8):
         if weightin1 != "gamma":
-            kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index), unpack=True)
+            kappa_, weight1_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index), unpack=True)
             weight1_ = weight1_ / med_weight1
         else:
-            kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,2,3), unpack=True)
+            kappa_, gamma1_,gamma2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -318,7 +338,7 @@ if conjoined == 2:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
+            weight1_,weight2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(weight1_index,weight2_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -326,7 +346,7 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,1,2], unpack=True)
+            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=[weight1_index,1,2], unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -356,11 +376,11 @@ if conjoined == 2:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index), unpack=True)
+            kappa_, weight1_,weight2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,weight2_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
         else:
-            kappa_, weight1_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,2,3), unpack=True)
+            kappa_, weight1_,gamma1_,gamma2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -387,8 +407,6 @@ if conjoined == 2:
             weight2 = np.append(weight2,weight2_)
         print j,i
 
-lens='WFI2033'
-
 if conjoined == 3:
     med1 = np.zeros(8)
     med2 = np.zeros(8)
@@ -396,7 +414,7 @@ if conjoined == 3:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
+            weight1_,weight2_,weight3_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -406,7 +424,7 @@ if conjoined == 3:
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(weight1_index,1,2,weight3_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -443,12 +461,12 @@ if conjoined == 3:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index), unpack=True)
+            kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,weight2_index,weight3_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
         else:
-            kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight3_index,2,3), unpack=True)
+            kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,weight3_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -494,7 +512,7 @@ if conjoined == 4:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -506,7 +524,7 @@ if conjoined == 4:
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriz_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -550,13 +568,13 @@ if conjoined == 4:
     for j in range(8):
       for i in range(8):
         if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         else:
-            kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
+            kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobetaave3435NEWMEASUREDmedinject_ugriJHK_HE0435_GGL_los_8_%s_%s_%s.cat" % (root,str(j),str(i),radius), usecols=(1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
