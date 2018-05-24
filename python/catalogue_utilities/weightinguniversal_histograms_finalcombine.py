@@ -238,7 +238,7 @@ plot(maglim,'120')
 
 # output the final summary file
 if local == 'global':
-    ff = open('%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,maglim,inner,handpicked,zinf,zsup),'w')
+    f = open('%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(rootout,lens,mode,maglim,inner,handpicked,zinf,zsup),'w')
     str = '# weight      45_%smed    45_%sinf  45_%ssup 120_%smed 120_%sinf 120_%ssup \n' %(maglim,maglim,maglim,maglim,maglim,maglim)
     str += 'gal           %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[1],percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[0],percentile(np.median(x45[0]),np.percentile(x45[0], 16),np.percentile(x45[0], 84))[2],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[1],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[0],percentile(np.median(x120[0]),np.percentile(x120[0], 16),np.percentile(x120[0], 84))[2])
     str += 'z             %.2f %.2f %.2f %.2f %.2f %.2f \n' % (percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[1],percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[0],percentile(np.median(x45[1]),np.percentile(x45[1], 16),np.percentile(x45[1], 84))[2],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[1],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[0],percentile(np.median(x120[1]),np.percentile(x120[1], 16),np.percentile(x120[1], 84))[2])
