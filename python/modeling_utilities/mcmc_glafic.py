@@ -1,38 +1,29 @@
-# Given the best-fit input file from hostlens, run 10 mcmc chains, combine them (accounting for burn-in) and plot the histogram with the 16th and 84th percentiles, using the corner package. It also computes the R_hat convergence diagnostic.
+# Given the best-fit input file from glafic, run 10 mcmc chains, combine them (accounting for burn-in) and plot the histogram with the 16th and 84th percentiles, using the corner package. It also computes the R_hat convergence diagnostic.
 
 import sys
 import os
 import numpy as np
 import corner
 
-file = "ylens_out23_file.input"
-length = 1000000
-for i in range(0): #10
-    os.system("hostlens %s" % file) # since it takes a few runs to fully converge
+file = "point1pertSIEgamma.input"
+length = 400000
 
 for i in range(10): #10
-    os.system("cp %s %s" % (file,file[:-10] + str(i+1) + "_file.input"))
-    with open(file[:-10] + str(i+1) + "_file.input", 'r') as f:
-        hostlens = f.readlines()
-    hostlens[5 - 1] = "prefix        %s" % file[:-10] + str(i+1) + "\n"
-    hostlens[17 - 1] = "ran_seed      %s" % str(i) + "\n"
-    hostlens[20 - 1] = "do_optimize   0 \n"
-    hostlens[21 - 1] = "dump_psf      0 \n"
-    hostlens[22 - 1] = "dump_model    0 \n"
-    hostlens[23 - 1] = "dump_modelori 0 \n"
-    hostlens[24 - 1] = "dump_subtract 0 \n"
-    hostlens[25 - 1] = "dump_infile   0 \n"
-    hostlens[26 - 1] = "dump_lenseq   0 \n"
-    hostlens[27 - 1] = "do_mcmc       %s" % str(length) + "\n"
-    with open(file[:-10] + str(i+1) + "_file.input", 'w') as f:
-        f.writelines(hostlens)
+    os.system("cp %s %s" % (file,file[:-6] + str(i+1) + ".input"))
+    with open(file[:-6] + str(i+1) + ".input", 'r') as f:
+        glafic = f.readlines()
+    glafic[10 - 1] = "prefix        %s" % file[:-6] + str(i+1) + "\n"
+    glafic[20 - 1] = "ran_seed      -%s" % str(i+1) + "\n"
+    glafic[55 - 1] = "mcmc       %s" % str(length) + "\n"
+    with open(file[:-6] + str(i+1) + ".input", 'w') as f:
+        f.writelines(glafic)
         f.close()
 
-#os.system("hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s & hostlens %s" % (file[:-10] + "1_file.input",file[:-10] + "2_file.input",file[:-10] + "3_file.input",file[:-10] + "4_file.input",file[:-10] + "5_file.input",file[:-10] + "6_file.input",file[:-10] + "7_file.input",file[:-10] + "8_file.input",file[:-10] + "9_file.input",file[:-10] + "10_file.input"))
+os.system("glafic %s & glafic %s & glafic %s & glafic %s & glafic %s & glafic %s & glafic %s & glafic %s & glafic %s & glafic %s" % (file[:-6] + "1.input",file[:-6] + "2.input",file[:-6] + "3.input",file[:-6] + "4.input",file[:-6] + "5.input",file[:-6] + "6.input",file[:-6] + "7.input",file[:-6] + "8.input",file[:-6] + "9.input",file[:-6] + "10.input"))
 
 for i in range(10):#10
-    mcmc = np.loadtxt(file[:-10] + str(i+1) + "_mcmc.dat",unpack=True)
-    mcmci = mcmc[1:,int(np.shape(mcmc)[1]/5):np.shape(mcmc)[1]] # eliminate the first column, containing chi^2, as well as the first 20% of the chains
+    mcmc = np.loadtxt(file[:-6] + str(i+1) + "_mcmc.dat",unpack=True)
+    mcmci = mcmc[1:,int(np.shape(mcmc)[1]/4):np.shape(mcmc)[1]] # eliminate the first column, containing chi^2, as well as the first 25% of the chains
     if i == 0: mcmcfinal = mcmci
     else: mcmcfinal = np.append(mcmcfinal,mcmci, axis = 1)
 
@@ -68,7 +59,7 @@ def R_hat(samples): # https://groups.google.com/forum/#!topic/hddm-users/qWzCWTz
     R_hat = np.sqrt(Var_hat / W)
     return R_hat
 
-minsize = np.min([np.shape(mcmc0[i]),np.shape(mcmc1[i]),np.shape(mcmc2[i]),np.shape(mcmc3[i]),np.shape(mcmc4[i]),np.shape(mcmc5[i]),np.shape(mcmc6[i]),np.shape(mcmc7[i]),np.shape(mcmc8[i]),np.shape(mcmc9[i])])
+minsize = np.min([np.shape(mcmc0)[1],np.shape(mcmc1)[1],np.shape(mcmc2)[1],np.shape(mcmc3)[1],np.shape(mcmc4)[1],np.shape(mcmc5)[1],np.shape(mcmc6)[1],np.shape(mcmc7)[1],np.shape(mcmc8)[1],np.shape(mcmc9)[1]])
 for i in range(np.shape(mcmc)[0] - 1): # added -1
     samples = np.vstack((mcmc0[i][:minsize],mcmc1[i][:minsize],mcmc2[i][:minsize],mcmc3[i][:minsize],mcmc4[i][:minsize],mcmc5[i][:minsize],mcmc6[i][:minsize],mcmc7[i][:minsize],mcmc8[i][:minsize],mcmc9[i][:minsize]))
     print "[%d] R_hat = " %(i+1), R_hat(samples) # added +1
