@@ -5,6 +5,7 @@ import os
 import numpy as np
 import corner
 
+img = 4
 fileorig = "pointSIEgamma.input"
 fileoutorig = "pointSIEgamma_einstmagniftime_out_.dat"
 file = "terminal.dat"
@@ -12,7 +13,9 @@ os.system("grep \"M_Sun/h\" %s > %s" % (file,fileoutorig[:-4]+"einst.dat"))
 os.system("paste %s %s > %s" % (fileoutorig,fileoutorig[:-4]+"einst.dat",fileoutorig[:-5]+".dat"))
 os.system("rm %s %s %s" % (fileoutorig,fileoutorig[:-4]+"einst.dat",file))
 
-mcmc = np.loadtxt(fileoutorig[:-5]+".dat",usecols=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,23])
+mcmc = np.loadtxt(fileoutorig[:-5]+".dat", usecols=[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,26,0,1,2])
+mcmc = mcmc[mcmc[:,17]==img]
+mcmc = np.delete(mcmc,17,1)
 mcmcfinal = np.copy(mcmc)
 
 # make sure the order of images is correct:
@@ -59,9 +62,9 @@ for i in range(np.shape(mcmc)[0]):
             mcmcfinal[i][12] = mcmcfinal[i][8]; mcmcfinal[i][13] = mcmcfinal[i][9]; mcmcfinal[i][14] = mcmcfinal[i][10]; mcmcfinal[i][15] = mcmcfinal[i][11]
             mcmcfinal[i][8] = mcmc[i][12]; mcmcfinal[i][9] = mcmc[i][13]; mcmcfinal[i][10] = mcmc[i][14]; mcmcfinal[i][11] = mcmc[i][15]
 
-np.savetxt('%s' % (fileoutorig[:-4] + "mcmc.dat"),mcmcfinal,fmt="%.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f")
+np.savetxt('%s' % (fileoutorig[:-4] + "mcmc.dat"),mcmcfinal,fmt="%.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f")
 os.system("rm %s" % (fileoutorig[:-5]+".dat"))
-mcmc = np.loadtxt(fileoutorig[:-4] + "mcmc.dat",usecols=[2,3,6,7,10,11,14,15,16])
+mcmc = np.loadtxt(fileoutorig[:-4] + "mcmc.dat",usecols=[2,3,6,7,10,11,14,15,16,17,18])
 
 # now remove the column with no dynamic range (time delay = 0 for the reference image)
 mcmcfinal = np.delete(mcmc,1,1)
