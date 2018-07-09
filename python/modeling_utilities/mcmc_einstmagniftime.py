@@ -9,7 +9,7 @@ import corner
 file = "pointSIEgamma.input"
 fileout = "out_SIEgammafield_einstmagniftime_point.dat"
 chains = 10
-length = 100
+length = 10000
 z_s = 2.517
 img = 4
 
@@ -27,7 +27,7 @@ for i in range(length):
         os.system("cp %s %s" % (file,file[:-6] + "_einstmagniftime.input"))
         with open(file[:-6] + "_einstmagniftime.input", 'r') as f:
             glafic = f.readlines()
-        glafic[10 - 1] = "prefix      out_SIEgammafield_einstmagniftime \n"
+        glafic[10 - 1] = "prefix      %s \n" % (fileout[:-10])
         glafic[28 - 1] = "lens   sie      %s  %s  %s  %s  %s  0.000000e+00  0.000000e+00 \n" % (mcmcfinal[:,interval * i][0],mcmcfinal[:,interval * i][1],mcmcfinal[:,interval * i][2],mcmcfinal[:,interval * i][3],mcmcfinal[:,interval * i][4])
         glafic[29 - 1] = "lens   pert     %s  %s  %s  %s  %s  0.000000e+00  0.000000e+00 \n" % (z_s,mcmcfinal[:,interval * i][5],mcmcfinal[:,interval * i][6],mcmcfinal[:,interval * i][7],mcmcfinal[:,interval * i][8])
         glafic[21 - 1] = "chi2_checknimg 1 \n"
