@@ -41,5 +41,5 @@ for i in range(length):
         x = np.loadtxt(fileout)
         if x[0][0] == img:
             with open(file[:-6] + "_einstmagniftime_out_.dat", 'a') as f:
-                f.write("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s \n" % (x[1][0],x[1][1],x[1][2],x[1][3],x[2][0],x[2][1],x[2][2],x[2][3],x[3][0],x[3][1],x[3][2],x[3][3],x[4][0],x[4][1],x[4][2],x[4][3]))
+                f.write("%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s \n" % (x[0][0],x[0][2],x[0][3],x[1][0],x[1][1],x[1][2],x[1][3],x[2][0],x[2][1],x[2][2],x[2][3],x[3][0],x[3][1],x[3][2],x[3][3],x[4][0],x[4][1],x[4][2],x[4][3]))
                 f.close()
