@@ -9,8 +9,8 @@ filters = "griK"
 rootin = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/"
 rootout = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/%s/" % lens
 filein = str(sys.argv[1])
-fileout_ugriz = str(sys.argv[1])[:-11] + "_ugriz.images.txt"
-fileout_ugrizJHK = str(sys.argv[1])[:-11] + "_%s_%s.images.txt" % (filters,lens)
+fileout_ugriz = rootout+str(sys.argv[1])[:-11] + "_ugriz.images.txt"
+fileout_ugrizJHK = rootout+str(sys.argv[1])[:-11] + "_%s_%s.images.txt" % (filters,lens)
 
 id = 0
 zspec = 5
@@ -181,7 +181,8 @@ dataout[i_o] = np.copy(data[i])
 dataout[K_o] = np.copy(data[K])
 
 ''' Sampling the photometry by assuming error bars from the observations. '''
-# ugriJHK (WFI2033-like)
+# ugriJHK
+# WFI2033
 #dataout[uerr_o][data[u]<20]                        = positive(np.random.normal(0.01, 0.006, len(data[u][data[u]<20])))
 #dataout[uerr_o][(data[u]>=20) & (data[u]<20.5)]    = positive(np.random.normal(0.02, 0.009, len(data[u][(data[u]>=20) & (data[u]<20.5)])))
 #dataout[uerr_o][(data[u]>=20.5) & (data[u]<21)]    = positive(np.random.normal(0.03, 0.008, len(data[u][(data[u]>=20.5) & (data[u]<21)])))
@@ -200,50 +201,103 @@ dataout[K_o] = np.copy(data[K])
 #dataout[uerr_o][(data[u]>=24.75) & (data[u]<25)]   = positive(np.random.normal(0.26, 0.038, len(data[u][(data[u]>=24.75) & (data[u]<25)])))
 #dataout[uerr_o][(data[u]>=25) & (data[u]<25.25)]   = positive(np.random.normal(0.32, 0.032, len(data[u][(data[u]>=25) & (data[u]<25.25)])))
 #dataout[uerr_o][data[u]>=25.25]                    = positive(np.random.normal(0.36, 0.039, len(data[u][data[u]>=25.25])))
+# WFI2033
+#dataout[gerr_o][data[g]<20]                        = positive(np.random.normal(0.005,0.004, len(data[g][data[g]<20])))
+#dataout[gerr_o][(data[g]>=20) & (data[g]<21)]      = positive(np.random.normal(0.01, 0.002, len(data[g][(data[g]>=20) & (data[g]<21)])))
+#dataout[gerr_o][(data[g]>=21) & (data[g]<21.5)]    = positive(np.random.normal(0.02, 0.011, len(data[g][(data[g]>=21) & (data[g]<21.5)])))
+#dataout[gerr_o][(data[g]>=21.5) & (data[g]<22)]    = positive(np.random.normal(0.03, 0.007, len(data[g][(data[g]>=21.5) & (data[g]<22)])))
+#dataout[gerr_o][(data[g]>=22) & (data[g]<22.5)]    = positive(np.random.normal(0.04, 0.010, len(data[g][(data[g]>=22) & (data[g]<22.5)])))
+#dataout[gerr_o][(data[g]>=22.5) & (data[g]<22.75)] = positive(np.random.normal(0.05, 0.007, len(data[g][(data[g]>=22.5) & (data[g]<22.75)])))
+#dataout[gerr_o][(data[g]>=22.75) & (data[g]<23)]   = positive(np.random.normal(0.07, 0.013, len(data[g][(data[g]>=22.75) & (data[g]<23)])))
+#dataout[gerr_o][(data[g]>=23) & (data[g]<23.25)]   = positive(np.random.normal(0.08, 0.019, len(data[g][(data[g]>=23) & (data[g]<23.25)])))
+#dataout[gerr_o][(data[g]>=23.25) & (data[g]<23.5)] = positive(np.random.normal(0.09, 0.024, len(data[g][(data[g]>=23.25) & (data[g]<23.5)])))
+#dataout[gerr_o][(data[g]>=23.5) & (data[g]<23.75)] = positive(np.random.normal(0.12, 0.032, len(data[g][(data[g]>=23.5) & (data[g]<23.75)])))
+#dataout[gerr_o][(data[g]>=23.75) & (data[g]<24)]   = positive(np.random.normal(0.14, 0.026, len(data[g][(data[g]>=23.75) & (data[g]<24)])))
+#dataout[gerr_o][(data[g]>=24) & (data[g]<24.25)]   = positive(np.random.normal(0.18, 0.040, len(data[g][(data[g]>=24) & (data[g]<24.25)])))
+#dataout[gerr_o][(data[g]>=24.25) & (data[g]<24.5)] = positive(np.random.normal(0.22, 0.056, len(data[g][(data[g]>=24.25) & (data[g]<24.5)])))
+#dataout[gerr_o][(data[g]>=24.5) & (data[g]<24.75)] = positive(np.random.normal(0.25, 0.053, len(data[g][(data[g]>=24.5) & (data[g]<24.75)])))
+#dataout[gerr_o][data[g]>=24.75]                    = positive(np.random.normal(0.29, 0.062, len(data[g][data[g]>=24.75])))
 
-dataout[gerr_o][data[g]<20]                        = positive(np.random.normal(0.005,0.004, len(data[g][data[g]<20])))
-dataout[gerr_o][(data[g]>=20) & (data[g]<21)]      = positive(np.random.normal(0.01, 0.002, len(data[g][(data[g]>=20) & (data[g]<21)])))
-dataout[gerr_o][(data[g]>=21) & (data[g]<21.5)]    = positive(np.random.normal(0.02, 0.011, len(data[g][(data[g]>=21) & (data[g]<21.5)])))
-dataout[gerr_o][(data[g]>=21.5) & (data[g]<22)]    = positive(np.random.normal(0.03, 0.007, len(data[g][(data[g]>=21.5) & (data[g]<22)])))
-dataout[gerr_o][(data[g]>=22) & (data[g]<22.5)]    = positive(np.random.normal(0.04, 0.010, len(data[g][(data[g]>=22) & (data[g]<22.5)])))
-dataout[gerr_o][(data[g]>=22.5) & (data[g]<22.75)] = positive(np.random.normal(0.05, 0.007, len(data[g][(data[g]>=22.5) & (data[g]<22.75)])))
-dataout[gerr_o][(data[g]>=22.75) & (data[g]<23)]   = positive(np.random.normal(0.07, 0.013, len(data[g][(data[g]>=22.75) & (data[g]<23)])))
-dataout[gerr_o][(data[g]>=23) & (data[g]<23.25)]   = positive(np.random.normal(0.08, 0.019, len(data[g][(data[g]>=23) & (data[g]<23.25)])))
-dataout[gerr_o][(data[g]>=23.25) & (data[g]<23.5)] = positive(np.random.normal(0.09, 0.024, len(data[g][(data[g]>=23.25) & (data[g]<23.5)])))
-dataout[gerr_o][(data[g]>=23.5) & (data[g]<23.75)] = positive(np.random.normal(0.12, 0.032, len(data[g][(data[g]>=23.5) & (data[g]<23.75)])))
-dataout[gerr_o][(data[g]>=23.75) & (data[g]<24)]   = positive(np.random.normal(0.14, 0.026, len(data[g][(data[g]>=23.75) & (data[g]<24)])))
-dataout[gerr_o][(data[g]>=24) & (data[g]<24.25)]   = positive(np.random.normal(0.18, 0.040, len(data[g][(data[g]>=24) & (data[g]<24.25)])))
-dataout[gerr_o][(data[g]>=24.25) & (data[g]<24.5)] = positive(np.random.normal(0.22, 0.056, len(data[g][(data[g]>=24.25) & (data[g]<24.5)])))
-dataout[gerr_o][(data[g]>=24.5) & (data[g]<24.75)] = positive(np.random.normal(0.25, 0.053, len(data[g][(data[g]>=24.5) & (data[g]<24.75)])))
-dataout[gerr_o][data[g]>=24.75]                    = positive(np.random.normal(0.29, 0.062, len(data[g][data[g]>=24.75])))
+# J1206
+dataout[gerr_o][data[g]<20]                        = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[g][data[g]<20])))
+dataout[gerr_o][(data[g]>=20) & (data[g]<21)]      = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.004, len(data[g][(data[g]>=20) & (data[g]<21)])))
+dataout[gerr_o][(data[g]>=21) & (data[g]<22)]      = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.004, len(data[g][(data[g]>=21) & (data[g]<22)])))
+dataout[gerr_o][(data[g]>=22) & (data[g]<22.5)]    = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.004, len(data[g][(data[g]>=22) & (data[g]<22.5)])))
+dataout[gerr_o][(data[g]>=22.5) & (data[g]<22.75)] = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.008, len(data[g][(data[g]>=22.5) & (data[g]<22.75)])))
+dataout[gerr_o][(data[g]>=22.75) & (data[g]<23)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.007, len(data[g][(data[g]>=22.75) & (data[g]<23)])))
+dataout[gerr_o][(data[g]>=23) & (data[g]<23.25)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.006, len(data[g][(data[g]>=23) & (data[g]<23.25)])))
+dataout[gerr_o][(data[g]>=23.25) & (data[g]<23.5)] = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.006, len(data[g][(data[g]>=23.25) & (data[g]<23.5)])))
+dataout[gerr_o][(data[g]>=23.5) & (data[g]<23.75)] = positive(np.random.normal(np.sqrt(0.04**2+0.025**2), 0.008, len(data[g][(data[g]>=23.5) & (data[g]<23.75)])))
+dataout[gerr_o][(data[g]>=23.75) & (data[g]<24)]   = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.011, len(data[g][(data[g]>=23.75) & (data[g]<24)])))
+dataout[gerr_o][(data[g]>=24) & (data[g]<24.25)]   = positive(np.random.normal(np.sqrt(0.05**2+0.025**2), 0.010, len(data[g][(data[g]>=24) & (data[g]<24.25)])))
+dataout[gerr_o][(data[g]>=24.25) & (data[g]<24.5)] = positive(np.random.normal(np.sqrt(0.06**2+0.025**2), 0.011, len(data[g][(data[g]>=24.25) & (data[g]<24.5)])))
+dataout[gerr_o][(data[g]>=24.5) & (data[g]<24.75)] = positive(np.random.normal(np.sqrt(0.06**2+0.025**2), 0.016, len(data[g][(data[g]>=24.5) & (data[g]<24.75)])))
+dataout[gerr_o][(data[g]>=24.75) & (data[g]<25)]   = positive(np.random.normal(np.sqrt(0.08**2+0.025**2), 0.014, len(data[g][(data[g]>=24.75) & (data[g]<25)])))
+dataout[gerr_o][(data[g]>=25) & (data[g]<25.25)]   = positive(np.random.normal(np.sqrt(0.09**2+0.025**2), 0.019, len(data[g][(data[g]>=25) & (data[g]<25.25)])))
+dataout[gerr_o][(data[g]>=25.25) & (data[g]<25.5)] = positive(np.random.normal(np.sqrt(0.09**2+0.025**2), 0.022, len(data[g][(data[g]>=25.25) & (data[g]<25.5)])))
+dataout[gerr_o][(data[g]>=25.5) & (data[g]<26)]    = positive(np.random.normal(np.sqrt(0.11**2+0.025**2), 0.025, len(data[g][(data[g]>=25.5) & (data[g]<26)])))
+dataout[gerr_o][data[g]>=24.75]                    = positive(np.random.normal(np.sqrt(0.19**2+0.025**2), 0.020, len(data[g][data[g]>=24.75])))
 
-dataout[rerr_o][data[r]<20]                        = positive(np.random.normal(0.005,0.007, len(data[r][data[r]<20])))
-dataout[rerr_o][(data[r]>=20) & (data[r]<20.5)]    = positive(np.random.normal(0.01, 0.008, len(data[r][(data[r]>=20) & (data[r]<20.5)])))
-dataout[rerr_o][(data[r]>=20.5) & (data[r]<21)]    = positive(np.random.normal(0.02, 0.008, len(data[r][(data[r]>=20.5) & (data[r]<21)])))
-dataout[rerr_o][(data[r]>=21) & (data[r]<21.5)]    = positive(np.random.normal(0.03, 0.007, len(data[r][(data[r]>=21) & (data[r]<21.5)])))
-dataout[rerr_o][(data[r]>=21.5) & (data[r]<22)]    = positive(np.random.normal(0.03, 0.009, len(data[r][(data[r]>=21.5) & (data[r]<22)])))
-dataout[rerr_o][(data[r]>=22) & (data[r]<22.5)]    = positive(np.random.normal(0.05, 0.016, len(data[r][(data[r]>=22) & (data[r]<22.5)])))
-dataout[rerr_o][(data[r]>=22.5) & (data[r]<22.75)] = positive(np.random.normal(0.06, 0.009, len(data[r][(data[r]>=22.5) & (data[r]<22.75)])))
-dataout[rerr_o][(data[r]>=22.75) & (data[r]<23)]   = positive(np.random.normal(0.08, 0.016, len(data[r][(data[r]>=22.75) & (data[r]<23)])))
-dataout[rerr_o][(data[r]>=23) & (data[r]<23.25)]   = positive(np.random.normal(0.08, 0.019, len(data[r][(data[r]>=23) & (data[r]<23.25)])))
-dataout[rerr_o][(data[r]>=23.25) & (data[r]<23.5)] = positive(np.random.normal(0.10, 0.018, len(data[r][(data[r]>=23.25) & (data[r]<23.5)])))
-dataout[rerr_o][(data[r]>=23.5) & (data[r]<23.75)] = positive(np.random.normal(0.11, 0.018, len(data[r][(data[r]>=23.5) & (data[r]<23.75)])))
-dataout[rerr_o][(data[r]>=23.75) & (data[r]<24)]   = positive(np.random.normal(0.14, 0.021, len(data[r][(data[r]>=23.75) & (data[r]<24)])))
-dataout[rerr_o][(data[r]>=24) & (data[r]<24.25)]   = positive(np.random.normal(0.15, 0.020, len(data[r][(data[r]>=24) & (data[r]<24.25)])))
-dataout[rerr_o][data[r]>=24.25]                    = positive(np.random.normal(0.16, 0.026, len(data[r][data[r]>=24.25])))
+# WFI2033
+#dataout[rerr_o][data[r]<20]                        = positive(np.random.normal(0.005,0.007, len(data[r][data[r]<20])))
+#dataout[rerr_o][(data[r]>=20) & (data[r]<20.5)]    = positive(np.random.normal(0.01, 0.008, len(data[r][(data[r]>=20) & (data[r]<20.5)])))
+#dataout[rerr_o][(data[r]>=20.5) & (data[r]<21)]    = positive(np.random.normal(0.02, 0.008, len(data[r][(data[r]>=20.5) & (data[r]<21)])))
+#dataout[rerr_o][(data[r]>=21) & (data[r]<21.5)]    = positive(np.random.normal(0.03, 0.007, len(data[r][(data[r]>=21) & (data[r]<21.5)])))
+#dataout[rerr_o][(data[r]>=21.5) & (data[r]<22)]    = positive(np.random.normal(0.03, 0.009, len(data[r][(data[r]>=21.5) & (data[r]<22)])))
+#dataout[rerr_o][(data[r]>=22) & (data[r]<22.5)]    = positive(np.random.normal(0.05, 0.016, len(data[r][(data[r]>=22) & (data[r]<22.5)])))
+#dataout[rerr_o][(data[r]>=22.5) & (data[r]<22.75)] = positive(np.random.normal(0.06, 0.009, len(data[r][(data[r]>=22.5) & (data[r]<22.75)])))
+#dataout[rerr_o][(data[r]>=22.75) & (data[r]<23)]   = positive(np.random.normal(0.08, 0.016, len(data[r][(data[r]>=22.75) & (data[r]<23)])))
+#dataout[rerr_o][(data[r]>=23) & (data[r]<23.25)]   = positive(np.random.normal(0.08, 0.019, len(data[r][(data[r]>=23) & (data[r]<23.25)])))
+#dataout[rerr_o][(data[r]>=23.25) & (data[r]<23.5)] = positive(np.random.normal(0.10, 0.018, len(data[r][(data[r]>=23.25) & (data[r]<23.5)])))
+#dataout[rerr_o][(data[r]>=23.5) & (data[r]<23.75)] = positive(np.random.normal(0.11, 0.018, len(data[r][(data[r]>=23.5) & (data[r]<23.75)])))
+#dataout[rerr_o][(data[r]>=23.75) & (data[r]<24)]   = positive(np.random.normal(0.14, 0.021, len(data[r][(data[r]>=23.75) & (data[r]<24)])))
+#dataout[rerr_o][(data[r]>=24) & (data[r]<24.25)]   = positive(np.random.normal(0.15, 0.020, len(data[r][(data[r]>=24) & (data[r]<24.25)])))
+#dataout[rerr_o][data[r]>=24.25]                    = positive(np.random.normal(0.16, 0.026, len(data[r][data[r]>=24.25])))
 
-dataout[ierr_o][data[i]<19]                        = positive(np.random.normal(0.005,0.002, len(data[i][data[i]<19])))
-dataout[ierr_o][(data[i]>=19) & (data[i]<20)]      = positive(np.random.normal(0.01, 0.005, len(data[i][(data[i]>=19) & (data[i]<20)])))
-dataout[ierr_o][(data[i]>=20) & (data[i]<20.5)]    = positive(np.random.normal(0.02, 0.005, len(data[i][(data[i]>=20) & (data[i]<20.5)])))
-dataout[ierr_o][(data[i]>=20.5) & (data[i]<21)]    = positive(np.random.normal(0.03, 0.011, len(data[i][(data[i]>=20.5) & (data[i]<21)])))
-dataout[ierr_o][(data[i]>=21) & (data[i]<21.5)]    = positive(np.random.normal(0.04, 0.015, len(data[i][(data[i]>=21) & (data[i]<21.5)])))
-dataout[ierr_o][(data[i]>=21.5) & (data[i]<22)]    = positive(np.random.normal(0.07, 0.019, len(data[i][(data[i]>=21.5) & (data[i]<22)])))
-dataout[ierr_o][(data[i]>=22) & (data[i]<22.5)]    = positive(np.random.normal(0.10, 0.023, len(data[i][(data[i]>=22) & (data[i]<22.5)])))
-dataout[ierr_o][(data[i]>=22.5) & (data[i]<22.75)] = positive(np.random.normal(0.13, 0.034, len(data[i][(data[i]>=22.5) & (data[i]<22.75)])))
-dataout[ierr_o][(data[i]>=22.75) & (data[i]<23)]   = positive(np.random.normal(0.15, 0.038, len(data[i][(data[i]>=22.75) & (data[i]<23)])))
-dataout[ierr_o][(data[i]>=23) & (data[i]<23.25)]   = positive(np.random.normal(0.19, 0.039, len(data[i][(data[i]>=23) & (data[i]<23.25)])))
-dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0.23, 0.031, len(data[i][data[i]>=23.25])))
+# J1206
+dataout[rerr_o][data[r]<20]                        = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[r][data[r]<20])))
+dataout[rerr_o][(data[r]>=20) & (data[r]<21)]      = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[r][(data[r]>=20) & (data[r]<21)])))
+dataout[rerr_o][(data[r]>=21) & (data[r]<21.5)]    = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.003, len(data[r][(data[r]>=21) & (data[r]<21.5)])))
+dataout[rerr_o][(data[r]>=21.5) & (data[r]<22)]    = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.004, len(data[r][(data[r]>=21.5) & (data[r]<22)])))
+dataout[rerr_o][(data[r]>=22) & (data[r]<22.5)]    = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.008, len(data[r][(data[r]>=22) & (data[r]<22.5)])))
+dataout[rerr_o][(data[r]>=22.5) & (data[r]<22.75)] = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.005, len(data[r][(data[r]>=22.5) & (data[r]<22.75)])))
+dataout[rerr_o][(data[r]>=22.75) & (data[r]<23)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.006, len(data[r][(data[r]>=22.75) & (data[r]<23)])))
+dataout[rerr_o][(data[r]>=23) & (data[r]<23.25)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.007, len(data[r][(data[r]>=23) & (data[r]<23.25)])))
+dataout[rerr_o][(data[r]>=23.25) & (data[r]<23.5)] = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.008, len(data[r][(data[r]>=23.25) & (data[r]<23.5)])))
+dataout[rerr_o][(data[r]>=23.5) & (data[r]<23.75)] = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.010, len(data[r][(data[r]>=23.5) & (data[r]<23.75)])))
+dataout[rerr_o][(data[r]>=23.75) & (data[r]<24)]   = positive(np.random.normal(np.sqrt(0.04**2+0.025**2), 0.013, len(data[r][(data[r]>=23.75) & (data[r]<24)])))
+dataout[rerr_o][(data[r]>=24) & (data[r]<24.25)]   = positive(np.random.normal(np.sqrt(0.04**2+0.025**2), 0.011, len(data[r][(data[r]>=24) & (data[r]<24.25)])))
+dataout[rerr_o][(data[r]>=24.25) & (data[r]<24.5)] = positive(np.random.normal(np.sqrt(0.05**2+0.025**2), 0.017, len(data[r][(data[r]>=24.25) & (data[r]<24.5)])))
+dataout[rerr_o][(data[r]>=24.5) & (data[r]<24.75)] = positive(np.random.normal(np.sqrt(0.06**2+0.025**2), 0.020, len(data[r][(data[r]>=24.5) & (data[r]<24.75)])))
+dataout[rerr_o][(data[r]>=24.75) & (data[r]<25)]   = positive(np.random.normal(np.sqrt(0.08**2+0.025**2), 0.024, len(data[r][(data[r]>=24.75) & (data[r]<25)])))
+dataout[rerr_o][data[r]>=25]                       = positive(np.random.normal(np.sqrt(0.10**2+0.025**2), 0.027, len(data[r][data[r]>=25])))
 
+# WFI2033
+#dataout[ierr_o][data[i]<19]                        = positive(np.random.normal(0.005,0.002, len(data[i][data[i]<19])))
+#dataout[ierr_o][(data[i]>=19) & (data[i]<20)]      = positive(np.random.normal(0.01, 0.005, len(data[i][(data[i]>=19) & (data[i]<20)])))
+#dataout[ierr_o][(data[i]>=20) & (data[i]<20.5)]    = positive(np.random.normal(0.02, 0.005, len(data[i][(data[i]>=20) & (data[i]<20.5)])))
+#dataout[ierr_o][(data[i]>=20.5) & (data[i]<21)]    = positive(np.random.normal(0.03, 0.011, len(data[i][(data[i]>=20.5) & (data[i]<21)])))
+#dataout[ierr_o][(data[i]>=21) & (data[i]<21.5)]    = positive(np.random.normal(0.04, 0.015, len(data[i][(data[i]>=21) & (data[i]<21.5)])))
+#dataout[ierr_o][(data[i]>=21.5) & (data[i]<22)]    = positive(np.random.normal(0.07, 0.019, len(data[i][(data[i]>=21.5) & (data[i]<22)])))
+#dataout[ierr_o][(data[i]>=22) & (data[i]<22.5)]    = positive(np.random.normal(0.10, 0.023, len(data[i][(data[i]>=22) & (data[i]<22.5)])))
+#dataout[ierr_o][(data[i]>=22.5) & (data[i]<22.75)] = positive(np.random.normal(0.13, 0.034, len(data[i][(data[i]>=22.5) & (data[i]<22.75)])))
+#dataout[ierr_o][(data[i]>=22.75) & (data[i]<23)]   = positive(np.random.normal(0.15, 0.038, len(data[i][(data[i]>=22.75) & (data[i]<23)])))
+#dataout[ierr_o][(data[i]>=23) & (data[i]<23.25)]   = positive(np.random.normal(0.19, 0.039, len(data[i][(data[i]>=23) & (data[i]<23.25)])))
+#dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0.23, 0.031, len(data[i][data[i]>=23.25])))
+
+# J1206
+dataout[ierr_o][data[i]<20]                        = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[i][data[i]<19])))
+dataout[ierr_o][(data[i]>=20) & (data[i]<21)]      = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[i][(data[i]>=20) & (data[i]<21)])))
+dataout[ierr_o][(data[i]>=21) & (data[i]<22)]      = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.003, len(data[i][(data[i]>=21) & (data[i]<22)])))
+dataout[ierr_o][(data[i]>=22) & (data[i]<22.5)]    = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.006, len(data[i][(data[i]>=22) & (data[i]<22.5)])))
+dataout[ierr_o][(data[i]>=22.5) & (data[i]<22.75)] = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.007, len(data[i][(data[i]>=22.5) & (data[i]<22.75)])))
+dataout[ierr_o][(data[i]>=22.75) & (data[i]<23)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.008, len(data[i][(data[i]>=22.75) & (data[i]<23)])))
+dataout[ierr_o][(data[i]>=23) & (data[i]<23.25)]   = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.005, len(data[i][(data[i]>=23) & (data[i]<23.25)])))
+dataout[ierr_o][(data[i]>=23.25) & (data[i]<23.5)] = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.007, len(data[i][(data[i]>=23.25) & (data[i]<23.5)])))
+dataout[ierr_o][(data[i]>=23.5) & (data[i]<23.75)] = positive(np.random.normal(np.sqrt(0.03**2+0.025**2), 0.014, len(data[i][(data[i]>=23.5) & (data[i]<23.75)])))
+dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(np.sqrt(0.04**2+0.025**2), 0.015, len(data[i][data[i]>=23.25])))
+
+# WFI2033
 #dataout[zerr_o][data[z]<18]                        = positive(np.random.normal(0.005,0.005, len(data[z][data[z]<18])))
 #dataout[zerr_o][(data[z]>=18) & (data[z]<19)]      = positive(np.random.normal(0.01, 0.009, len(data[z][(data[z]>=18) & (data[z]<19)])))
 #dataout[zerr_o][(data[z]>=19) & (data[z]<20)]      = positive(np.random.normal(0.02, 0.008, len(data[z][(data[z]>=19) & (data[z]<20)])))
@@ -257,6 +311,7 @@ dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0
 #dataout[zerr_o][(data[z]>=23) & (data[z]<23.25)]   = positive(np.random.normal(0.21, 0.037, len(data[z][(data[z]>=23) & (data[z]<23.25)])))
 #dataout[zerr_o][data[z]>=23.25]                    = positive(np.random.normal(0.30, 0.082, len(data[z][data[z]>=23.25])))
 
+# WFI2033
 #dataout[Jerr_o][data[J]<16]                        = positive(np.random.normal(np.sqrt(0.005**2+0.04**2),0.004, len(data[J][data[J]<16])))
 #dataout[Jerr_o][(data[J]>=16) & (data[J]<17)]      = positive(np.random.normal(np.sqrt(0.01**2+0.04**2), 0.006, len(data[J][(data[J]>=16) & (data[J]<17)])))
 #dataout[Jerr_o][(data[J]>=17) & (data[J]<18)]      = positive(np.random.normal(np.sqrt(0.02**2+0.04**2), 0.014, len(data[J][(data[J]>=17) & (data[J]<18)])))
@@ -271,6 +326,7 @@ dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0
 #dataout[Jerr_o][(data[J]>=21.25) & (data[J]<21.5)] = positive(np.random.normal(np.sqrt(0.18**2+0.04**2), 0.028, len(data[J][(data[J]>=21.25) & (data[J]<21.5)])))
 #dataout[Jerr_o][data[J]>=21.5]                     = positive(np.random.normal(np.sqrt(0.19**2+0.04**2), 0.029, len(data[J][data[J]>=21.5])))
 
+# WFI2033
 #dataout[Herr_o][data[H]<15]                        = positive(np.random.normal(np.sqrt(0.005**2+0.04**2),0.003, len(data[H][data[H]<15])))
 #dataout[Herr_o][(data[H]>=15) & (data[H]<16)]      = positive(np.random.normal(np.sqrt(0.01**2+0.04**2), 0.003, len(data[H][(data[H]>=15) & (data[H]<16)])))
 #dataout[Herr_o][(data[H]>=16) & (data[H]<17)]      = positive(np.random.normal(np.sqrt(0.02**2+0.04**2), 0.013, len(data[H][(data[H]>=16) & (data[H]<17)])))
@@ -285,17 +341,30 @@ dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0
 #dataout[Herr_o][(data[H]>=20.25) & (data[H]<20.5)] = positive(np.random.normal(np.sqrt(0.17**2+0.04**2), 0.025, len(data[H][(data[H]>=20.25) & (data[H]<20.5)])))
 #dataout[Herr_o][data[H]>=20.5]                     = positive(np.random.normal(np.sqrt(0.19**2+0.04**2), 0.029, len(data[H][data[H]>=20.5])))
 
-dataout[Kerr_o][data[K]<15]                        = positive(np.random.normal(np.sqrt(0.005**2+0.08**2),0.004, len(data[K][data[K]<15])))
-dataout[Kerr_o][(data[K]>=15) & (data[K]<16)]      = positive(np.random.normal(np.sqrt(0.02**2+0.08**2), 0.013, len(data[K][(data[K]>=15) & (data[K]<16)])))
-dataout[Kerr_o][(data[K]>=16) & (data[K]<17)]      = positive(np.random.normal(np.sqrt(0.03**2+0.08**2), 0.007, len(data[K][(data[K]>=16) & (data[K]<17)])))
-dataout[Kerr_o][(data[K]>=17) & (data[K]<17.5)]    = positive(np.random.normal(np.sqrt(0.04**2+0.08**2), 0.016, len(data[K][(data[K]>=17) & (data[K]<17.5)])))
-dataout[Kerr_o][(data[K]>=17.5) & (data[K]<18)]    = positive(np.random.normal(np.sqrt(0.06**2+0.08**2), 0.018, len(data[K][(data[K]>=17.5) & (data[K]<18)])))
-dataout[Kerr_o][(data[K]>=18) & (data[K]<18.5)]    = positive(np.random.normal(np.sqrt(0.07**2+0.08**2), 0.014, len(data[K][(data[K]>=18) & (data[K]<18.5)])))
-dataout[Kerr_o][(data[K]>=18.5) & (data[K]<19)]    = positive(np.random.normal(np.sqrt(0.10**2+0.08**2), 0.026, len(data[K][(data[K]>=18.5) & (data[K]<19)])))
-dataout[Kerr_o][(data[K]>=19) & (data[K]<19.5)]    = positive(np.random.normal(np.sqrt(0.14**2+0.08**2), 0.032, len(data[K][(data[K]>=19) & (data[K]<19.5)])))
-dataout[Kerr_o][(data[K]>=19.5) & (data[K]<19.75)] = positive(np.random.normal(np.sqrt(0.17**2+0.08**2), 0.035, len(data[K][(data[K]>=19.5) & (data[K]<19.75)])))
-dataout[Kerr_o][(data[K]>=19.75) & (data[K]<20)]   = positive(np.random.normal(np.sqrt(0.19**2+0.08**2), 0.070, len(data[K][(data[K]>=19.75) & (data[K]<20)])))
-dataout[Kerr_o][data[K]>=20]                       = positive(np.random.normal(np.sqrt(0.19**2+0.08**2), 0.037, len(data[K][data[K]>=20])))
+# WFI2033
+#dataout[Kerr_o][data[K]<15]                        = positive(np.random.normal(np.sqrt(0.005**2+0.08**2),0.004, len(data[K][data[K]<15])))
+#dataout[Kerr_o][(data[K]>=15) & (data[K]<16)]      = positive(np.random.normal(np.sqrt(0.02**2+0.08**2), 0.013, len(data[K][(data[K]>=15) & (data[K]<16)])))
+#dataout[Kerr_o][(data[K]>=16) & (data[K]<17)]      = positive(np.random.normal(np.sqrt(0.03**2+0.08**2), 0.007, len(data[K][(data[K]>=16) & (data[K]<17)])))
+#dataout[Kerr_o][(data[K]>=17) & (data[K]<17.5)]    = positive(np.random.normal(np.sqrt(0.04**2+0.08**2), 0.016, len(data[K][(data[K]>=17) & (data[K]<17.5)])))
+#dataout[Kerr_o][(data[K]>=17.5) & (data[K]<18)]    = positive(np.random.normal(np.sqrt(0.06**2+0.08**2), 0.018, len(data[K][(data[K]>=17.5) & (data[K]<18)])))
+#dataout[Kerr_o][(data[K]>=18) & (data[K]<18.5)]    = positive(np.random.normal(np.sqrt(0.07**2+0.08**2), 0.014, len(data[K][(data[K]>=18) & (data[K]<18.5)])))
+#dataout[Kerr_o][(data[K]>=18.5) & (data[K]<19)]    = positive(np.random.normal(np.sqrt(0.10**2+0.08**2), 0.026, len(data[K][(data[K]>=18.5) & (data[K]<19)])))
+#dataout[Kerr_o][(data[K]>=19) & (data[K]<19.5)]    = positive(np.random.normal(np.sqrt(0.14**2+0.08**2), 0.032, len(data[K][(data[K]>=19) & (data[K]<19.5)])))
+#dataout[Kerr_o][(data[K]>=19.5) & (data[K]<19.75)] = positive(np.random.normal(np.sqrt(0.17**2+0.08**2), 0.035, len(data[K][(data[K]>=19.5) & (data[K]<19.75)])))
+#dataout[Kerr_o][(data[K]>=19.75) & (data[K]<20)]   = positive(np.random.normal(np.sqrt(0.19**2+0.08**2), 0.070, len(data[K][(data[K]>=19.75) & (data[K]<20)])))
+#dataout[Kerr_o][data[K]>=20]                       = positive(np.random.normal(np.sqrt(0.19**2+0.08**2), 0.037, len(data[K][data[K]>=20])))
+
+# J1206
+dataout[Kerr_o][data[K]<18.5]                      = positive(np.random.normal(np.sqrt(0.01**2+0.04**2),0.005, len(data[K][data[K]<18.5])))
+dataout[Kerr_o][(data[K]>=18.5) & (data[K]<19.5)]  = positive(np.random.normal(np.sqrt(0.01**2+0.04**2), 0.007, len(data[K][(data[K]>=18.5) & (data[K]<19.5)])))
+dataout[Kerr_o][(data[K]>=19.5) & (data[K]<20.5)]  = positive(np.random.normal(np.sqrt(0.02**2+0.04**2), 0.006, len(data[K][(data[K]>=19.5) & (data[K]<20.5)])))
+dataout[Kerr_o][(data[K]>=20.5) & (data[K]<21.5)]  = positive(np.random.normal(np.sqrt(0.03**2+0.04**2), 0.009, len(data[K][(data[K]>=20.5) & (data[K]<21.5)])))
+dataout[Kerr_o][(data[K]>=21.5) & (data[K]<22)]    = positive(np.random.normal(np.sqrt(0.05**2+0.04**2), 0.011, len(data[K][(data[K]>=21.5) & (data[K]<22)])))
+dataout[Kerr_o][(data[K]>=22) & (data[K]<22.5)]    = positive(np.random.normal(np.sqrt(0.07**2+0.04**2), 0.016, len(data[K][(data[K]>=22) & (data[K]<22.5)])))
+dataout[Kerr_o][(data[K]>=22.5) & (data[K]<22.75)] = positive(np.random.normal(np.sqrt(0.09**2+0.04**2), 0.029, len(data[K][(data[K]>=22.5) & (data[K]<22.75)])))
+dataout[Kerr_o][(data[K]>=22.75) & (data[K]<23)]   = positive(np.random.normal(np.sqrt(0.10**2+0.04**2), 0.015, len(data[K][(data[K]>=22.75) & (data[K]<23)])))
+dataout[Kerr_o][(data[K]>=23) & (data[K]<23.25)]   = positive(np.random.normal(np.sqrt(0.12**2+0.04**2), 0.022, len(data[K][(data[K]>=23) & (data[K]<23.25)])))
+dataout[Kerr_o][data[K]>=23.25]                    = positive(np.random.normal(np.sqrt(0.13**2+0.04**2), 0.025, len(data[K][data[K]>=23.25])))
 
 dataout = np.delete(dataout,np.where(dataout[i_o] > 24),axis=1)
 
@@ -312,25 +381,27 @@ dataout[K_o] = np.random.normal(dataout[K_o], dataout[Kerr_o])
 dataout = np.delete(dataout,np.where((dataout[i_o] > 24) & (dataout[iorig_o] > 24)),axis=1)
 
 # applying 1-sigma detection limits including their uncertainty; these are final values I used as input for lephare for the real lens field; all values are in AB
-# J1206
-#dataout[u_o][dataout[u_o]>=np.random.normal(27.39, 0.05, len(dataout[u_o]))] = 99.0
-dataout[g_o][dataout[g_o]>=np.random.normal(25.09+1.75, 0.07, len(dataout[g_o]))] = 99.0
-dataout[r_o][dataout[r_o]>=np.random.normal(24.88+1.75, 0.04, len(dataout[r_o]))] = 99.0
-#dataout[z_o][dataout[z_o]>=np.random.normal(24.64, 0.45, len(dataout[z_o]))] = 99.0
-#dataout[J_o][dataout[J_o]>=np.random.normal(23.21, 0.12, len(dataout[J_o]))] = 99.0
-#dataout[H_o][dataout[H_o]>=np.random.normal(22.60, 0.08, len(dataout[H_o]))] = 99.0
-dataout[K_o][dataout[K_o]>=np.random.normal(20.63+1.75+1.85, 0.07, len(dataout[K_o]))] = 99.0 # added conversion to AB
-#dataout[uerr_o][dataout[u_o]==99.0] = 27.39
-dataout[gerr_o][dataout[g_o]==99.0] = 25.09+1.75
-dataout[rerr_o][dataout[r_o]==99.0] = 24.88+1.75
-#dataout[zerr_o][dataout[z_o]==99.0] = 24.64
-#dataout[Jerr_o][dataout[J_o]==99.0] = 23.21
-#dataout[Herr_o][dataout[H_o]==99.0] = 22.60
-dataout[Kerr_o][dataout[K_o]==99.0] = 20.63+1.75+1.85
+#dataout[u_o][dataout[u_o]>=np.random.normal(27.39, 0.05, len(dataout[u_o]))] = 99.0 # WFI2033
+#dataout[g_o][dataout[g_o]>=np.random.normal(25.48, 0.15, len(dataout[g_o]))] = 99.0 # WFI2033
+#dataout[r_o][dataout[r_o]>=np.random.normal(25.55, 0.12, len(dataout[r_o]))] = 99.0 # WFI2033
+dataout[g_o][dataout[g_o]>=np.random.normal(25.09+1.75, 0.07, len(dataout[g_o]))] = 99.0 # J1206
+dataout[r_o][dataout[r_o]>=np.random.normal(24.88+1.75, 0.04, len(dataout[r_o]))] = 99.0 # J1206
+#dataout[z_o][dataout[z_o]>=np.random.normal(24.64, 0.45, len(dataout[z_o]))] = 99.0 # WFI2033
+#dataout[J_o][dataout[J_o]>=np.random.normal(23.21, 0.12, len(dataout[J_o]))] = 99.0 # WFI2033
+#dataout[H_o][dataout[H_o]>=np.random.normal(22.60, 0.08, len(dataout[H_o]))] = 99.0 # WFI2033
+#dataout[K_o][dataout[K_o]>=np.random.normal(22.50, 0.04, len(dataout[K_o]))] = 99.0 # WFI2033
+dataout[K_o][dataout[K_o]>=np.random.normal(20.63+1.75+1.85, 0.07, len(dataout[K_o]))] = 99.0 # added conversion to AB;  # J1206
+#dataout[uerr_o][dataout[u_o]==99.0] = 27.39 # WFI2033
+dataout[gerr_o][dataout[g_o]==99.0] = 25.09+1.75 # J1206
+dataout[rerr_o][dataout[r_o]==99.0] = 24.88+1.75 # J1206
+#dataout[zerr_o][dataout[z_o]==99.0] = 24.64 # WFI2033
+#dataout[Jerr_o][dataout[J_o]==99.0] = 23.21 # WFI2033
+#dataout[Herr_o][dataout[H_o]==99.0] = 22.60 # WFI2033
+dataout[Kerr_o][dataout[K_o]==99.0] = 20.63+1.75+1.85 # J1206
 
 #head = "GalID \t z_spec \t pos_0[rad] \t pos_1[rad] \t M_Halo[M_sol/h] \t M_Stellar[M_sol/h] \t mag_SDSS_iorig \t mag_SDSS_u \t mag_SDSS_uerr \t mag_SDSS_g \t mag_SDSS_gerr \t mag_SDSS_r \t mag_SDSS_rerr \t mag_SDSS_i \t mag_SDSS_ierr \t mag_SDSS_z \t mag_SDSS_zerr \t mag_J \t mag_Jerr \t mag_H \t mag_Herr \t mag_K \t mag_Kerr" NOT USING THIS ONE BECAUSE THE SPECIAL CHARACTERS ARE NOT RECOGNIZED PROPERLY BY BPZ
 head = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t mag_SDSS_g \t mag_SDSS_gerr \t mag_SDSS_r \t mag_SDSS_rerr \t mag_SDSS_i \t mag_SDSS_ierr \t mag_K \t mag_Kerr"
-np.savetxt(fileout_ugrizJHK,dataout.T,header=head,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t')
+np.savetxt(fileout_ugrizJHK,dataout.T,header=head,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f')
 
 print str(sys.argv[1]) + ' Done!'
 
