@@ -14,4 +14,4 @@ cd $PBS_O_HOME
 # Run your executable
 cd /lfs08/rusucs/code/
 
-python inferkappa_unbiasedwithshearJ1206withHE0435.py J1206 -1.0 -1.0 nohandpicked fiducial 5 120 23 meds gal gamma oneoverr
+python inferkappa_unbiasedwithshearJ1206withHE0435.py J1206 -1.0 -1.0 nohandpicked fiducial 5 120 24 meds gal gamma zoverr

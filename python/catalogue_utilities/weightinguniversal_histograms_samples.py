@@ -1,6 +1,6 @@
 # CE Rusu, Feb 13 2018
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles, using the 10 samples
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 handpicked testduplicatesamples/testothersamples
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 removegrouphandpicked testduplicatesamples/testothersamples
 # After running this code, combine the results into a final text file with the final distributions and widths, using weightinguniversal_histograms_finalcombine.py
 # If desired, run weightinguniversal_histograms_samples_publicationqualitynotext.py to produce a publication quality plot
 
