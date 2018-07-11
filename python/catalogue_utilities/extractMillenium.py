@@ -6,8 +6,8 @@ import sys
 
 lens = "J1206"
 filters = "griK"
-rootin = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/"
-rootout = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/%s/" % lens
+rootin = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/original/"
+rootout = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/%s/" % lens
 filein = str(sys.argv[1])
 fileout_ugriz = rootout+str(sys.argv[1])[:-11] + "_ugriz.images.txt"
 fileout_ugrizJHK = rootout+str(sys.argv[1])[:-11] + "_%s_%s.images.txt" % (filters,lens)
@@ -27,7 +27,7 @@ J = 17
 H = 18
 K = 19
 
-data = np.loadtxt(str(sys.argv[1]),usecols=[id,zspec,posx,posy,mhalo,mstar,u,g,r,i,z,K],comments='GalID',unpack=True)
+data = np.loadtxt(rootin+str(sys.argv[1]),usecols=[id,zspec,posx,posy,mhalo,mstar,u,g,r,i,z,K],comments='GalID',unpack=True)
 
 # reposition labels
 id = 0
@@ -166,7 +166,25 @@ dataout[zerr_o][dataout[z_o]==99.0] = 23.46+1.75
 head = "GalID \t z_spec \t pos0 \t pos1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t mag_SDSS_u \t mag_SDSS_uerr \t mag_SDSS_g \t mag_SDSS_gerr \t mag_SDSS_r \t mag_SDSS_rerr \t mag_SDSS_i \t mag_SDSS_ierr \t mag_SDSS_z \t mag_SDSS_zerr"
 #np.savetxt(fileout_ugriz,np.c_[dataout[id_o],dataout[zspec_o],dataout[posx_o],dataout[posy_o],dataout[mhalo_o],dataout[mstar_o],dataout[iorig_o],dataout[u_o],dataout[uerr_o],dataout[g_o],dataout[gerr_o],dataout[r_o],dataout[rerr_o],dataout[i_o],dataout[ierr_o],dataout[z_o],dataout[zerr_o]],header=head,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f')
 
-dataout = np.zeros([np.shape(data)[0]+9,np.shape(data)[1]])
+dataout = np.zeros([15,np.shape(data)[1]])
+
+# name dataout labels
+# o stands for out
+id_o = 0
+zspec_o = 1
+posx_o = 2
+posy_o = 3
+mhalo_o = 4
+mstar_o = 5
+iorig_o = 6
+g_o = 7
+gerr_o = 8
+r_o = 9
+rerr_o = 10
+i_o = 11
+ierr_o = 12
+K_o = 13
+Kerr_o = 14
 
 dataout[id_o] = np.copy(data[id])
 dataout[zspec_o] = np.copy(data[zspec])
@@ -286,7 +304,7 @@ dataout[rerr_o][data[r]>=25]                       = positive(np.random.normal(n
 #dataout[ierr_o][data[i]>=23.25]                    = positive(np.random.normal(0.23, 0.031, len(data[i][data[i]>=23.25])))
 
 # J1206
-dataout[ierr_o][data[i]<20]                        = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[i][data[i]<19])))
+dataout[ierr_o][data[i]<20]                        = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[i][data[i]<20])))
 dataout[ierr_o][(data[i]>=20) & (data[i]<21)]      = positive(np.random.normal(np.sqrt(0.005**2+0.025**2),0.005, len(data[i][(data[i]>=20) & (data[i]<21)])))
 dataout[ierr_o][(data[i]>=21) & (data[i]<22)]      = positive(np.random.normal(np.sqrt(0.01**2+0.025**2), 0.003, len(data[i][(data[i]>=21) & (data[i]<22)])))
 dataout[ierr_o][(data[i]>=22) & (data[i]<22.5)]    = positive(np.random.normal(np.sqrt(0.02**2+0.025**2), 0.006, len(data[i][(data[i]>=22) & (data[i]<22.5)])))
@@ -404,4 +422,3 @@ head = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iori
 np.savetxt(fileout_ugrizJHK,dataout.T,header=head,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f')
 
 print str(sys.argv[1]) + ' Done!'
-
