@@ -101,14 +101,14 @@ str = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig
 dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data_bpz]
 np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f')
 
-#os.system("rm %s" % (file1[:-4]+".bpz"))
-#os.system("rm %s" % (file1[:-4]+".bpz.bak"))
-#os.system("rm %s" % (file1[:-4]+"_bpz.cat"))
-#os.system("rm %s" % (file1[:-4]+".flux_comparison"))
-#os.system("rm %s" % (file1[:-4]+".probs"))
-#os.system("rm %s" % file1)
-#if "griK" in file:
-    #os.system("rm %s" % (file1[:-4]+'.columns'))
+os.system("rm %s" % (file1[:-4]+".bpz"))
+os.system("rm %s" % (file1[:-4]+".bpz.bak"))
+os.system("rm %s" % (file1[:-4]+"_bpz.cat"))
+os.system("rm %s" % (file1[:-4]+".flux_comparison"))
+os.system("rm %s" % (file1[:-4]+".probs"))
+os.system("rm %s" % file1)
+if "griK" in file:
+    os.system("rm %s" % (file1[:-4]+'.columns'))
 
 print("Total time for field: --- %s seconds ---" % (time.time() - start_timefield))
 
