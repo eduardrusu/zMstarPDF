@@ -5,7 +5,7 @@
 #PBS -o Log4.out
 #PBS -e Log4.err
 #PBS -N 4
-#PBS -l mem=16gb
+#PBS -l mem=30gb
 #PBS -M eduardrusu@yahoo.com
 
 # Go to this job's working directory
@@ -14,4 +14,4 @@ cd $PBS_O_HOME
 # Run your executable
 cd /lfs08/rusucs/code/
 
-python inferkappa_unbiasedwithshearJ1206withHE0435.py J1206 -1.0 -1.0 removegrouphandpicked fiducial 5 45 24 meds gal gamma oneoverr
+python inferkappa_unbiasedwithshearJ1206withHE0435.py J1206 -1.0 -1.0 nohandpicked fiducial 5 45 24 meds gal oneoverr

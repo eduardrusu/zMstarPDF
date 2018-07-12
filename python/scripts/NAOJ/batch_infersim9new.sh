@@ -5,7 +5,7 @@
 #PBS -o Log9.out
 #PBS -e Log9.err
 #PBS -N 9
-#PBS -l mem=16gb
+#PBS -l mem=30gb
 #PBS -M eduardrusu@yahoo.com
 
 # Go to this job's working directory
