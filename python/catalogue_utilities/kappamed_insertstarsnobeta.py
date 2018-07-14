@@ -282,10 +282,28 @@ if lens == "HE1104":
 #pln = 30 & 31
 if lens == "RX1131":
     z_s = 0.66
-#pln = 45 & 46
 if lens == "J1206":
     z_s = 1.79
+    z_l = 0.745
     pln = 34
+    limmag = 24
+    brightmag = 18.00
+    if (radiusstr == "45"):
+        hstcoverage = 1
+        radius = 45
+        fracspec20 = 0.40 # gal+stars
+        fracspec21 = 1
+        fracspec22 = 0.83
+        fracspec23 = 0.29
+        fracspec24 = 0.13
+    if (radiusstr == "120"):
+        hstcoverage = 1 * 0.50
+        radius = 120
+        fracspec20 = 0.40
+        fracspec21 = 0.81
+        fracspec22 = 0.65
+        fracspec23 = 0.19
+        fracspec24 = 0.04
 
 #rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
