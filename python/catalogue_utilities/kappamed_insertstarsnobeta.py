@@ -297,7 +297,7 @@ if lens == "J1206":
         fracspec23 = 0.29
         fracspec24 = 0.13
     if (radiusstr == "120"):
-        hstcoverage = 1 * 0.50
+        hstcoverage = 1 * 0.44
         radius = 120
         fracspec20 = 0.40
         fracspec21 = 0.81
