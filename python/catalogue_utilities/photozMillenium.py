@@ -97,9 +97,9 @@ if "griK" in file:
 data = np.loadtxt(root_original+file,usecols=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],unpack=True) # ID + mags
 data_bpz = np.loadtxt(file1[:-4]+"_bpz.cat",usecols=[1],unpack=True)
 fileout = root_original + file[:-4] + "_forNAOJ.txt"
-str = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t photoz"
-dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data_bpz]
-np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f')
+str = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t mag_SDSS_i \t photoz"
+dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[11],data_bpz]
+np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f')
 
 os.system("rm %s" % (file1[:-4]+".bpz"))
 os.system("rm %s" % (file1[:-4]+".bpz.bak"))
