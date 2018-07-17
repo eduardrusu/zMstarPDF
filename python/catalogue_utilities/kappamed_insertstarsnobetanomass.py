@@ -1,6 +1,6 @@
 # CE Rusu, Feb 12 2018
 # This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights.
-# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_34_f 23 45 measured 5 -1.0 -1.0
+# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_34_f 23 45 measured 5 -1.0 -1.0
 # the code can oly be used for limmag 23 or 24 currently
 
 import numpy as np
@@ -550,7 +550,7 @@ for i in range(4):
             posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz))
             imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz))
 
-cat_ugrizJHK = np.c_[z_ugrizJHK,posx_ugrizJHK,posy_ugrizJHKimag_ugrizJHK]
+cat_ugrizJHK = np.c_[z_ugrizJHK,posx_ugrizJHK,posy_ugrizJHK,imag_ugrizJHK]
 del z___ugrizJHK
 del z_ugrizJHK
 del posx_ugrizJHK
