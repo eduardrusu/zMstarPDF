@@ -27,5 +27,5 @@ print strcolumns
 for i in range(number):
     strrows = ""
     for j in range(len(columns)):
-        strrows = strrows + str(read[i][j]) + "\t"
+        strrows = strrows + "%.5e \t" % read[i][j])
     print strrows
