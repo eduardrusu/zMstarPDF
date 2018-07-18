@@ -108,14 +108,17 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
             
             cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
-            print np.shape(cellkappagamma)
-            if initialized == 0:
+            cellkappagammastyle = np.c_[cellkappagamma[:,1],cellkappagamma[:,2].round(decimals=5),cellkappagamma[:,3].round(decimals=5),cellkappagamma[:,4].round(decimals=5),cellkappagamma[:,5],cellkappagamma[:,6].round(decimals=4),cellkappagamma[:,7].round(decimals=4),cellkappagamma[:,8].round(decimals=4),cellkappagamma[:,9]]
+            if initialized != 0:
+                cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
+            else:
                 f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
                 os.system('rm -f %s' % f)
+                cellkappagammafinal = cellkappagammastyle
                 initialized = 1
-            cellkappagammafinal = np.c_[cellkappagamma[k][1],cellkappagamma[k][2].round(decimals=5),cellkappagamma[k][3].round(decimals=5),cellkappagamma[k][4].round(decimals=5),cellkappagamma[k][5],cellkappagamma[k][6].round(decimals=4),cellkappagamma[k][7].round(decimals=4),cellkappagamma[k][8].round(decimals=4),cellkappagamma[k][9]]
-            tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag))
-            fits.append(f, tableout.as_array())
+            if (i == spacing - 1) and (j == spacing - 1):
+                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag))
+                fits.append(f, tableout.as_array())
 
 ############################
 # lens information
