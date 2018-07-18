@@ -112,10 +112,9 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
                 os.system('rm -f %s' % f)
                 initialized = 1
-            for k in range(cellkappagamma.shape[0]):
-                output = np.c_[cellkappagamma[k][1],cellkappagamma[k][2].round(decimals=5),cellkappagamma[k][3].round(decimals=5),cellkappagamma[k][4].round(decimals=5),cellkappagamma[k][5],cellkappagamma[k][6].round(decimals=4),cellkappagamma[k][7].round(decimals=4),cellkappagamma[k][8].round(decimals=4),cellkappagamma[k][9]]
-                tableout = table.Table(output, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag))
-                fits.append(f, tableout.as_array())
+            cellkappagammafinal = np.c_[cellkappagamma[k][1],cellkappagamma[k][2].round(decimals=5),cellkappagamma[k][3].round(decimals=5),cellkappagamma[k][4].round(decimals=5),cellkappagamma[k][5],cellkappagamma[k][6].round(decimals=4),cellkappagamma[k][7].round(decimals=4),cellkappagamma[k][8].round(decimals=4),cellkappagamma[k][9]]
+            tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag))
+            fits.append(f, tableout.as_array())
 
 ############################
 # lens information
