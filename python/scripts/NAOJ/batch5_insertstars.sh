@@ -1,7 +1,7 @@
 #!/bin/sh
 #PBS -r y
 #PBS -m abe
-#PBS -q q1m
+#PBS -q q1
 #PBS -o Logb5.out
 #PBS -e Logb5.err
 #PBS -N 5
@@ -12,22 +12,22 @@
 cd $PBS_O_HOME
 
 # Run your executable
-cd /mfst01a/rusucs/WFI2033/MSwghtratios/
+cd /lfs08/rusucs/code/
 
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_0_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_1_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_2_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_3_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_4_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_5_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_6_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_7_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 5 0.61 0.71
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_0_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_1_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_2_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_3_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_4_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_5_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_6_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_7_N_4096_ang_4_rays_to_plane_34_f 23 120 measured 5 -1 -1
 
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_0_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_1_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_2_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_3_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_4_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_5_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_6_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
-python kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_5_7_N_4096_ang_4_rays_to_plane_35_f 23 120 measured 15 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_0_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_1_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_2_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_3_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_4_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_5_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_6_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
+python kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_5_7_N_4096_ang_4_rays_to_plane_34_f 24 120 measured 5 -1 -1
