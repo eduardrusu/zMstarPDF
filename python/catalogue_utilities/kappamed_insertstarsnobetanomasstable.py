@@ -108,7 +108,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
             
             cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
-            cellkappagammastyle = np.c_[cellkappagamma[:,1],cellkappagamma[:,2].round(decimals=5),cellkappagamma[:,3].round(decimals=5),cellkappagamma[:,4].round(decimals=5),cellkappagamma[:,5],cellkappagamma[:,6].round(decimals=4),cellkappagamma[:,7].round(decimals=4),cellkappagamma[:,8].round(decimals=4),cellkappagamma[:,9]]
+            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),cellkappagamma[:,2].round(decimals=5),cellkappagamma[:,3].round(decimals=5),cellkappagamma[:,4].round(decimals=5),cellkappagamma[:,5],cellkappagamma[:,6].round(decimals=4),cellkappagamma[:,7].round(decimals=4),cellkappagamma[:,8].round(decimals=4),cellkappagamma[:,9].astype(int)]
             if initialized != 0:
                 cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
