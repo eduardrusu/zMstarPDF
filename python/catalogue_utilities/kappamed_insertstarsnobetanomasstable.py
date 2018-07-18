@@ -108,6 +108,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
             
             cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
+            print np.shape(cellkappagamma)
             if initialized == 0:
                 f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
                 os.system('rm -f %s' % f)
