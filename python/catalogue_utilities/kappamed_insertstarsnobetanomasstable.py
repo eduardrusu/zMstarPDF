@@ -235,21 +235,21 @@ if lens == "J1206":
         fracspec23 = 0.19
         fracspec24 = 0.04
 
-rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/u/flashscratch/c/cerusu/MSwghtratios/"
 #rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
-#rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
-rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
+rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
+#rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
 #rootgals = "/u/flashscratch/c/cerusu/MSgals/"
 #rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
-#rootgals = "/Volumes/LaCieSubaru/MSgals/"
-rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
+rootgals = "/Volumes/LaCieSubaru/MSgals/"
+#rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
 #rootkappaplanes = "/u/flashscratch/c/cerusu/kappaplanes/"
 #rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
-#rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
-rootstars = "/lfs08/rusucs/insertstars/"
+rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
+#rootstars = "/lfs08/rusucs/insertstars/"
 #rootstars = "/u/flashscratch/c/cerusu/insertstars/"
-#rootstars = "/Volumes/LaCieSubaru/insertstars/"
+rootstars = "/Volumes/LaCieSubaru/insertstars/"
 #rootstars = "/mnt/scratch/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
@@ -406,9 +406,10 @@ root = plane[0:13]
 
 for i in range(4):
     for j in range(4):
-        file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
-        file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
-        #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
+        #file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+        file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
+        #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+        file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
         if "measured" in type:
             posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
             posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
