@@ -13,6 +13,8 @@ import pandas as pd
 import time
 #import distances
 from scipy.interpolate import griddata
+import astropy.table as table
+from astropy.io import fits # for tables
 
 ############################
 # function definitions
@@ -78,7 +80,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 for k in range(len(missing)):
                     insert = np.copy(cat_msk[0]) # any entry would do
                     insert[index_index] = missing[k]
-                    cat_msk = np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                    cat_msk = np.append(cat_msk,insert.reshape(1,6),axis = 0)
                 index_all = np.append(index_all,missing)
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
                 galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
@@ -95,7 +97,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 for k in range(len(missing)):
                     insert = np.copy(cat_msk[0]) # any entry would do
                     insert[index_index] = missing[k]
-                    cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                    cat_msk=np.append(cat_msk,insert.reshape(1,6),axis = 0)
             
             p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
             p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
@@ -106,17 +108,19 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
             
             cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
-            if initialized == 0:
-                os.system('rm -f %snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap))
-                f=open('%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.cat' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap),'ab') # open in binary
-                output = "# ID kappa gamma1 gamma2 w_gal_%s w_zweight_%s w_oneoverr_%s w_zoverr_%s galinner_%s \n" % (limmag,limmag,limmag,limmag,limmag)
-                f.write(output) # needs to be done inside the loop because otherwise it crashes
+            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),cellkappagamma[:,9].astype(int)]
+            if initialized != 0:
+                cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
+            else:
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
+                os.system('rm -f %s' % f)
+                cellkappagammafinal = cellkappagammastyle
                 initialized = 1
-            output = ""
-            for k in range(cellkappagamma.shape[0]):
-                output = output + str('%.1d' % cellkappagamma[k][1])+ "\t" + str('%.5e' % cellkappagamma[k][2])+ "\t" + str('%.5e' % cellkappagamma[k][3])+ "\t" + str('%.5e' % cellkappagamma[k][4])+ "\t" + str('%.1d' % cellkappagamma[k][5])+ "\t" + str('%.4e' % cellkappagamma[k][6])+ "\t" + str('%.4e' % cellkappagamma[k][7])+ "\t" + str('%.4e' % cellkappagamma[k][8])+ "\t" + str('%.1d' % cellkappagamma[k][9]) + "\n"
-            f.write(output)
-    f.close()
+            if (i == spacing - 1) and (j == spacing - 1):
+                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.int32))
+                #fits.append(f, tableout.as_array())
+                tableout.write(f)
+                del tableout
 
 ############################
 # lens information
@@ -174,7 +178,7 @@ if lens == "WFI2033":
     z_s = 1.66
     z_l = 0.66
     brightmag = 16.90
-    #limmag = 23
+    limmag = 23
     pln = 35
     if (radiusstr == "45"):
         hstcoverage = 1
@@ -236,22 +240,22 @@ if lens == "J1206":
         fracspec23 = 0.19
         fracspec24 = 0.04
 
-rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/u/flashscratch/c/cerusu/MSwghtratios/"
-#rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
-rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
+#rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
 #rootgals = "/u/flashscratch/c/cerusu/MSgals/"
-#rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
+rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
 #rootgals = "/Volumes/LaCieSubaru/MSgals/"
-rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
+#rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
 #rootkappaplanes = "/u/flashscratch/c/cerusu/kappaplanes/"
-#rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
+rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
 #rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
-rootstars = "/lfs08/rusucs/insertstars/"
+#rootstars = "/lfs08/rusucs/insertstars/"
 #rootstars = "/u/flashscratch/c/cerusu/insertstars/"
 #rootstars = "/Volumes/LaCieSubaru/insertstars/"
-#rootstars = "/mnt/scratch/rusucs/insertstars/"
+rootstars = "/mnt/scratch/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
@@ -408,7 +412,9 @@ root = plane[0:13]
 for i in range(4):
     for j in range(4):
         file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
-        file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+        #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
+        #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+        file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
         #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
         if "measured" in type:
             posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)

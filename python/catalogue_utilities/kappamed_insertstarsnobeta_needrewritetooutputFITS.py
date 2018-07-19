@@ -286,7 +286,7 @@ if lens == "J1206":
     z_s = 1.79
     z_l = 0.745
     pln = 34
-    limmag = 24
+    #limmag = 24
     brightmag = 18.00
     if (radiusstr == "45"):
         hstcoverage = 1
