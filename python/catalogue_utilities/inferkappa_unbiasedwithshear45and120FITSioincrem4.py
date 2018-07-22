@@ -74,7 +74,7 @@ min_kappa = -0.10
 max_kappa = 1
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 8
+increment2 = 4
 increment3 = 4
 increment4 = 4
 increment5 = 4
