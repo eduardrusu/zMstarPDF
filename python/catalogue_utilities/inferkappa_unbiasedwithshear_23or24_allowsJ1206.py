@@ -94,7 +94,7 @@ if lens == "WFI2033":
     print 'shear: ',constr_gamma
 if lens == "J1206":
 	filters = "griK"
-    plane = 34
+    plane = 34 
     constr_gamma = 0.04
     constrwidth_gamma_inf = 0.03
     constrwidth_gamma_sup = 0.05
