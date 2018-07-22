@@ -359,7 +359,9 @@ if conjoined == 1:
             gamma = np.sqrt(gamma1**2 + gamma2**2)
             weight1_ = gamma / med_weight1
         weight = np.copy(weight1_)
+        print np.shape(kappa_)
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
+        print np.shape(kappa_)
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         del weight
         if (i == 0) and (j == 0):
