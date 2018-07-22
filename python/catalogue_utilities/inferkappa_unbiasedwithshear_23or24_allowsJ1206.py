@@ -1,6 +1,6 @@
 # CE Rusu July 21 2018
 # NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES FOR 23 and 24
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear_23or24_allowsJ1206.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 45 23 measured meds gal gamma oneoverr mass
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear_23or24_allowsJ1206.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 45 23 measured med gal gamma oneoverr mass
 # It does not accept mixed radii or selecting empty inner radii. When a single radius is used (not mixing different radii constraints) this code is faster than inferkappa_unbiasedwithshear45and120_23or24_allowsemptymskandJ1206 because it doesn't read the id column
 # The input weight files have to be FITS files. In case of multiple data extensions, data is combined from every extension
 # J1206 is considered separately because their the input weight files do not include columns which use mass
@@ -60,7 +60,7 @@ rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
 rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
