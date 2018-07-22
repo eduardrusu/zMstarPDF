@@ -324,7 +324,7 @@ if conjoined == 1:
             else:
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
-        print j,i
+        #print j,i
       if weightin1 != "gamma":
         med1[j] = np.median(weight1)
       else:
@@ -334,6 +334,13 @@ if conjoined == 1:
         constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights, so that it is meaningful to multiply by med_weight1
         constrwidth_weight1_inf = constrwidth_weight1_inf / med_weight1
         constrwidth_weight1_sup = constrwidth_weight1_sup / med_weight1
+        del weight1_1
+        del weight1_1_
+        del weight1_2
+        del weight1_2_
+    else:
+        del weight1
+        del weight1_
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))]) # absolute number, e.g. of galaxies within the lower width
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     
@@ -361,7 +368,16 @@ if conjoined == 1:
         else:
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
-        print j,i
+        #print j,i
+    if weightin1 == "gamma":
+        del weight1_
+        del gamma1
+        del gamma1_
+        del gamma2
+        del gamma2_
+        del gamma
+    else:
+        del weight1_
 
 if conjoined == 2:
     med1 = np.zeros(8)
@@ -387,7 +403,7 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
-        print j,i
+        #print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -404,6 +420,18 @@ if conjoined == 2:
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
+    if weightin2 == "gamma":
+        del weight1
+        del weight1_
+        del weight2_1
+        del weight2_1_
+        del weight2_2
+        del weight2_2_
+    else:
+        del weight1
+        del weight1_
+        del weight2
+        del weight2_
 
     filters1 = filters
     for j in range(8):
@@ -438,7 +466,19 @@ if conjoined == 2:
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
-        print j,i
+        #print j,i
+    if weightin1 == "gamma":
+        del weight1_
+        del weight2_
+        del gamma1
+        del gamma1_
+        del gamma2
+        del gamma2_
+        del gamma
+    else:
+        del weight1_
+        del weight2_
+
 
 if conjoined == 3:
     med1 = np.zeros(8)
@@ -469,7 +509,7 @@ if conjoined == 3:
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
-        print j,i
+        #print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -491,6 +531,22 @@ if conjoined == 3:
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
     E_w3_inf = np.max([1, round(med_weight1 * (constr_weight3 - constrwidth_weight3_inf))])
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
+    if weightin2 == "gamma":
+        del weight1
+        del weight1_
+        del weight2_1
+        del weight2_1_
+        del weight2_2
+        del weight2_2_
+        del weight3
+        del weight3_
+    else:
+        del weight1
+        del weight1_
+        del weight2
+        del weight2_
+        del weight3
+        del weight3_
 
     filters1 = filters
     for j in range(8):
@@ -537,7 +593,20 @@ if conjoined == 3:
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
-        print j,i
+        #print j,i
+    if weightin1 == "gamma":
+        del weight1_
+        del weight2_
+        del weight3_
+        del gamma1
+        del gamma1_
+        del gamma2
+        del gamma2_
+        del gamma
+    else:
+        del weight1_
+        del weight2_
+        del weight3_
 
 if conjoined == 4:
     med1 = np.zeros(8)
@@ -573,7 +642,7 @@ if conjoined == 4:
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
-        print j,i
+        #print j,i
       if weightin2 != "gamma":
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -600,6 +669,26 @@ if conjoined == 4:
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
+    if weightin2 == "gamma":
+        del weight1
+        del weight1_
+        del weight2_1
+        del weight2_1_
+        del weight2_2
+        del weight2_2_
+        del weight3
+        del weight3_
+        del weight4
+        del weight4_
+    else:
+        del weight1
+        del weight1_
+        del weight2
+        del weight2_
+        del weight3
+        del weight3_
+        del weight4
+        del weight4_
 
     filters1 = filters
     for j in range(8):
@@ -660,7 +749,22 @@ if conjoined == 4:
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
             weight4 = np.append(weight4,weight4_)
-        print j,i
+        #print j,i
+    if weightin1 == "gamma":
+        del weight1_
+        del weight2_
+        del weight3_
+        del weight4_
+        del gamma1
+        del gamma1_
+        del gamma2
+        del gamma2_
+        del gamma
+    else:
+        del weight1_
+        del weight2_
+        del weight3_
+        del weight4_
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
