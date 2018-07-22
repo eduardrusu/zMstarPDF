@@ -56,13 +56,14 @@ if conjoined == 5:
     weightin5 = str(sys.argv[15])
 
 print "conjoined:", conjoined
-#root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
-root = "/Volumes/LaCieSubaru/MSweights/"
+#root = "/Volumes/LaCieSubaru/MSweights/"
+rootcode = "/lfs08/rusucs/code/"
+#rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
 #rootcode = "/mnt/scratch/rusucs/code/"
-rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
-#rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
-rootout = "/Volumes/LaCieSubaru/kapparesults/"
+rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
+#rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
@@ -101,9 +102,10 @@ if lens == "WFI2033":
 if lens == "J1206":
     filters = "griK"
     plane = 34
-    constr_gamma = 0.04
-    constrwidth_gamma_inf = 0.03
-    constrwidth_gamma_sup = 0.05
+    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or handpicked == 'nohandpicked'):
+        constr_gamma = 0.04
+        constrwidth_gamma_inf = 0.03
+        constrwidth_gamma_sup = 0.05
 
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile

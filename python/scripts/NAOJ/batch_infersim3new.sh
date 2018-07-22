@@ -14,4 +14,7 @@ cd $PBS_O_HOME
 # Run your executable
 cd /lfs08/rusucs/code/
 
-python inferkappa_unbiasedwithshearJ1206withHE0435.py J1206 -1.0 -1.0 nohandpicked fiducial 5 120 24 meds gal oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py J1206 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py J1206 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured med 120_gal 120_zoverr 45_gal 45_zoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py J1206 -1.0 -1.0 nohandpicked fiducial notempty 5 24 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py J1206 -1.0 -1.0 nohandpicked fiducial notempty 5 24 measured med 120_gal 120_zoverr 45_gal 45_zoverr
