@@ -68,7 +68,7 @@ min_kappa = -0.10
 max_kappa = 1
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 4
+increment2 = 10
 increment3 = 4
 increment4 = 2
 
@@ -291,18 +291,20 @@ def readfile(file,usecols):
             data = fitsio.read(file, columns=usecols, ext=i+1)
         else:
             data = np.r_[data,fitsio.read(file, columns=usecols, ext=i+1)]
+    # for speed, fitsio always returns columns and rows in order, so for instance in [1,2,3] even when usecols=[2,3,1]
+    sort = np.argsort(np.argsort(usecols))
     if len(usecols) == 1:
         return data[data.dtype.names[0]]
     if len(usecols) == 2:
-        return data[data.dtype.names[0]],data[data.dtype.names[1]]
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]]
     if len(usecols) == 3:
-        return data[data.dtype.names[0]],data[data.dtype.names[1]],data[data.dtype.names[2]]
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]]
     if len(usecols) == 4:
-        return data[data.dtype.names[0]],data[data.dtype.names[1]],data[data.dtype.names[2]],data[data.dtype.names[3]]
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]]
     if len(usecols) == 5:
-        return data[data.dtype.names[0]],data[data.dtype.names[1]],data[data.dtype.names[2]],data[data.dtype.names[3]],data[data.dtype.names[4]]
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]]
     if len(usecols) == 6:
-        return data[data.dtype.names[0]],data[data.dtype.names[1]],data[data.dtype.names[2]],data[data.dtype.names[3]],data[data.dtype.names[4]],data[data.dtype.names[5]]
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]]
 
 if conjoined == 1:
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
@@ -396,7 +398,7 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,1,2])
+            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,2,3])
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -503,7 +505,7 @@ if conjoined == 3:
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index))
+            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -638,7 +640,7 @@ if conjoined == 4:
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index,weight4_index))
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
