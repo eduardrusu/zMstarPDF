@@ -15,6 +15,7 @@ import scipy as sp
 from scipy.stats import norm
 import numpy as np
 import time
+import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
 
