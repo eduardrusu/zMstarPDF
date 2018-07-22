@@ -67,9 +67,9 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 4
-increment3 = 4
+increment1 = 2 # refers to the E interval from Greene et al. 2014
+increment2 = 2
+increment3 = 2
 increment4 = 2
 
 # define the shear constraints
