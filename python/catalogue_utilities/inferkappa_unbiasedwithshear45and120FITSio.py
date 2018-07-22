@@ -1,7 +1,7 @@
 # CE Rusu July 21 2018
 # NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
 # Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured med 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
@@ -114,33 +114,33 @@ measured_index_sup120 = 5
 
 if lens != "J1206":
     def declareweight(weightin):
-        if weightin == "gal": weight_index = 4
-        if weightin == "z": weight_index = 6
-        if weightin == "mass": weight_index = 8
-        if weightin == "mass2": weight_index = 10
-        if weightin == "mass3": weight_index = 12
-        if weightin == "oneoverr": weight_index = 14
-        if weightin == "zoverr": weight_index = 16
-        if weightin == "massoverr": weight_index = 18
-        if weightin == "mass2overr": weight_index = 20
-        if weightin == "mass3overr": weight_index = 22
-        if weightin == "mass2rms": weight_index = 24
-        if weightin == "mass3rms": weight_index = 26
-        if weightin == "mass2overrrms": weight_index = 28
-        if weightin == "mass3overrrms": weight_index = 30
-        if weightin == "flexion": weight_index = 32
-        if weightin == "tidal": weight_index = 34
-        if weightin == "SIS": weight_index = 36
-        if weightin == "SIShalo": weight_index = 38
-        if weightin == "gamma": weight_index = None
+        if weightin.split('_')[1] == "gal": weight_index = 4
+        if weightin.split('_')[1] == "z": weight_index = 6
+        if weightin.split('_')[1] == "mass": weight_index = 8
+        if weightin.split('_')[1] == "mass2": weight_index = 10
+        if weightin.split('_')[1] == "mass3": weight_index = 12
+        if weightin.split('_')[1] == "oneoverr": weight_index = 14
+        if weightin.split('_')[1] == "zoverr": weight_index = 16
+        if weightin.split('_')[1] == "massoverr": weight_index = 18
+        if weightin.split('_')[1] == "mass2overr": weight_index = 20
+        if weightin.split('_')[1] == "mass3overr": weight_index = 22
+        if weightin.split('_')[1] == "mass2rms": weight_index = 24
+        if weightin.split('_')[1] == "mass3rms": weight_index = 26
+        if weightin.split('_')[1] == "mass2overrrms": weight_index = 28
+        if weightin.split('_')[1] == "mass3overrrms": weight_index = 30
+        if weightin.split('_')[1] == "flexion": weight_index = 32
+        if weightin.split('_')[1] == "tidal": weight_index = 34
+        if weightin.split('_')[1] == "SIS": weight_index = 36
+        if weightin.split('_')[1] == "SIShalo": weight_index = 38
+        if weightin.split('_')[1] == "gamma": weight_index = None
         return weight_index
 if lens == "J1206":
     def declareweight(weightin):
-        if weightin == "gal": weight_index = 4
-        if weightin == "z": weight_index = 5
-        if weightin == "oneoverr": weight_index = 6
-        if weightin == "zoverr": weight_index = 7
-        if weightin == "gamma": weight_index = None
+        if weightin.split('_')[1] == "gal": weight_index = 4
+        if weightin.split('_')[1] == "z": weight_index = 5
+        if weightin.split('_')[1] == "oneoverr": weight_index = 6
+        if weightin.split('_')[1] == "zoverr": weight_index = 7
+        if weightin.split('_')[1] == "gamma": weight_index = None
         return weight_index
 
 weight1_index = declareweight(weightin1)
