@@ -1,6 +1,7 @@
-# CE Rusu Mar 2 2018
+# CE Rusu July 21 2018
+# NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
 # Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120emptymsk.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty 5 23 meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured meds 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
@@ -25,45 +26,46 @@ other = str(sys.argv[5]) # refers to an optional suffix for the shear constraint
 empty = str(sys.argv[6])
 innermask = str(sys.argv[7])
 mag = str(sys.argv[8])
-mode = str(sys.argv[9])
-conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
+compmeas = str(sys.argv[9])
+mode = str(sys.argv[10])
+conjoined = len(sys.argv) - 11 # total number of arguments including code name, minus the number of ones that are not weights
 
 if handpicked == 'nohandpicked': handpickedstr = ''
 else: handpickedstr = '_'+str(sys.argv[4])
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[10])
+    weightin1 = str(sys.argv[11])
 if conjoined == 2:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
+    weightin1 = str(sys.argv[11])
+    weightin2 = str(sys.argv[12])
 if conjoined == 3:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
+    weightin1 = str(sys.argv[11])
+    weightin2 = str(sys.argv[12])
+    weightin3 = str(sys.argv[13])
 if conjoined == 4:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
+    weightin1 = str(sys.argv[11])
+    weightin2 = str(sys.argv[12])
+    weightin3 = str(sys.argv[13])
+    weightin4 = str(sys.argv[14])
 if conjoined == 5:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
-    weightin5 = str(sys.argv[14])
+    weightin1 = str(sys.argv[11])
+    weightin2 = str(sys.argv[12])
+    weightin3 = str(sys.argv[13])
+    weightin4 = str(sys.argv[14])
+    weightin5 = str(sys.argv[15])
 
 print "conjoined:", conjoined
 #root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 root = "/Volumes/LaCieSubaru/MSweights/"
 #rootcode = "/mnt/scratch/rusucs/code/"
-rootcode = "/Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/"
+rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
 #rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/WFI2033/weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
@@ -85,62 +87,71 @@ if lens == "WFI2033":
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
+        constr_gamma = 0.10
+        constrwidth_gamma_inf = 0.085
+        constrwidth_gamma_sup = 0.115
+    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or float(zsup) > 0):
+        constr_gamma = 0.095
+        constrwidth_gamma_inf = 0.070
+        constrwidth_gamma_sup = 0.110
     filters = "ugrizJHK"
     print 'shear: ',constr_gamma
+if lens == "J1206":
+    filters = "griK"
+    plane = 34
+    constr_gamma = 0.04
+    constrwidth_gamma_inf = 0.03
+    constrwidth_gamma_sup = 0.05
 
 # declare which weights to read
-if mag == "23": # the only option currently working
-    measured_index45 = 0 # specifies the column index in weightsfile
-    measured_index_inf45 = 1
-    measured_index_sup45 = 2
-    measured_index120 = 3
-    measured_index_inf120 = 4
-    measured_index_sup120 = 5
+measured_index45 = 0 # specifies the column index in weightsfile
+measured_index_inf45 = 1
+measured_index_sup45 = 2
+measured_index120 = 3
+measured_index_inf120 = 4
+measured_index_sup120 = 5
 
-def declareweight(weightin): # column index in the files created by kappamed_insertstarsnobeta.py
-    if weightin.split('_')[1] == "gal": weight_index = 4
-    if weightin.split('_')[1] == "z": weight_index = 5
-    if weightin.split('_')[1] == "mass": weight_index = 6
-    if weightin.split('_')[1] == "mass2": weight_index = 7
-    if weightin.split('_')[1] == "mass3": weight_index = 8
-    if weightin.split('_')[1] == "oneoverr": weight_index = 9
-    if weightin.split('_')[1] == "zoverr": weight_index = 10
-    if weightin.split('_')[1] == "massoverr": weight_index = 11
-    if weightin.split('_')[1] == "mass2overr": weight_index = 12
-    if weightin.split('_')[1] == "mass3overr": weight_index = 13
-    if weightin.split('_')[1] == "mass2rms": weight_index = 14
-    if weightin.split('_')[1] == "mass3rms": weight_index = 15
-    if weightin.split('_')[1] == "mass2overrrms": weight_index = 16
-    if weightin.split('_')[1] == "mass3overrrms": weight_index = 17
-    if weightin.split('_')[1] == "flexion": weight_index = 18
-    if weightin.split('_')[1] == "tidal": weight_index = 19
-    if weightin.split('_')[1] == "SIS": weight_index = 20
-    if weightin.split('_')[1] == "SIShalo": weight_index = 21
-    if weightin.split('_')[1] == "gamma": weight_index = None
-    return weight_index
+if lens != "J1206":
+    def declareweight(weightin):
+        if weightin == "gal": weight_index = 4
+        if weightin == "z": weight_index = 6
+        if weightin == "mass": weight_index = 8
+        if weightin == "mass2": weight_index = 10
+        if weightin == "mass3": weight_index = 12
+        if weightin == "oneoverr": weight_index = 14
+        if weightin == "zoverr": weight_index = 16
+        if weightin == "massoverr": weight_index = 18
+        if weightin == "mass2overr": weight_index = 20
+        if weightin == "mass3overr": weight_index = 22
+        if weightin == "mass2rms": weight_index = 24
+        if weightin == "mass3rms": weight_index = 26
+        if weightin == "mass2overrrms": weight_index = 28
+        if weightin == "mass3overrrms": weight_index = 30
+        if weightin == "flexion": weight_index = 32
+        if weightin == "tidal": weight_index = 34
+        if weightin == "SIS": weight_index = 36
+        if weightin == "SIShalo": weight_index = 38
+        if weightin == "gamma": weight_index = None
+        return weight_index
+if lens == "J1206":
+    def declareweight(weightin):
+        if weightin == "gal": weight_index = 4
+        if weightin == "z": weight_index = 5
+        if weightin == "oneoverr": weight_index = 6
+        if weightin == "zoverr": weight_index = 7
+        if weightin == "gamma": weight_index = None
+        return weight_index
 
-if mag == "23":
-    weight1_index = declareweight(weightin1)
+weight1_index = declareweight(weightin1)
 if conjoined >= 2:
-    if mag == "23":
-        weight2_index = declareweight(weightin2)
+    weight2_index = declareweight(weightin2)
     if conjoined >= 3:
-        if mag == "23":
-            weight3_index = declareweight(weightin3)
+        weight3_index = declareweight(weightin3)
         if conjoined >= 4:
-            if mag == "23":
-                weight4_index = declareweight(weightin4)
+            weight4_index = declareweight(weightin4)
             if conjoined == 5:
-                if mag == "23":
-                    weight5_index = declareweight(weightin5)
+                weight5_index = declareweight(weightin5)
 
 # read weight constraints
 constr_gal_meds45 = weightsfile[measured_index45][0]
@@ -340,44 +351,66 @@ print "Reading..."
 
 if empty == 'empty': emptystr = '_emptymsk'
 else: emptystr = ''
-if mode == "sum": str1 = "sum"
-if mode == "meds": str1 = "med"
 if conjoined == 5:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr)
 if conjoined == 4:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr)
 if conjoined == 3:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr)
 if conjoined == 2:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_LOS_increments%s_%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr)
 if conjoined == 1:
-    output = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr)
-    outputLOS = '%skappahist_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_LOS_increments%s%s.cat' % (rootout,lens,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr)
+
+def readfile(file,usecols):
+    f = fitsio.FITS(file)
+    print f # I need to print it, or f.hdu_list will not read
+    ext = len(f.hdu_list)
+    for i in range(ext - 1):
+        if i == 0:
+            data = fitsio.read(file, columns=usecols, ext=i+1)
+        else:
+            data = np.r_[data,fitsio.read(file, columns=usecols, ext=i+1)]
+    # for speed, fitsio always returns columns and rows in order, so for instance in [1,2,3] even when usecols=[2,3,1]
+    sort = np.argsort(np.argsort(usecols))
+    if len(usecols) == 1:
+        return data[data.dtype.names[0]]
+    if len(usecols) == 2:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]]
+    if len(usecols) == 3:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]]
+    if len(usecols) == 4:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]]
+    if len(usecols) == 5:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]]
+    if len(usecols) == 6:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]]
+    if len(usecols) == 7:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]],data[data.dtype.names[sort[6]]]
+    if len(usecols) == 8:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]],data[data.dtype.names[sort[6]]],data[data.dtype.names[sort[7]]]
             
 def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup):
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
     med1 = np.zeros(8)
+    filters1 = "ugriz"
     for j in range(8):
       for i in range(8):
         if type(weight1_index) == int:
-            weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index], unpack=True)
+            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3], unpack=True)
+            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3])
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
             else:
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
-        print j,i
+        #print j,i
       if type(weight1_index) == int:
         med1[j] = np.median(weight1)
       else:
@@ -394,10 +427,11 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
 def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
     med1 = np.zeros(8)
     med2 = np.zeros(8)
+    filters1 = "ugriz"
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index), unpack=True)
+            weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -405,7 +439,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,1,2], unpack=True)
+            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,2,3])
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -414,7 +448,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight1 = np.append(weight1,weight1_)
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
-        print j,i
+        #print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -437,10 +471,11 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
     med1 = np.zeros(8)
     med2 = np.zeros(8)
     med3 = np.zeros(8)
+    filters1 = "ugriz"
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
+            weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -450,7 +485,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -461,7 +496,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
-        print j,i
+        #print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -490,10 +525,11 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
     med2 = np.zeros(8)
     med3 = np.zeros(8)
     med4 = np.zeros(8)
+    filters1 = "ugriz"
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -505,7 +541,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -518,7 +554,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
-        print j,i
+        #print j,i
       if type(weight2_index) == int:
         med1[j] = np.median(weight1)
         med2[j] = np.median(weight2)
@@ -550,13 +586,14 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
 
 def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
     ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
+    filters1 = filters
     for j in range(8):
       for i in range(8):
         if type(weight1_index) == int:
-            id_,kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index), unpack=True)
+            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index))
             weight1_ = weight1_ / med_weight1
         else:
-            id_,kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3), unpack=True)
+            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -579,19 +616,20 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
             ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
-        print j,i
+        #print j,i
     return id,ind1,ind2,kappa,weight1
 
 
 def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index), unpack=True)
+            id_,kappa_, weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
         else:
-            id_,kappa_,weight1_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,2,3), unpack=True)
+            id_,kappa_,weight1_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -624,19 +662,20 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
-        print j,i
+        #print j,i
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index), unpack=True)
+            id_,kappa_, weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
         else:
-            id_,kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,2,3), unpack=True)
+            id_,kappa_, weight1_,weight3_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -681,20 +720,21 @@ def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,con
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
-        print j,i
+        #print j,i
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+            id_,kappa_, weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         else:
-            id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
+            id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -752,25 +792,25 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
             weight4 = np.append(weight4,weight4_)
-        print j,i
+        #print j,i
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
 
 
 
 def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
-        file = "%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
-        f = open(file)
-        line = f.readline()
-        if 'galinner' not in line.split()[-1]:
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
         else:
             if type(weight1_index) == int:
-                id_,kappa_, weight1_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,-1), unpack=True)
+                id_,kappa_, weight1_,galinner_ = readfile(file, usecols=(0,1,weight1_index,len(f[1].get_colnames()) - 1), unpack=True)
                 weight1_ = weight1_ / med_weight1
             else:
-                id_,kappa_, gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,2,3,-1), unpack=True)
+                id_,kappa_, gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,2,3,len(f[1].get_colnames()) - 1))
                 gamma1 = gamma1_
                 gamma2 = gamma2_
                 gamma = gamma1 # just so that the array has the correct shape
@@ -797,24 +837,24 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
                 ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
-            print j,i
+            #print j,i
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
-        file = "%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
-        f = open(file)
-        line = f.readline()
-        if 'galinner' not in line.split()[-1]:
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
         else:
             if type(weight2_index) == int:
-                id_,kappa_, weight1_,weight2_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,weight2_index,-1), unpack=True)
+                id_,kappa_, weight1_,weight2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,len(f[1].get_colnames()) - 1))
                 weight1_ = weight1_ / med_weight1
                 weight2_ = weight2_ / med_weight2
             else:
-                id_,kappa_,weight1_,gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,2,3,-1), unpack=True)
+                id_,kappa_,weight1_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,2,3,len(f[1].get_colnames()) - 1))
                 gamma1 = gamma1_
                 gamma2 = gamma2_
                 gamma = gamma1 # just so that the array has the correct shape
@@ -853,25 +893,25 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
-            print j,i
+            #print j,i
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
-        file = "%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
-        f = open(file)
-        line = f.readline()
-        if 'galinner' not in line.split()[-1]:
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
         else:
             if type(weight2_index) == int:
-                id_,kappa_, weight1_,weight2_,weight3_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,-1), unpack=True)
+                id_,kappa_, weight1_,weight2_,weight3_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,len(f[1].get_colnames()) - 1))
                 weight1_ = weight1_ / med_weight1
                 weight2_ = weight2_ / med_weight2
                 weight3_ = weight3_ / med_weight3
             else:
-                id_,kappa_, weight1_,weight3_,gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,weight3_index,2,3,-1), unpack=True)
+                id_,kappa_, weight1_,weight3_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight3_index,2,3,len(f[1].get_colnames()) - 1))
                 gamma1 = gamma1_
                 gamma2 = gamma2_
                 gamma = gamma1 # just so that the array has the correct shape
@@ -927,22 +967,22 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
+    filters1 = filters
     for j in range(8):
       for i in range(8):
-        file = "%snobeta35measured%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.cat" % (root,str1,filters,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
-        f = open(file)
-        line = f.readline()
-        if 'galinner' not in line.split()[-1]:
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
         else:
             if type(weight2_index) == int:
-                id_,kappa_, weight1_,weight2_,weight3_,weight4_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index,-1), unpack=True)
+                id_,kappa_, weight1_,weight2_,weight3_,weight4_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index,len(f[1].get_colnames()) - 1))
                 weight1_ = weight1_ / med_weight1
                 weight2_ = weight2_ / med_weight2
                 weight3_ = weight3_ / med_weight3
                 weight4_ = weight4_ / med_weight4
             else:
-                id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3,-1), unpack=True)
+                id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3,len(f[1].get_colnames()) - 1))
                 gamma1 = gamma1_
                 gamma2 = gamma2_
                 gamma = gamma1 # just so that the array has the correct shape
@@ -1010,7 +1050,7 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
-            print j,i
+            #print j,i
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
 
 if conjoined == 1:
@@ -1553,8 +1593,8 @@ if conjoined == 1:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
                     LOS = LOS + data.size
 
-np.savetxt(output,unbiased_kappa_constrained,fmt='%s',delimiter='\t',newline='\n')
-np.savetxt(outputLOS,np.array([LOS]),fmt='%s',delimiter='\t',newline='\n')
+head = 'LOS: %d' % np.array([LOS])
+np.savetxt(output,unbiased_kappa_constrained,header=head,fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 
 if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5):

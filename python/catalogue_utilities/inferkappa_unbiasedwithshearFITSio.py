@@ -1,6 +1,6 @@
 # CE Rusu July 21 2018
-# NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES FOR 23 and 24
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear_23or24_allowsJ1206.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 45 23 measured med gal gamma oneoverr mass
+# NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshearFITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 45 23 measured med gal gamma oneoverr mass
 # It does not accept mixed radii or selecting empty inner radii. When a single radius is used (not mixing different radii constraints) this code is faster than inferkappa_unbiasedwithshear45and120_23or24_allowsemptymskandJ1206 because it doesn't read the id column
 # The input weight files have to be FITS files. In case of multiple data extensions, data is combined from every extension
 # J1206 is considered separately because their the input weight files do not include columns which use mass
@@ -82,14 +82,14 @@ if lens == "WFI2033":
         constr_gamma = 0.193
         constrwidth_gamma_inf = 0.178
         constrwidth_gamma_sup = 0.208
-    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
-    if other == 'fiducial' and (handpicked == 'handpicked' or handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.09
-        constrwidth_gamma_inf = 0.075
-        constrwidth_gamma_sup = 0.105
+    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
+        constr_gamma = 0.10
+        constrwidth_gamma_inf = 0.085
+        constrwidth_gamma_sup = 0.115
+    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or float(zsup) > 0):
+        constr_gamma = 0.095
+        constrwidth_gamma_inf = 0.070
+        constrwidth_gamma_sup = 0.110
     filters = "ugrizJHK"
     print 'shear: ',constr_gamma
 if lens == "J1206":
@@ -110,50 +110,27 @@ if radius == "120":
     measured_index_sup = 5
 
 if lens != "J1206":
-    if mag == '24':
-        def declareweight(weightin):
-            if weightin == "gal": weight_index = 4
-            if weightin == "z": weight_index = 6
-            if weightin == "mass": weight_index = 8
-            if weightin == "mass2": weight_index = 10
-            if weightin == "mass3": weight_index = 12
-            if weightin == "oneoverr": weight_index = 14
-            if weightin == "zoverr": weight_index = 16
-            if weightin == "massoverr": weight_index = 18
-            if weightin == "mass2overr": weight_index = 20
-            if weightin == "mass3overr": weight_index = 22
-            if weightin == "mass2rms": weight_index = 24
-            if weightin == "mass3rms": weight_index = 26
-            if weightin == "mass2overrrms": weight_index = 28
-            if weightin == "mass3overrrms": weight_index = 30
-            if weightin == "flexion": weight_index = 32
-            if weightin == "tidal": weight_index = 34
-            if weightin == "SIS": weight_index = 36
-            if weightin == "SIShalo": weight_index = 38
-            if weightin == "gamma": weight_index = None
-            return weight_index
-    if mag == '23':
-        def declareweight(weightin):
-            if weightin == "gal": weight_index = 5
-            if weightin == "z": weight_index = 7
-            if weightin == "mass": weight_index = 9
-            if weightin == "mass2": weight_index = 11
-            if weightin == "mass3": weight_index = 13
-            if weightin == "oneoverr": weight_index = 15
-            if weightin == "zoverr": weight_index = 17
-            if weightin == "massoverr": weight_index = 19
-            if weightin == "mass2overr": weight_index = 21
-            if weightin == "mass3overr": weight_index = 23
-            if weightin == "mass2rms": weight_index = 25
-            if weightin == "mass3rms": weight_index = 27
-            if weightin == "mass2overrrms": weight_index = 29
-            if weightin == "mass3overrrms": weight_index = 31
-            if weightin == "flexion": weight_index = 33
-            if weightin == "tidal": weight_index = 35
-            if weightin == "SIS": weight_index = 37
-            if weightin == "SIShalo": weight_index = 39
-            if weightin == "gamma": weight_index = None
-            return weight_index
+    def declareweight(weightin):
+        if weightin == "gal": weight_index = 4
+        if weightin == "z": weight_index = 6
+        if weightin == "mass": weight_index = 8
+        if weightin == "mass2": weight_index = 10
+        if weightin == "mass3": weight_index = 12
+        if weightin == "oneoverr": weight_index = 14
+        if weightin == "zoverr": weight_index = 16
+        if weightin == "massoverr": weight_index = 18
+        if weightin == "mass2overr": weight_index = 20
+        if weightin == "mass3overr": weight_index = 22
+        if weightin == "mass2rms": weight_index = 24
+        if weightin == "mass3rms": weight_index = 26
+        if weightin == "mass2overrrms": weight_index = 28
+        if weightin == "mass3overrrms": weight_index = 30
+        if weightin == "flexion": weight_index = 32
+        if weightin == "tidal": weight_index = 34
+        if weightin == "SIS": weight_index = 36
+        if weightin == "SIShalo": weight_index = 38
+        if weightin == "gamma": weight_index = None
+        return weight_index
 if lens == "J1206":
     def declareweight(weightin):
         if weightin == "gal": weight_index = 4
