@@ -652,12 +652,12 @@ print "Writing output..."
 count = ">75 percent and >50 percent: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
 mskname = 'msk%sarcsecrad%sarcsecgap.fits'[0:-5] % (radius,inner)
-fcount = open('%s/%s_%s_%s_%s_%s_%s_zgap%s_%s%s_count.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
+fcount = open('%s/%s_%s_%s_%s_%s_%s_zgap%s_%s%s_count.cat' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
 fcount.write(count)
 fcount.close()
 
-fout50 = '%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75 = '%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+fout50 = '%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-5],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+fout75 = '%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-5],mskname,lensID,det,irac,type,zinf,zsup,suffix)
 os.system('rm -f %s' % fout50) # '-f' ignores non-existent files
 os.system('rm -f %s' % fout75)
 
