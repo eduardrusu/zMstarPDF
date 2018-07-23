@@ -746,7 +746,7 @@ def output(frac,unmaskedcell,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_gal
                             out[72] = 1.0*lens_convergence_24eazy_[k][l][i][j][n][n]/field_convergence_24_[k][l][i][j][n]
                             out[73] = 1.0*lens_convergence_23eazy_[k][l][i][j][n][n]/field_convergence_23_[k][l][i][j][n]
                             out[74] = 1.0*lens_convergencehalo_24eazy_[k][l][i][j][n][n]/field_convergencehalo_24_[k][l][i][j][n]
-                            out[75] = 1.0*lens_convergencehalo_23eazy_[k][l][i][j][n][n]/field_convergencehalo_23_[k][l][i][j][n])
+                            out[75] = 1.0*lens_convergencehalo_23eazy_[k][l][i][j][n][n]/field_convergencehalo_23_[k][l][i][j][n]
                             if start == True:
                                 if n == 0: outlist0 = out
                                 if n == 1: outlist1 = out
