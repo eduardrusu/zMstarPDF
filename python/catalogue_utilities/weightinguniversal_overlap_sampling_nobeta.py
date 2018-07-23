@@ -738,7 +738,7 @@ def output(frac_,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_g
                             out['55_lens_massoverr_24eazy'] = np.float32(1.0*lens_massoverr_24eazy_[k][l][i][j][n]/field_massoverr_24_[k][l][i][j])
                             out['56_lens_massoverr_23eazy'] = np.float32(1.0*lens_massoverr_23eazy_[k][l][i][j][n]/field_massoverr_23_[k][l][i][j])
                             out['57_lens_mass2overr_24eazy'] = np.float32(1.0*lens_mass2overr_24eazy_[k][l][i][j][n]/field_mass2overr_24_[k][l][i][j])
-                            out['58_lens_mass2overr_23eazy] = np.float32(1.0*lens_mass2overr_23eazy_[k][l][i][j][n]/field_mass2overr_23_[k][l][i][j])
+                            out['58_lens_mass2overr_23eazy'] = np.float32(1.0*lens_mass2overr_23eazy_[k][l][i][j][n]/field_mass2overr_23_[k][l][i][j])
                             out['59_lens_mass3overr_24eazy'] = np.float32(1.0*lens_mass3overr_24eazy_[k][l][i][j][n]/field_mass3overr_24_[k][l][i][j])
                             out['60_lens_mass3overr_23eazy'] = np.float32(1.0*lens_mass3overr_23eazy_[k][l][i][j][n]/field_mass3overr_23_[k][l][i][j])
                             out['61_lens_mass2rms_24eazy'] = np.float32(1.0*lens_mass2rms_24eazy_[k][l][i][j][n]/field_mass2rms_24_[k][l][i][j])
