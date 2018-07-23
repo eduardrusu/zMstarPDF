@@ -34,6 +34,7 @@ from astropy.coordinates import SkyCoord
 import time
 #import pandas as pd
 import astropy.table as table
+from astropy.table import Table
 
 lensID = str(sys.argv[1])
 fieldID = str(sys.argv[2])
