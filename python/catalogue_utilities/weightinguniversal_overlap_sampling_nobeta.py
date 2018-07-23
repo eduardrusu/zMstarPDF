@@ -681,7 +681,7 @@ def output(frac,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_ga
                         #print "d",i,j,k,l,field_gal_24[k][l][i][j] # test to check if the function actually returns the result globally
                         #print "d",i,j,k,l,field_gal_23[k][l][i][j] # test to check if the function actually returns the result globally
                         if (unmaskedcell[k][l][i][j] >= frac) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0):
-                            out[0] = k
+                            out[0] = k 
                             out[1] = l
                             out[2] = i
                             out[3] = j
