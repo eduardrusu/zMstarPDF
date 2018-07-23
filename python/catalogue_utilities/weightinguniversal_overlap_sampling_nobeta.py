@@ -663,7 +663,16 @@ os.system('rm -f %s' % fout75)
 
 def output(frac,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_gal_24_,lens_gal_23bpz_,field_gal_23_,lens_zweight_24bpz_,field_zweight_24_,lens_zweight_23bpz_,field_zweight_23_,lens_mass_24bpz_,field_mass_24_,lens_mass_23bpz_,field_mass_23_,lens_mass2_24bpz_,field_mass2_24_,lens_mass2_23bpz_,field_mass2_23_,lens_mass3_24bpz_,field_mass3_24_,lens_mass3_23bpz_,field_mass3_23_,lens_oneoverr_24bpz_,field_oneoverr_24_,lens_oneoverr_23bpz_,field_oneoverr_23_,lens_zoverr_24bpz_,field_zoverr_24_,lens_zoverr_23bpz_,field_zoverr_23_,lens_massoverr_24bpz_,field_massoverr_24_,lens_massoverr_23bpz_,field_massoverr_23_,lens_mass2overr_24bpz_,field_mass2overr_24_,lens_mass2overr_23bpz_,field_mass2overr_23_,lens_mass3overr_24bpz_,field_mass3overr_24_,lens_mass3overr_23bpz_,field_mass3overr_23_,lens_mass2rms_24bpz_,field_mass2rms_24_,lens_mass2rms_23bpz_,field_mass2rms_23_,lens_mass3rms_24bpz_,field_mass3rms_24_,lens_mass3rms_23bpz_,field_mass3rms_23_,lens_mass2overrms_24bpz_,field_mass2overrms_24_,lens_mass2overrms_23bpz_,field_mass2overrms_23_,lens_mass3overrms_24bpz_,field_mass3overrms_24_,lens_mass3overrms_23bpz_,field_mass3overrms_23_,lens_flexion_24bpz_,field_flexion_24_,lens_flexion_23bpz_,field_flexion_23_,lens_tidal_24bpz_,field_tidal_24_,lens_tidal_23bpz_,field_tidal_23_,lens_convergence_24bpz_,field_convergence_24_,lens_convergence_23bpz_,field_convergence_23_,lens_convergencehalo_24bpz_,field_convergencehalo_24_,lens_convergencehalo_23bpz_,field_convergencehalo_23_,lens_gal_24eazy_,lens_gal_23eazy_,lens_zweight_24eazy_,lens_zweight_23eazy_,lens_mass_24eazy_,lens_mass_23eazy_,lens_mass2_24eazy_,lens_mass2_23eazy_,lens_mass3_24eazy_,lens_mass3_23eazy_,lens_oneoverr_24eazy_,lens_oneoverr_23eazy_,lens_zoverr_24eazy_,lens_zoverr_23eazy_,lens_massoverr_24eazy_,lens_massoverr_23eazy_,lens_mass2overr_24eazy_,lens_mass2overr_23eazy_,lens_mass3overr_24eazy_,lens_mass3overr_23eazy_,lens_mass2rms_24eazy_,lens_mass2rms_23eazy_,lens_mass3rms_24eazy_,lens_mass3rms_23eazy_,lens_mass2overrms_24eazy_,lens_mass2overrms_23eazy_,lens_mass3overrms_24eazy_,lens_mass3overrms_23eazy_,lens_flexion_24eazy_,lens_flexion_23eazy_,lens_tidal_24eazy_,lens_tidal_23eazy_,lens_convergence_24eazy_,lens_convergence_23eazy_,lens_convergencehalo_24eazy_,lens_convergencehalo_23eazy_):
     out = np.zeros(76)
-    start = True
+    start0 = True
+    start1 = True
+    start2 = True
+    start3 = True
+    start4 = True
+    start5 = True
+    start6 = True
+    start7 = True
+    start8 = True
+    start9 = True
     for k in range(overlap):
         for l in range(overlap):
             for i in range(cells_on_a_side):
@@ -748,29 +757,46 @@ def output(frac,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_ga
                             out[73] = 1.0*lens_convergence_23eazy_[k][l][i][j][n]/field_convergence_23_[k][l][i][j]
                             out[74] = 1.0*lens_convergencehalo_24eazy_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j]
                             out[75] = 1.0*lens_convergencehalo_23eazy_[k][l][i][j][n]/field_convergencehalo_23_[k][l][i][j]
-                            if start == True:
-                                if n == 0: outlist0 = out
-                                if n == 1: outlist1 = out
-                                if n == 2: outlist2 = out
-                                if n == 3: outlist3 = out
-                                if n == 4: outlist4 = out
-                                if n == 5: outlist5 = out
-                                if n == 6: outlist6 = out
-                                if n == 7: outlist7 = out
-                                if n == 8: outlist8 = out
-                                if n == 9: outlist9 = out
-                            else:
-                                if n == 0: outlist0 = np.c_[outlist0,out]
-                                if n == 1: outlist1 = np.c_[outlist1,out]
-                                if n == 2: outlist2 = np.c_[outlist2,out]
-                                if n == 3: outlist3 = np.c_[outlist3,out]
-                                if n == 4: outlist4 = np.c_[outlist4,out]
-                                if n == 5: outlist5 = np.c_[outlist5,out]
-                                if n == 6: outlist6 = np.c_[outlist6,out]
-                                if n == 7: outlist7 = np.c_[outlist7,out]
-                                if n == 8: outlist8 = np.c_[outlist8,out]
-                                if n == 9: outlist9 = np.c_[outlist9,out]
-                            start = False
+                            if n == 0:
+                                if start0 == True: outlist0 = out
+                                else: outlist0 = np.c_[outlist0,out]
+                                start0 = False
+                            if n == 1:
+                                if start1 == True: outlist1 = out
+                                else: outlist1 = np.c_[outlist1,out]
+                                start1 = False
+                            if n == 2:
+                                if start2 == True: outlist2 = out
+                                else: outlist2 = np.c_[outlist2,out]
+                                start2 = False
+                            if n == 3:
+                                if start3 == True: outlist3 = out
+                                else: outlist3 = np.c_[outlist3,out]
+                                start3 = False
+                            if n == 4:
+                                if start4 == True: outlist4 = out
+                                else: outlist4 = np.c_[outlist4,out]
+                                start4 = False
+                            if n == 5:
+                                if start5 == True: outlist5 = out
+                                else: outlist5 = np.c_[outlist5,out]
+                                start5 = False
+                            if n == 6:
+                                if start6 == True: outlist6 = out
+                                else: outlist6 = np.c_[outlist6,out]
+                                start6 = False
+                            if n == 7:
+                                if start7 == True: outlist7 = out
+                                else: outlist7 = np.c_[outlist7,out]
+                                start7 = False
+                            if n == 8:
+                                if start8 == True: outlist8 = out
+                                else: outlist8 = np.c_[outlist8,out]
+                                start8 = False
+                            if n == 9:
+                                if start9 == True: outlist9 = out
+                                else: outlist9 = np.c_[outlist9,out]
+                                start9 = False
     return outlist0,outlist1,outlist2,outlist3,outlist4,outlist5,outlist6,outlist7,outlist8,outlist9
         
 outlist50_0,outlist50_1,outlist50_2,outlist50_3,outlist50_4,outlist50_5,outlist50_6,outlist50_7,outlist50_8,outlist50_9 = output(0.5,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
