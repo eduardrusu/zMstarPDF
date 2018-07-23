@@ -1,6 +1,6 @@
 # CE Rusu, Feb 14 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
-# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.fits /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 5 IRAC deti meds removegrouphandpicked -1 -1
+# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.cat /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 5 IRAC deti meds removegrouphandpicked -1 -1
 # the code produces output for two different limiting mags: 23 and 24
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
@@ -24,16 +24,15 @@ import sys
 import os
 from scipy import ndimage
 from scipy import special
-#from scipy import stats
-#from scipy.interpolate import griddata
+from scipy import stats
+from scipy.interpolate import griddata
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 #import distances
 import time
-#import pandas as pd
-import astropy.table as table
+import pandas as pd
 
 lensID = str(sys.argv[1])
 fieldID = str(sys.argv[2])
@@ -406,9 +405,14 @@ print("Initialization of lens catalogue was completed in %0.1f seconds" % (time.
 start_timefield = time.time()
 print "Reading ", fieldID, "..."
 
-field_ = Table.read('%s' % fieldID)
-field = np.c_[field_['RA'],field_['DEC'],field_['photoz'],field_['i'],field_['y'],field_['mass_BEST'],field_['mass_MED']].T
-del field_
+field = np.loadtxt('%s' % fieldID,usecols = [1,2,4,14,16,20,22],unpack=True)
+# 1->0 RA
+# 2->1 DEC
+# 4->2 z_bpz
+# 14->3 i
+# 16->4 y
+# 20->5 mass_BEST
+# 22->6 mass_MED
 RA_field = 0
 DEC_field = 1
 z_field = 2
@@ -651,158 +655,154 @@ print "Writing output..."
 count = ">75 percent and >50 percent: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
 mskname = 'msk%sarcsecrad%sarcsecgap.fits'[0:-5] % (radius,inner)
-fcount = open('%s/%s_%s_%s_%s_%s_%s_zgap%s_%s%s_count.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
+fcount = open('%s/%s_%s_%s_%s_%s_%s_zgap%s_%s%s_count.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
 fcount.write(count)
 fcount.close()
 
-fout50 = '%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75 = '%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s.fits' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-os.system('rm -f %s' % fout50) # '-f' ignores non-existent files
-os.system('rm -f %s' % fout75)
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix)) # '-f' ignores non-existent files
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
+os.system('rm -f %s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix))
 
-def output(frac,unmaskedcell,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_gal_24_,lens_gal_23bpz_,field_gal_23_,lens_zweight_24bpz_,field_zweight_24_,lens_zweight_23bpz_,field_zweight_23_,lens_mass_24bpz_,field_mass_24_,lens_mass_23bpz_,field_mass_23_,lens_mass2_24bpz_,field_mass2_24_,lens_mass2_23bpz_,field_mass2_23_,lens_mass3_24bpz_,field_mass3_24_,lens_mass3_23bpz_,field_mass3_23_,lens_oneoverr_24bpz_,field_oneoverr_24_,lens_oneoverr_23bpz_,field_oneoverr_23_,lens_zoverr_24bpz_,field_zoverr_24_,lens_zoverr_23bpz_,field_zoverr_23_,lens_massoverr_24bpz_,field_massoverr_24_,lens_massoverr_23bpz_,field_massoverr_23_,lens_mass2overr_24bpz_,field_mass2overr_24_,lens_mass2overr_23bpz_,field_mass2overr_23_,lens_mass3overr_24bpz_,field_mass3overr_24_,lens_mass3overr_23bpz_,field_mass3overr_23_,lens_mass2rms_24bpz_,field_mass2rms_24_,lens_mass2rms_23bpz_,field_mass2rms_23_,lens_mass3rms_24bpz_,field_mass3rms_24_,lens_mass3rms_23bpz_,field_mass3rms_23_,lens_mass2overrms_24bpz_,field_mass2overrms_24_,lens_mass2overrms_23bpz_,field_mass2overrms_23_,lens_mass3overrms_24bpz_,field_mass3overrms_24_,lens_mass3overrms_23bpz_,field_mass3overrms_23_,lens_flexion_24bpz_,field_flexion_24_,lens_flexion_23bpz_,field_flexion_23_,lens_tidal_24bpz_,field_tidal_24_,lens_tidal_23bpz_,field_tidal_23_,lens_convergence_24bpz_,field_convergence_24_,lens_convergence_23bpz_,field_convergence_23_,lens_convergencehalo_24bpz_,field_convergencehalo_24_,lens_convergencehalo_23bpz_,field_convergencehalo_23_,lens_gal_24eazy_,field_gal_24_,lens_gal_23eazy_,field_gal_23_,lens_zweight_24eazy_,field_zweight_24_,lens_zweight_23eazy_,field_zweight_23_,lens_mass_24eazy_,field_mass_24_,lens_mass_23eazy_,field_mass_23_,lens_mass2_24eazy_,field_mass2_24_,lens_mass2_23eazy_,field_mass2_23_,lens_mass3_24eazy_,field_mass3_24_,lens_mass3_23eazy_,field_mass3_23_,lens_oneoverr_24eazy_,field_oneoverr_24_,lens_oneoverr_23eazy_,field_oneoverr_23_,lens_zoverr_24eazy_,field_zoverr_24_,lens_zoverr_23eazy_,field_zoverr_23_,lens_massoverr_24eazy_,field_massoverr_24_,lens_massoverr_23eazy_,field_massoverr_23_,lens_mass2overr_24eazy_,field_mass2overr_24_,lens_mass2overr_23eazy_,field_mass2overr_23_,lens_mass3overr_24eazy_,field_mass3overr_24_,lens_mass3overr_23eazy_,field_mass3overr_23_,lens_mass2rms_24eazy_,field_mass2rms_24_,lens_mass2rms_23eazy_,field_mass2rms_23_,lens_mass3rms_24eazy_,field_mass3rms_24_,lens_mass3rms_23eazy_,field_mass3rms_23_,lens_mass2overrms_24eazy_,field_mass2overrms_24_,lens_mass2overrms_23eazy_,field_mass2overrms_23_,lens_mass3overrms_24eazy_,field_mass3overrms_24_,lens_mass3overrms_23eazy_,field_mass3overrms_23_,lens_flexion_24eazy_,field_flexion_24_,lens_flexion_23eazy_,field_flexion_23_,lens_tidal_24eazy_,field_tidal_24_,lens_tidal_23eazy_,field_tidal_23_,lens_convergence_24eazy_,field_convergence_24_,lens_convergence_23eazy_,field_convergence_23_,lens_convergencehalo_24eazy_,field_convergencehalo_24_,lens_convergencehalo_23eazy_,field_convergencehalo_23_):
-    out = np.zeros(76)
-    start = True
-    for k in range(overlap):
-        for l in range(overlap):
-            for i in range(cells_on_a_side):
-                for j in range(cells_on_a_side):
-                    for n in range(10):
-                        #print "d",i,j,k,l,field_gal_24[k][l][i][j] # test to check if the function actually returns the result globally
-                        #print "d",i,j,k,l,field_gal_23[k][l][i][j] # test to check if the function actually returns the result globally
-                        if (unmaskedcell[k][l][i][j] >= frac) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0):
-                            out[0] = k
-                            out[1] = l
-                            out[2] = i
-                            out[3] = j
-                            out[4] = 1.0*lens_gal_24bpz_[k][l][i][j][n][n]/field_gal_24_[k][l][i][j][n]
-                            out[5] = 1.0*lens_gal_23bpz_[k][l][i][j][n][n]/field_gal_23_[k][l][i][j][n]
-                            out[6] = 1.0*lens_zweight_24bpz_[k][l][i][j][n][n]/field_zweight_24_[k][l][i][j][n]
-                            out[7] = 1.0*lens_zweight_23bpz_[k][l][i][j][n][n]/field_zweight_23_[k][l][i][j][n]
-                            out[8] = 1.0*lens_mass_24bpz_[k][l][i][j][n][n]/field_mass_24_[k][l][i][j][n]
-                            out[9] = 1.0*lens_mass_23bpz_[k][l][i][j][n][n]/field_mass_23_[k][l][i][j][n]
-                            out[10] = 1.0*lens_mass2_24bpz_[k][l][i][j][n][n]/field_mass2_24_[k][l][i][j][n]
-                            out[11] = 1.0*lens_mass2_23bpz_[k][l][i][j][n][n]/field_mass2_23_[k][l][i][j][n]
-                            out[12] = 1.0*lens_mass3_24bpz_[k][l][i][j][n][n]/field_mass3_24_[k][l][i][j][n]
-                            out[13] = 1.0*lens_mass3_23bpz_[k][l][i][j][n][n]/field_mass3_23_[k][l][i][j][n]
-                            out[14] = 1.0*lens_oneoverr_24bpz_[k][l][i][j][n][n]/field_oneoverr_24_[k][l][i][j][n]
-                            out[15] = 1.0*lens_oneoverr_23bpz_[k][l][i][j][n][n]/field_oneoverr_23_[k][l][i][j][n]
-                            out[16] = 1.0*lens_zoverr_24bpz_[k][l][i][j][n][n]/field_zoverr_24_[k][l][i][j][n]
-                            out[17] = 1.0*lens_zoverr_23bpz_[k][l][i][j][n][n]/field_zoverr_23_[k][l][i][j][n]
-                            out[18] = 1.0*lens_massoverr_24bpz_[k][l][i][j][n][n]/field_massoverr_24_[k][l][i][j][n]
-                            out[19] = 1.0*lens_massoverr_23bpz_[k][l][i][j][n][n]/field_massoverr_23_[k][l][i][j][n]
-                            out[20] = 1.0*lens_mass2overr_24bpz_[k][l][i][j][n][n]/field_mass2overr_24_[k][l][i][j][n]
-                            out[21] = 1.0*lens_mass2overr_23bpz_[k][l][i][j][n][n]/field_mass2overr_23_[k][l][i][j][n]
-                            out[22] = 1.0*lens_mass3overr_24bpz_[k][l][i][j][n][n]/field_mass3overr_24_[k][l][i][j][n]
-                            out[23] = 1.0*lens_mass3overr_23bpz_[k][l][i][j][n][n]/field_mass3overr_23_[k][l][i][j][n]
-                            out[24] = 1.0*lens_mass2rms_24bpz_[k][l][i][j][n][n]/field_mass2rms_24_[k][l][i][j][n]
-                            out[25] = 1.0*lens_mass2rms_23bpz_[k][l][i][j][n][n]/field_mass2rms_23_[k][l][i][j][n]
-                            out[26] = 1.0*lens_mass3rms_24bpz_[k][l][i][j][n][n]/field_mass3rms_24_[k][l][i][j][n]
-                            out[27] = 1.0*lens_mass3rms_23bpz_[k][l][i][j][n][n]/field_mass3rms_23_[k][l][i][j][n]
-                            out[28] = 1.0*lens_mass2overrms_24bpz_[k][l][i][j][n][n]/field_mass2overrms_24_[k][l][i][j][n]
-                            out[29] = 1.0*lens_mass2overrms_23bpz_[k][l][i][j][n][n]/field_mass2overrms_23_[k][l][i][j][n]
-                            out[30] = 1.0*lens_mass3overrms_24bpz_[k][l][i][j][n][n]/field_mass3overrms_24_[k][l][i][j][n]
-                            out[31] = 1.0*lens_mass3overrms_23bpz_[k][l][i][j][n][n]/field_mass3overrms_23_[k][l][i][j][n]
-                            out[32] = 1.0*lens_flexion_24bpz_[k][l][i][j][n][n]/field_flexion_24_[k][l][i][j][n]
-                            out[33] = 1.0*lens_flexion_23bpz_[k][l][i][j][n][n]/field_flexion_23_[k][l][i][j][n]
-                            out[34] = 1.0*lens_tidal_24bpz_[k][l][i][j][n][n]/field_tidal_24_[k][l][i][j][n]
-                            out[35] = 1.0*lens_tidal_23bpz_[k][l][i][j][n][n]/field_tidal_23_[k][l][i][j][n]
-                            out[36] = 1.0*lens_convergence_24bpz_[k][l][i][j][n][n]/field_convergence_24_[k][l][i][j][n]
-                            out[37] = 1.0*lens_convergence_23bpz_[k][l][i][j][n][n]/field_convergence_23_[k][l][i][j][n]
-                            out[38] = 1.0*lens_convergencehalo_24bpz_[k][l][i][j][n][n]/field_convergencehalo_24_[k][l][i][j][n]
-                            out[39] = 1.0*lens_convergencehalo_23bpz_[k][l][i][j][n][n]/field_convergencehalo_23_[k][l][i][j][n]
-                            out[40] = 1.0*lens_gal_24eazy_[k][l][i][j][n][n]/field_gal_24_[k][l][i][j][n]
-                            out[41] = 1.0*lens_gal_23eazy_[k][l][i][j][n][n]/field_gal_23_[k][l][i][j][n]
-                            out[42] = 1.0*lens_zweight_24eazy_[k][l][i][j][n][n]/field_zweight_24_[k][l][i][j][n]
-                            out[43] = 1.0*lens_zweight_23eazy_[k][l][i][j][n][n]/field_zweight_23_[k][l][i][j][n]
-                            out[44] = 1.0*lens_mass_24eazy_[k][l][i][j][n][n]/field_mass_24_[k][l][i][j][n]
-                            out[45] = 1.0*lens_mass_23eazy_[k][l][i][j][n][n]/field_mass_23_[k][l][i][j][n]
-                            out[46] = 1.0*lens_mass2_24eazy_[k][l][i][j][n][n]/field_mass2_24_[k][l][i][j][n]
-                            out[47] = 1.0*lens_mass2_23eazy_[k][l][i][j][n][n]/field_mass2_23_[k][l][i][j][n]
-                            out[48] = 1.0*lens_mass3_24eazy_[k][l][i][j][n][n]/field_mass3_24_[k][l][i][j][n]
-                            out[49] = 1.0*lens_mass3_23eazy_[k][l][i][j][n][n]/field_mass3_23_[k][l][i][j][n]
-                            out[50] = 1.0*lens_oneoverr_24eazy_[k][l][i][j][n][n]/field_oneoverr_24_[k][l][i][j][n]
-                            out[51] = 1.0*lens_oneoverr_23eazy_[k][l][i][j][n][n]/field_oneoverr_23_[k][l][i][j][n]
-                            out[52] = 1.0*lens_zoverr_24eazy_[k][l][i][j][n][n]/field_zoverr_24_[k][l][i][j][n]
-                            out[53] = 1.0*lens_zoverr_23eazy_[k][l][i][j][n][n]/field_zoverr_23_[k][l][i][j][n]
-                            out[54] = 1.0*lens_massoverr_24eazy_[k][l][i][j][n][n]/field_massoverr_24_[k][l][i][j][n]
-                            out[55] = 1.0*lens_massoverr_23eazy_[k][l][i][j][n][n]/field_massoverr_23_[k][l][i][j][n]
-                            out[56] = 1.0*lens_mass2overr_24eazy_[k][l][i][j][n][n]/field_mass2overr_24_[k][l][i][j][n]
-                            out[57] = 1.0*lens_mass2overr_23eazy_[k][l][i][j][n][n]/field_mass2overr_23_[k][l][i][j][n]
-                            out[58] = 1.0*lens_mass3overr_24eazy_[k][l][i][j][n][n]/field_mass3overr_24_[k][l][i][j][n]
-                            out[59] = 1.0*lens_mass3overr_23eazy_[k][l][i][j][n][n]/field_mass3overr_23_[k][l][i][j][n]
-                            out[60] = 1.0*lens_mass2rms_24eazy_[k][l][i][j][n][n]/field_mass2rms_24_[k][l][i][j][n]
-                            out[61] = 1.0*lens_mass2rms_23eazy_[k][l][i][j][n][n]/field_mass2rms_23_[k][l][i][j][n]
-                            out[62] = 1.0*lens_mass3rms_24eazy_[k][l][i][j][n][n]/field_mass3rms_24_[k][l][i][j][n]
-                            out[63] = 1.0*lens_mass3rms_23eazy_[k][l][i][j][n][n]/field_mass3rms_23_[k][l][i][j][n]
-                            out[64] = 1.0*lens_mass2overrms_24eazy_[k][l][i][j][n][n]/field_mass2overrms_24_[k][l][i][j][n]
-                            out[65] = 1.0*lens_mass2overrms_23eazy_[k][l][i][j][n][n]/field_mass2overrms_23_[k][l][i][j][n]
-                            out[66] = 1.0*lens_mass3overrms_24eazy_[k][l][i][j][n][n]/field_mass3overrms_24_[k][l][i][j][n]
-                            out[67] = 1.0*lens_mass3overrms_23eazy_[k][l][i][j][n][n]/field_mass3overrms_23_[k][l][i][j][n]
-                            out[68] = 1.0*lens_flexion_24eazy_[k][l][i][j][n][n]/field_flexion_24_[k][l][i][j][n]
-                            out[69] = 1.0*lens_flexion_23eazy_[k][l][i][j][n][n]/field_flexion_23_[k][l][i][j][n]
-                            out[70] = 1.0*lens_tidal_24eazy_[k][l][i][j][n][n]/field_tidal_24_[k][l][i][j][n]
-                            out[71] = 1.0*lens_tidal_23eazy_[k][l][i][j][n][n]/field_tidal_23_[k][l][i][j][n]
-                            out[72] = 1.0*lens_convergence_24eazy_[k][l][i][j][n][n]/field_convergence_24_[k][l][i][j][n]
-                            out[73] = 1.0*lens_convergence_23eazy_[k][l][i][j][n][n]/field_convergence_23_[k][l][i][j][n]
-                            out[74] = 1.0*lens_convergencehalo_24eazy_[k][l][i][j][n][n]/field_convergencehalo_24_[k][l][i][j][n]
-                            out[75] = 1.0*lens_convergencehalo_23eazy_[k][l][i][j][n][n]/field_convergencehalo_23_[k][l][i][j][n])
-                            if start == True:
-                                if n == 0: outlist0 = out
-                                if n == 1: outlist1 = out
-                                if n == 2: outlist2 = out
-                                if n == 3: outlist3 = out
-                                if n == 4: outlist4 = out
-                                if n == 5: outlist5 = out
-                                if n == 6: outlist6 = out
-                                if n == 7: outlist7 = out
-                                if n == 8: outlist8 = out
-                                if n == 9: outlist9 = out
-                            else:
-                                if n == 0: outlist0 = np.c_[outlist0,out]
-                                if n == 1: outlist1 = np.c_[outlist1,out]
-                                if n == 2: outlist2 = np.c_[outlist2,out]
-                                if n == 3: outlist3 = np.c_[outlist3,out]
-                                if n == 4: outlist4 = np.c_[outlist4,out]
-                                if n == 5: outlist5 = np.c_[outlist5,out]
-                                if n == 6: outlist6 = np.c_[outlist6,out]
-                                if n == 7: outlist7 = np.c_[outlist7,out]
-                                if n == 8: outlist8 = np.c_[outlist8,out]
-                                if n == 9: outlist9 = np.c_[outlist9,out]
-                            start = False
-    return outlist0,outlist1,outlist2,outlist3,outlist4,outlist5,outlist6,outlist7,outlist8,outlist9
-        
-outlist50_0,outlist50_1,outlist50_2,outlist50_3,outlist50_4,outlist50_5,outlist50_6,outlist50_7,outlist50_8,outlist50_9 = output(0.5,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,field_gal_24,lens_gal_23eazy,field_gal_23,lens_zweight_24eazy,field_zweight_24,lens_zweight_23eazy,field_zweight_23,lens_mass_24eazy,field_mass_24,lens_mass_23eazy,field_mass_23,lens_mass2_24eazy,field_mass2_24,lens_mass2_23eazy,field_mass2_23,lens_mass3_24eazy,field_mass3_24,lens_mass3_23eazy,field_mass3_23,lens_oneoverr_24eazy,field_oneoverr_24,lens_oneoverr_23eazy,field_oneoverr_23,lens_zoverr_24eazy,field_zoverr_24,lens_zoverr_23eazy,field_zoverr_23,lens_massoverr_24eazy,field_massoverr_24,lens_massoverr_23eazy,field_massoverr_23,lens_mass2overr_24eazy,field_mass2overr_24,lens_mass2overr_23eazy,field_mass2overr_23,lens_mass3overr_24eazy,field_mass3overr_24,lens_mass3overr_23eazy,field_mass3overr_23,lens_mass2rms_24eazy,field_mass2rms_24,lens_mass2rms_23eazy,field_mass2rms_23,lens_mass3rms_24eazy,field_mass3rms_24,lens_mass3rms_23eazy,field_mass3rms_23,lens_mass2overrms_24eazy,field_mass2overrms_24,lens_mass2overrms_23eazy,field_mass2overrms_23,lens_mass3overrms_24eazy,field_mass3overrms_24,lens_mass3overrms_23eazy,field_mass3overrms_23,lens_flexion_24eazy,field_flexion_24,lens_flexion_23eazy,field_flexion_23,lens_tidal_24eazy,field_tidal_24,lens_tidal_23eazy,field_tidal_23,lens_convergence_24eazy,field_convergence_24,lens_convergence_23eazy,field_convergence_23,lens_convergencehalo_24eazy,field_convergencehalo_24,lens_convergencehalo_23eazy,field_convergencehalo_23)
-outlist75_0,outlist75_1,outlist75_2,outlist75_3,outlist75_4,outlist75_5,outlist75_6,outlist75_7,outlist75_8,outlist75_9 = output(0.75,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,field_gal_24,lens_gal_23eazy,field_gal_23,lens_zweight_24eazy,field_zweight_24,lens_zweight_23eazy,field_zweight_23,lens_mass_24eazy,field_mass_24,lens_mass_23eazy,field_mass_23,lens_mass2_24eazy,field_mass2_24,lens_mass2_23eazy,field_mass2_23,lens_mass3_24eazy,field_mass3_24,lens_mass3_23eazy,field_mass3_23,lens_oneoverr_24eazy,field_oneoverr_24,lens_oneoverr_23eazy,field_oneoverr_23,lens_zoverr_24eazy,field_zoverr_24,lens_zoverr_23eazy,field_zoverr_23,lens_massoverr_24eazy,field_massoverr_24,lens_massoverr_23eazy,field_massoverr_23,lens_mass2overr_24eazy,field_mass2overr_24,lens_mass2overr_23eazy,field_mass2overr_23,lens_mass3overr_24eazy,field_mass3overr_24,lens_mass3overr_23eazy,field_mass3overr_23,lens_mass2rms_24eazy,field_mass2rms_24,lens_mass2rms_23eazy,field_mass2rms_23,lens_mass3rms_24eazy,field_mass3rms_24,lens_mass3rms_23eazy,field_mass3rms_23,lens_mass2overrms_24eazy,field_mass2overrms_24,lens_mass2overrms_23eazy,field_mass2overrms_23,lens_mass3overrms_24eazy,field_mass3overrms_24,lens_mass3overrms_23eazy,field_mass3overrms_23,lens_flexion_24eazy,field_flexion_24,lens_flexion_23eazy,field_flexion_23,lens_tidal_24eazy,field_tidal_24,lens_tidal_23eazy,field_tidal_23,lens_convergence_24eazy,field_convergence_24,lens_convergence_23eazy,field_convergence_23,lens_convergencehalo_24eazy,field_convergencehalo_24,lens_convergencehalo_23eazy,field_convergencehalo_23)
-                        
-names = ('1_overlap_x','2_overlap_y','3_cell_x','4_cell_y','5_lens_gal_24bpz','6_lens_gal_23bpz','7_lens_zweight_24bpz','8_lens_zweight_23bpz','9_lens_mass_24bpz','10_lens_mass_23bpz','11_lens_mass2_24bpz','12_lens_mass2_23bpz','13_lens_mass3_24bpz','14_lens_mass3_23bpz','15_lens_oneoverr_24bpz','16_lens_oneoverr_23bpz','17_lens_zoverr_24bpz','18_lens_zoverr_23bpz','19_lens_massoverr_24bpz','20_lens_massoverr_23bpz','21_lens_mass2overr_24bpz','22_lens_mass2overr_23bpz','23_lens_mass3overr_24bpz','24_lens_mass3overr_23bpz','25_lens_mass2rms_24bpz','26_lens_mass2rms_23bpz','27_lens_mass3rms_24bpz','28_lens_mass3rms_23bpz','29_lens_mass2overrms_24bpz','30_lens_mass2overrms_23bpz','31_lens_mass3overrms_24bpz','32_lens_mass3overrms_23bpz','33_lens_flexion_24bpz','34_lens_flexion_23bpz','35_lens_tidal_24bpz','36_lens_tidal_23bpz','37_lens_convergence_24bpz','38_lens_convergence_23bpz','39_lens_convergencehalo_24bpz','40_lens_convergencehalo_23bpz','41_lens_gal_24eazy','42_lens_gal_23eazy','43_lens_zweight_24eazy','44_lens_zweight_23eazy','45_lens_mass_24eazy','46_lens_mass_23eazy','47_lens_mass2_24eazy','48_lens_mass2_23eazy','49_lens_mass3_24eazy','50_lens_mass3_23eazy','51_lens_oneoverr_24eazy','52_lens_oneoverr_23eazy','53_lens_zoverr_24eazy','54_lens_zoverr_23eazy','55_lens_massoverr_24eazy','56_lens_massoverr_23eazy','57_lens_mass2overr_24eazy','58_lens_mass2overr_23eazy','59_lens_mass3overr_24eazy','60_lens_mass3overr_23eazy','61_lens_mass2rms_24eazy','62_lens_mass2rms_23eazy','63_lens_mass3rms_24eazy','64_lens_mass3rms_23eazy','65_lens_mass2overrms_24eazy','66_lens_mass2overrms_23eazy','67_lens_mass3overrms_24eazy','68_lens_mass3overrms_23eazy','69_lens_flexion_24eazy','70_lens_flexion_23eazy','71_lens_tidal_24eazy','72_lens_tidal_23eazy','73_lens_convergence_24eazy','74_lens_convergence_23eazy','75_lens_convergencehalo_24eazy','76_lens_convergencehalo_23eazy')
-dtype=(np.int32,np.int32,np.int32,np.int32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32)
+file50_0 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_0 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_0.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_1 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_1 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_1.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_2 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_2 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_2.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_3 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_3 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_3.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_4 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_4 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_4.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_5 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_5 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_5.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_6 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_6 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_6.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_7 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_7 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_7.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_8 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_8 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_8.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file50_9 = open('%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
+file75_9 = open('%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_9.lst' % (output,fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),'a')
 
-t = table.Table(outlist50_0.T, names=names, dtype=dtype)
-t.write(fout50)
-fits.append(fout50,outlist50_1.T)
-fits.append(fout50,outlist50_2.T)
-fits.append(fout50,outlist50_3.T)
-fits.append(fout50,outlist50_4.T)
-fits.append(fout50,outlist50_5.T)
-fits.append(fout50,outlist50_6.T)
-fits.append(fout50,outlist50_7.T)
-fits.append(fout50,outlist50_8.T)
-fits.append(fout50,outlist50_9.T)
+header = "#      1_overlap_x  2_overlap_y  3_cell_x  4_cell_y  5_lens_gal_24bpz  6_lens_gal_23bpz  7_lens_zweight_24bpz  8_lens_zweight_23bpz 9_lens_mass_24bpz 10_lens_mass_23bpz 11_lens_mass2_24bpz 12_lens_mass2_23bpz 13_lens_mass3_24bpz 14_lens_mass3_23bpz 15_lens_oneoverr_24bpz 16_lens_oneoverr_23bpz 17_lens_zoverr_24bpz 18_lens_zoverr_23bpz 19_lens_massoverr_24bpz 20_lens_massoverr_23bpz 21_lens_mass2overr_24bpz 22_lens_mass2overr_23bpz 23_lens_mass3overr_24bpz 24_lens_mass3overr_23bpz 25_lens_mass2rms_24bpz 26_lens_mass2rms_23bpz 27_lens_mass3rms_24bpz 28_lens_mass3rms_23bpz 29_lens_mass2overrms_24bpz 30_lens_mass2overrms_23bpz 31_lens_mass3overrms_24bpz 32_lens_mass3overrms_23bpz 33_lens_flexion_24bpz 34_lens_flexion_23bpz 35_lens_tidal_24bpz 36_lens_tidal_23bpz 37_lens_convergence_24bpz 38_lens_convergence_23bpz 39_lens_convergencehalo_24bpz 40_lens_convergencehalo_23bpz 41_lens_gal_24eazy 42_lens_gal_23eazy 43_lens_zweight_24eazy 44_lens_zweight_23eazy 45_lens_mass_24eazy 46_lens_mass_23eazy 47_lens_mass2_24eazy 48_lens_mass2_23eazy 49_lens_mass3_24eazy 50_lens_mass3_23eazy 51_lens_oneoverr_24eazy 52_lens_oneoverr_23eazy 53_lens_zoverr_24eazy 54_lens_zoverr_23eazy  55_lens_massoverr_24eazy  56_lens_massoverr_23eazy  57_lens_mass2overr_24eazy  58_lens_mass2overr_23eazy  59_lens_mass3overr_24eazy  60_lens_mass3overr_23eazy  61_lens_mass2rms_24eazy  62_lens_mass2rms_23eazy  63_lens_mass3rms_24eazy  64_lens_mass3rms_23eazy  65_lens_mass2overrms_24eazy  66_lens_mass2overrms_23eazy  67_lens_mass3overrms_24eazy  68_lens_mass3overrms_23eazy  69_lens_flexion_24eazy  70_lens_flexion_23eazy  71_lens_tidal_24eazy  72_lens_tidal_23eazy  73_lens_convergence_24eazy  74_lens_convergence_23eazy  75_lens_convergencehalo_24eazy  76_lens_convergencehalo_23eazy \n"
 
-t = table.Table(outlist75_0.T, names=names, dtype=dtype)
-t.write(fout75)
-fits.append(fout75,outlist75_1.T)
-fits.append(fout75,outlist75_2.T)
-fits.append(fout75,outlist75_3.T)
-fits.append(fout75,outlist75_4.T)
-fits.append(fout75,outlist75_5.T)
-fits.append(fout75,outlist75_6.T)
-fits.append(fout75,outlist75_7.T)
-fits.append(fout75,outlist75_8.T)
-fits.append(fout75,outlist75_9.T)
+file50_0.write(header)
+file75_0.write(header)
+file50_1.write(header)
+file75_1.write(header)
+file50_2.write(header)
+file75_2.write(header)
+file50_3.write(header)
+file75_3.write(header)
+file50_4.write(header)
+file75_4.write(header)
+file50_5.write(header)
+file75_5.write(header)
+file50_6.write(header)
+file75_6.write(header)
+file50_7.write(header)
+file75_7.write(header)
+file50_8.write(header)
+file75_8.write(header)
+file50_9.write(header)
+file75_9.write(header)
+
+for k in range(overlap):
+    for l in range(overlap):
+        for i in range(cells_on_a_side):
+            for j in range(cells_on_a_side):
+                for n in range(10):
+                    #print "d",i,j,k,l,field_gal_24[k][l][i][j] # test to check if the function actually returns the result globally
+                    #print "d",i,j,k,l,field_gal_23[k][l][i][j] # test to check if the function actually returns the result globally
+                    if (unmaskedcell[k][l][i][j] >= 0.50) & (np.min(lens_gal_24bpz[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy[k][l][i][j]) != 0) & (field_gal_24[k][l][i][j] != 0) & (field_gal_23[k][l][i][j] != 0):
+                        string='%s\t%s\t%s\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n'%(k,l,i,j,1.0*lens_gal_24bpz[k][l][i][j][n]/field_gal_24[k][l][i][j],1.0*lens_gal_23bpz[k][l][i][j][n]/field_gal_23[k][l][i][j],1.0*lens_zweight_24bpz[k][l][i][j][n]/field_zweight_24[k][l][i][j],1.0*lens_zweight_23bpz[k][l][i][j][n]/field_zweight_23[k][l][i][j],1.0*lens_mass_24bpz[k][l][i][j][n]/field_mass_24[k][l][i][j],1.0*lens_mass_23bpz[k][l][i][j][n]/field_mass_23[k][l][i][j],1.0*lens_mass2_24bpz[k][l][i][j][n]/field_mass2_24[k][l][i][j],1.0*lens_mass2_23bpz[k][l][i][j][n]/field_mass2_23[k][l][i][j],1.0*lens_mass3_24bpz[k][l][i][j][n]/field_mass3_24[k][l][i][j],1.0*lens_mass3_23bpz[k][l][i][j][n]/field_mass3_23[k][l][i][j],1.0*lens_oneoverr_24bpz[k][l][i][j][n]/field_oneoverr_24[k][l][i][j],1.0*lens_oneoverr_23bpz[k][l][i][j][n]/field_oneoverr_23[k][l][i][j],1.0*lens_zoverr_24bpz[k][l][i][j][n]/field_zoverr_24[k][l][i][j],1.0*lens_zoverr_23bpz[k][l][i][j][n]/field_zoverr_23[k][l][i][j],1.0*lens_massoverr_24bpz[k][l][i][j][n]/field_massoverr_24[k][l][i][j],1.0*lens_massoverr_23bpz[k][l][i][j][n]/field_massoverr_23[k][l][i][j],1.0*lens_mass2overr_24bpz[k][l][i][j][n]/field_mass2overr_24[k][l][i][j],1.0*lens_mass2overr_23bpz[k][l][i][j][n]/field_mass2overr_23[k][l][i][j],1.0*lens_mass3overr_24bpz[k][l][i][j][n]/field_mass3overr_24[k][l][i][j],1.0*lens_mass3overr_23bpz[k][l][i][j][n]/field_mass3overr_23[k][l][i][j],1.0*lens_mass2rms_24bpz[k][l][i][j][n]/field_mass2rms_24[k][l][i][j],1.0*lens_mass2rms_23bpz[k][l][i][j][n]/field_mass2rms_23[k][l][i][j],1.0*lens_mass3rms_24bpz[k][l][i][j][n]/field_mass3rms_24[k][l][i][j],1.0*lens_mass3rms_23bpz[k][l][i][j][n]/field_mass3rms_23[k][l][i][j],1.0*lens_mass2overrms_24bpz[k][l][i][j][n]/field_mass2overrms_24[k][l][i][j],1.0*lens_mass2overrms_23bpz[k][l][i][j][n]/field_mass2overrms_23[k][l][i][j],1.0*lens_mass3overrms_24bpz[k][l][i][j][n]/field_mass3overrms_24[k][l][i][j],1.0*lens_mass3overrms_23bpz[k][l][i][j][n]/field_mass3overrms_23[k][l][i][j],1.0*lens_flexion_24bpz[k][l][i][j][n]/field_flexion_24[k][l][i][j],1.0*lens_flexion_23bpz[k][l][i][j][n]/field_flexion_23[k][l][i][j],1.0*lens_tidal_24bpz[k][l][i][j][n]/field_tidal_24[k][l][i][j],1.0*lens_tidal_23bpz[k][l][i][j][n]/field_tidal_23[k][l][i][j],1.0*lens_convergence_24bpz[k][l][i][j][n]/field_convergence_24[k][l][i][j],1.0*lens_convergence_23bpz[k][l][i][j][n]/field_convergence_23[k][l][i][j],1.0*lens_convergencehalo_24bpz[k][l][i][j][n]/field_convergencehalo_24[k][l][i][j],1.0*lens_convergencehalo_23bpz[k][l][i][j][n]/field_convergencehalo_23[k][l][i][j],1.0*lens_gal_24eazy[k][l][i][j][n]/field_gal_24[k][l][i][j],1.0*lens_gal_23eazy[k][l][i][j][n]/field_gal_23[k][l][i][j],1.0*lens_zweight_24eazy[k][l][i][j][n]/field_zweight_24[k][l][i][j],1.0*lens_zweight_23eazy[k][l][i][j][n]/field_zweight_23[k][l][i][j],1.0*lens_mass_24eazy[k][l][i][j][n]/field_mass_24[k][l][i][j],1.0*lens_mass_23eazy[k][l][i][j][n]/field_mass_23[k][l][i][j],1.0*lens_mass2_24eazy[k][l][i][j][n]/field_mass2_24[k][l][i][j],1.0*lens_mass2_23eazy[k][l][i][j][n]/field_mass2_23[k][l][i][j],1.0*lens_mass3_24eazy[k][l][i][j][n]/field_mass3_24[k][l][i][j],1.0*lens_mass3_23eazy[k][l][i][j][n]/field_mass3_23[k][l][i][j],1.0*lens_oneoverr_24eazy[k][l][i][j][n]/field_oneoverr_24[k][l][i][j],1.0*lens_oneoverr_23eazy[k][l][i][j][n]/field_oneoverr_23[k][l][i][j],1.0*lens_zoverr_24eazy[k][l][i][j][n]/field_zoverr_24[k][l][i][j],1.0*lens_zoverr_23eazy[k][l][i][j][n]/field_zoverr_23[k][l][i][j],1.0*lens_massoverr_24eazy[k][l][i][j][n]/field_massoverr_24[k][l][i][j],1.0*lens_massoverr_23eazy[k][l][i][j][n]/field_massoverr_23[k][l][i][j],1.0*lens_mass2overr_24eazy[k][l][i][j][n]/field_mass2overr_24[k][l][i][j],1.0*lens_mass2overr_23eazy[k][l][i][j][n]/field_mass2overr_23[k][l][i][j],1.0*lens_mass3overr_24eazy[k][l][i][j][n]/field_mass3overr_24[k][l][i][j],1.0*lens_mass3overr_23eazy[k][l][i][j][n]/field_mass3overr_23[k][l][i][j],1.0*lens_mass2rms_24eazy[k][l][i][j][n]/field_mass2rms_24[k][l][i][j],1.0*lens_mass2rms_23eazy[k][l][i][j][n]/field_mass2rms_23[k][l][i][j],1.0*lens_mass3rms_24eazy[k][l][i][j][n]/field_mass3rms_24[k][l][i][j],1.0*lens_mass3rms_23eazy[k][l][i][j][n]/field_mass3rms_23[k][l][i][j],1.0*lens_mass2overrms_24eazy[k][l][i][j][n]/field_mass2overrms_24[k][l][i][j],1.0*lens_mass2overrms_23eazy[k][l][i][j][n]/field_mass2overrms_23[k][l][i][j],1.0*lens_mass3overrms_24eazy[k][l][i][j][n]/field_mass3overrms_24[k][l][i][j],1.0*lens_mass3overrms_23eazy[k][l][i][j][n]/field_mass3overrms_23[k][l][i][j],1.0*lens_flexion_24eazy[k][l][i][j][n]/field_flexion_24[k][l][i][j],1.0*lens_flexion_23eazy[k][l][i][j][n]/field_flexion_23[k][l][i][j],1.0*lens_tidal_24eazy[k][l][i][j][n]/field_tidal_24[k][l][i][j],1.0*lens_tidal_23eazy[k][l][i][j][n]/field_tidal_23[k][l][i][j],1.0*lens_convergence_24eazy[k][l][i][j][n]/field_convergence_24[k][l][i][j],1.0*lens_convergence_23eazy[k][l][i][j][n]/field_convergence_23[k][l][i][j],1.0*lens_convergencehalo_24eazy[k][l][i][j][n]/field_convergencehalo_24[k][l][i][j],1.0*lens_convergencehalo_23eazy[k][l][i][j][n]/field_convergencehalo_23[k][l][i][j])
+                        if n == 0:
+                            file50_0.write(string)
+                        if n == 1:
+                            file50_1.write(string)
+                        if n == 2:
+                            file50_2.write(string)
+                        if n == 3:
+                            file50_3.write(string)
+                        if n == 4:
+                            file50_4.write(string)
+                        if n == 5:
+                            file50_5.write(string)
+                        if n == 6:
+                            file50_6.write(string)
+                        if n == 7:
+                            file50_7.write(string)
+                        if n == 8:
+                            file50_8.write(string)
+                        if n == 9:
+                            file50_9.write(string)
+for k in range(overlap):
+    for l in range(overlap):
+        for i in range(cells_on_a_side):
+            for j in range(cells_on_a_side):
+                for n in range(10):
+                    if (unmaskedcell[k][l][i][j] >= 0.75) & (np.min(lens_gal_24bpz[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy[k][l][i][j]) != 0) & (field_gal_24[k][l][i][j] != 0) & (field_gal_23[k][l][i][j] != 0):
+                        string='%s\t%s\t%s\t%s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n'%(k,l,i,j,1.0*lens_gal_24bpz[k][l][i][j][n]/field_gal_24[k][l][i][j],1.0*lens_gal_23bpz[k][l][i][j][n]/field_gal_23[k][l][i][j],1.0*lens_zweight_24bpz[k][l][i][j][n]/field_zweight_24[k][l][i][j],1.0*lens_zweight_23bpz[k][l][i][j][n]/field_zweight_23[k][l][i][j],1.0*lens_mass_24bpz[k][l][i][j][n]/field_mass_24[k][l][i][j],1.0*lens_mass_23bpz[k][l][i][j][n]/field_mass_23[k][l][i][j],1.0*lens_mass2_24bpz[k][l][i][j][n]/field_mass2_24[k][l][i][j],1.0*lens_mass2_23bpz[k][l][i][j][n]/field_mass2_23[k][l][i][j],1.0*lens_mass3_24bpz[k][l][i][j][n]/field_mass3_24[k][l][i][j],1.0*lens_mass3_23bpz[k][l][i][j][n]/field_mass3_23[k][l][i][j],1.0*lens_oneoverr_24bpz[k][l][i][j][n]/field_oneoverr_24[k][l][i][j],1.0*lens_oneoverr_23bpz[k][l][i][j][n]/field_oneoverr_23[k][l][i][j],1.0*lens_zoverr_24bpz[k][l][i][j][n]/field_zoverr_24[k][l][i][j],1.0*lens_zoverr_23bpz[k][l][i][j][n]/field_zoverr_23[k][l][i][j],1.0*lens_massoverr_24bpz[k][l][i][j][n]/field_massoverr_24[k][l][i][j],1.0*lens_massoverr_23bpz[k][l][i][j][n]/field_massoverr_23[k][l][i][j],1.0*lens_mass2overr_24bpz[k][l][i][j][n]/field_mass2overr_24[k][l][i][j],1.0*lens_mass2overr_23bpz[k][l][i][j][n]/field_mass2overr_23[k][l][i][j],1.0*lens_mass3overr_24bpz[k][l][i][j][n]/field_mass3overr_24[k][l][i][j],1.0*lens_mass3overr_23bpz[k][l][i][j][n]/field_mass3overr_23[k][l][i][j],1.0*lens_mass2rms_24bpz[k][l][i][j][n]/field_mass2rms_24[k][l][i][j],1.0*lens_mass2rms_23bpz[k][l][i][j][n]/field_mass2rms_23[k][l][i][j],1.0*lens_mass3rms_24bpz[k][l][i][j][n]/field_mass3rms_24[k][l][i][j],1.0*lens_mass3rms_23bpz[k][l][i][j][n]/field_mass3rms_23[k][l][i][j],1.0*lens_mass2overrms_24bpz[k][l][i][j][n]/field_mass2overrms_24[k][l][i][j],1.0*lens_mass2overrms_23bpz[k][l][i][j][n]/field_mass2overrms_23[k][l][i][j],1.0*lens_mass3overrms_24bpz[k][l][i][j][n]/field_mass3overrms_24[k][l][i][j],1.0*lens_mass3overrms_23bpz[k][l][i][j][n]/field_mass3overrms_23[k][l][i][j],1.0*lens_flexion_24bpz[k][l][i][j][n]/field_flexion_24[k][l][i][j],1.0*lens_flexion_23bpz[k][l][i][j][n]/field_flexion_23[k][l][i][j],1.0*lens_tidal_24bpz[k][l][i][j][n]/field_tidal_24[k][l][i][j],1.0*lens_tidal_23bpz[k][l][i][j][n]/field_tidal_23[k][l][i][j],1.0*lens_convergence_24bpz[k][l][i][j][n]/field_convergence_24[k][l][i][j],1.0*lens_convergence_23bpz[k][l][i][j][n]/field_convergence_23[k][l][i][j],1.0*lens_convergencehalo_24bpz[k][l][i][j][n]/field_convergencehalo_24[k][l][i][j],1.0*lens_convergencehalo_23bpz[k][l][i][j][n]/field_convergencehalo_23[k][l][i][j],1.0*lens_gal_24eazy[k][l][i][j][n]/field_gal_24[k][l][i][j],1.0*lens_gal_23eazy[k][l][i][j][n]/field_gal_23[k][l][i][j],1.0*lens_zweight_24eazy[k][l][i][j][n]/field_zweight_24[k][l][i][j],1.0*lens_zweight_23eazy[k][l][i][j][n]/field_zweight_23[k][l][i][j],1.0*lens_mass_24eazy[k][l][i][j][n]/field_mass_24[k][l][i][j],1.0*lens_mass_23eazy[k][l][i][j][n]/field_mass_23[k][l][i][j],1.0*lens_mass2_24eazy[k][l][i][j][n]/field_mass2_24[k][l][i][j],1.0*lens_mass2_23eazy[k][l][i][j][n]/field_mass2_23[k][l][i][j],1.0*lens_mass3_24eazy[k][l][i][j][n]/field_mass3_24[k][l][i][j],1.0*lens_mass3_23eazy[k][l][i][j][n]/field_mass3_23[k][l][i][j],1.0*lens_oneoverr_24eazy[k][l][i][j][n]/field_oneoverr_24[k][l][i][j],1.0*lens_oneoverr_23eazy[k][l][i][j][n]/field_oneoverr_23[k][l][i][j],1.0*lens_zoverr_24eazy[k][l][i][j][n]/field_zoverr_24[k][l][i][j],1.0*lens_zoverr_23eazy[k][l][i][j][n]/field_zoverr_23[k][l][i][j],1.0*lens_massoverr_24eazy[k][l][i][j][n]/field_massoverr_24[k][l][i][j],1.0*lens_massoverr_23eazy[k][l][i][j][n]/field_massoverr_23[k][l][i][j],1.0*lens_mass2overr_24eazy[k][l][i][j][n]/field_mass2overr_24[k][l][i][j],1.0*lens_mass2overr_23eazy[k][l][i][j][n]/field_mass2overr_23[k][l][i][j],1.0*lens_mass3overr_24eazy[k][l][i][j][n]/field_mass3overr_24[k][l][i][j],1.0*lens_mass3overr_23eazy[k][l][i][j][n]/field_mass3overr_23[k][l][i][j],1.0*lens_mass2rms_24eazy[k][l][i][j][n]/field_mass2rms_24[k][l][i][j],1.0*lens_mass2rms_23eazy[k][l][i][j][n]/field_mass2rms_23[k][l][i][j],1.0*lens_mass3rms_24eazy[k][l][i][j][n]/field_mass3rms_24[k][l][i][j],1.0*lens_mass3rms_23eazy[k][l][i][j][n]/field_mass3rms_23[k][l][i][j],1.0*lens_mass2overrms_24eazy[k][l][i][j][n]/field_mass2overrms_24[k][l][i][j],1.0*lens_mass2overrms_23eazy[k][l][i][j][n]/field_mass2overrms_23[k][l][i][j],1.0*lens_mass3overrms_24eazy[k][l][i][j][n]/field_mass3overrms_24[k][l][i][j],1.0*lens_mass3overrms_23eazy[k][l][i][j][n]/field_mass3overrms_23[k][l][i][j],1.0*lens_flexion_24eazy[k][l][i][j][n]/field_flexion_24[k][l][i][j],1.0*lens_flexion_23eazy[k][l][i][j][n]/field_flexion_23[k][l][i][j],1.0*lens_tidal_24eazy[k][l][i][j][n]/field_tidal_24[k][l][i][j],1.0*lens_tidal_23eazy[k][l][i][j][n]/field_tidal_23[k][l][i][j],1.0*lens_convergence_24eazy[k][l][i][j][n]/field_convergence_24[k][l][i][j],1.0*lens_convergence_23eazy[k][l][i][j][n]/field_convergence_23[k][l][i][j],1.0*lens_convergencehalo_24eazy[k][l][i][j][n]/field_convergencehalo_24[k][l][i][j],1.0*lens_convergencehalo_23eazy[k][l][i][j][n]/field_convergencehalo_23[k][l][i][j])
+                        if n == 0:
+                            file75_0.write(string)
+                        if n == 1:
+                            file75_1.write(string)
+                        if n == 2:
+                            file75_2.write(string)
+                        if n == 3:
+                            file75_3.write(string)
+                        if n == 4:
+                            file75_4.write(string)
+                        if n == 5:
+                            file75_5.write(string)
+                        if n == 6:
+                            file75_6.write(string)
+                        if n == 7:
+                            file75_7.write(string)
+                        if n == 8:
+                            file75_8.write(string)
+                        if n == 9:
+                            file75_9.write(string)
+file50_0.close()
+file75_0.close()
+file50_1.close()
+file75_1.close()
+file50_2.close()
+file75_2.close()
+file50_3.close()
+file75_3.close()
+file50_4.close()
+file75_4.close()
+file50_5.close()
+file75_5.close()
+file50_6.close()
+file75_6.close()
+file50_7.close()
+file75_7.close()
+file50_8.close()
+file75_8.close()
+file50_9.close()
+file75_9.close()
 
 print("Writing output completed in %0.1f seconds" % ((time.time() - start_write)))
+
 print("Total time for %s: --- %0.2f seconds ---" % ('%s_%s_%s_%s_%s_%s_zgap%s_%s%s' % (fieldID[-25:-4],mskname,lensID,det,irac,type,zinf,zsup,suffix),(time.time() - start_time)))
 
 print 'Done!'
