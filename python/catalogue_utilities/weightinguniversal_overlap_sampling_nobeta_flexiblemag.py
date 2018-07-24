@@ -191,7 +191,7 @@ if lensID == "WFI2033":
     z_l = 0.66
     limmag = 24
     brightmag = 16.90
-    photoz = 'bpzeazy'
+    photoz = 'bpz'
     pixnr = 915
     pixlens = 0.2625 * u.arcsec
 if lensID == "J1206":
@@ -199,7 +199,7 @@ if lensID == "J1206":
     z_l = 0.75
     limmag = 23
     brightmag = 18.05
-    photoz = 'bpzeazy'
+    photoz = 'bpz'
     pixnr = 1283
     pixlens = 0.187 * u.arcsec
 
