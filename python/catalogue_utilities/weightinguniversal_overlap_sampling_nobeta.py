@@ -678,7 +678,7 @@ fout50_9 = '%s/%s_50_%s_%s_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-5
 fout75_9 = '%s/%s_75_%s_%s_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-5],mskname,lensID,det,irac,type,zinf,zsup,suffix)
 #os.system('rm -f %s' % fout50_0) # '-f' ignores non-existent files
 
-def output(frac_,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_gal_24_,lens_gal_23bpz_,field_gal_23_,lens_zweight_24bpz_,field_zweight_24_,lens_zweight_23bpz_,field_zweight_23_,lens_mass_24bpz_,field_mass_24_,lens_mass_23bpz_,field_mass_23_,lens_mass2_24bpz_,field_mass2_24_,lens_mass2_23bpz_,field_mass2_23_,lens_mass3_24bpz_,field_mass3_24_,lens_mass3_23bpz_,field_mass3_23_,lens_oneoverr_24bpz_,field_oneoverr_24_,lens_oneoverr_23bpz_,field_oneoverr_23_,lens_zoverr_24bpz_,field_zoverr_24_,lens_zoverr_23bpz_,field_zoverr_23_,lens_massoverr_24bpz_,field_massoverr_24_,lens_massoverr_23bpz_,field_massoverr_23_,lens_mass2overr_24bpz_,field_mass2overr_24_,lens_mass2overr_23bpz_,field_mass2overr_23_,lens_mass3overr_24bpz_,field_mass3overr_24_,lens_mass3overr_23bpz_,field_mass3overr_23_,lens_mass2rms_24bpz_,field_mass2rms_24_,lens_mass2rms_23bpz_,field_mass2rms_23_,lens_mass3rms_24bpz_,field_mass3rms_24_,lens_mass3rms_23bpz_,field_mass3rms_23_,lens_mass2overrms_24bpz_,field_mass2overrms_24_,lens_mass2overrms_23bpz_,field_mass2overrms_23_,lens_mass3overrms_24bpz_,field_mass3overrms_24_,lens_mass3overrms_23bpz_,field_mass3overrms_23_,lens_flexion_24bpz_,field_flexion_24_,lens_flexion_23bpz_,field_flexion_23_,lens_tidal_24bpz_,field_tidal_24_,lens_tidal_23bpz_,field_tidal_23_,lens_convergence_24bpz_,field_convergence_24_,lens_convergence_23bpz_,field_convergence_23_,lens_convergencehalo_24bpz_,field_convergencehalo_24_,lens_convergencehalo_23bpz_,field_convergencehalo_23_,lens_gal_24eazy_,lens_gal_23eazy_,lens_zweight_24eazy_,lens_zweight_23eazy_,lens_mass_24eazy_,lens_mass_23eazy_,lens_mass2_24eazy_,lens_mass2_23eazy_,lens_mass3_24eazy_,lens_mass3_23eazy_,lens_oneoverr_24eazy_,lens_oneoverr_23eazy_,lens_zoverr_24eazy_,lens_zoverr_23eazy_,lens_massoverr_24eazy_,lens_massoverr_23eazy_,lens_mass2overr_24eazy_,lens_mass2overr_23eazy_,lens_mass3overr_24eazy_,lens_mass3overr_23eazy_,lens_mass2rms_24eazy_,lens_mass2rms_23eazy_,lens_mass3rms_24eazy_,lens_mass3rms_23eazy_,lens_mass2overrms_24eazy_,lens_mass2overrms_23eazy_,lens_mass3overrms_24eazy_,lens_mass3overrms_23eazy_,lens_flexion_24eazy_,lens_flexion_23eazy_,lens_tidal_24eazy_,lens_tidal_23eazy_,lens_convergence_24eazy_,lens_convergence_23eazy_,lens_convergencehalo_24eazy_,lens_convergencehalo_23eazy_):
+def funcoutput(frac_,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_gal_24_,lens_gal_23bpz_,field_gal_23_,lens_zweight_24bpz_,field_zweight_24_,lens_zweight_23bpz_,field_zweight_23_,lens_mass_24bpz_,field_mass_24_,lens_mass_23bpz_,field_mass_23_,lens_mass2_24bpz_,field_mass2_24_,lens_mass2_23bpz_,field_mass2_23_,lens_mass3_24bpz_,field_mass3_24_,lens_mass3_23bpz_,field_mass3_23_,lens_oneoverr_24bpz_,field_oneoverr_24_,lens_oneoverr_23bpz_,field_oneoverr_23_,lens_zoverr_24bpz_,field_zoverr_24_,lens_zoverr_23bpz_,field_zoverr_23_,lens_massoverr_24bpz_,field_massoverr_24_,lens_massoverr_23bpz_,field_massoverr_23_,lens_mass2overr_24bpz_,field_mass2overr_24_,lens_mass2overr_23bpz_,field_mass2overr_23_,lens_mass3overr_24bpz_,field_mass3overr_24_,lens_mass3overr_23bpz_,field_mass3overr_23_,lens_mass2rms_24bpz_,field_mass2rms_24_,lens_mass2rms_23bpz_,field_mass2rms_23_,lens_mass3rms_24bpz_,field_mass3rms_24_,lens_mass3rms_23bpz_,field_mass3rms_23_,lens_mass2overrms_24bpz_,field_mass2overrms_24_,lens_mass2overrms_23bpz_,field_mass2overrms_23_,lens_mass3overrms_24bpz_,field_mass3overrms_24_,lens_mass3overrms_23bpz_,field_mass3overrms_23_,lens_flexion_24bpz_,field_flexion_24_,lens_flexion_23bpz_,field_flexion_23_,lens_tidal_24bpz_,field_tidal_24_,lens_tidal_23bpz_,field_tidal_23_,lens_convergence_24bpz_,field_convergence_24_,lens_convergence_23bpz_,field_convergence_23_,lens_convergencehalo_24bpz_,field_convergencehalo_24_,lens_convergencehalo_23bpz_,field_convergencehalo_23_,lens_gal_24eazy_,lens_gal_23eazy_,lens_zweight_24eazy_,lens_zweight_23eazy_,lens_mass_24eazy_,lens_mass_23eazy_,lens_mass2_24eazy_,lens_mass2_23eazy_,lens_mass3_24eazy_,lens_mass3_23eazy_,lens_oneoverr_24eazy_,lens_oneoverr_23eazy_,lens_zoverr_24eazy_,lens_zoverr_23eazy_,lens_massoverr_24eazy_,lens_massoverr_23eazy_,lens_mass2overr_24eazy_,lens_mass2overr_23eazy_,lens_mass3overr_24eazy_,lens_mass3overr_23eazy_,lens_mass2rms_24eazy_,lens_mass2rms_23eazy_,lens_mass3rms_24eazy_,lens_mass3rms_23eazy_,lens_mass2overrms_24eazy_,lens_mass2overrms_23eazy_,lens_mass3overrms_24eazy_,lens_mass3overrms_23eazy_,lens_flexion_24eazy_,lens_flexion_23eazy_,lens_tidal_24eazy_,lens_tidal_23eazy_,lens_convergence_24eazy_,lens_convergence_23eazy_,lens_convergencehalo_24eazy_,lens_convergencehalo_23eazy_):
     out = np.zeros(76)
     start0 = True
     start1 = True
@@ -698,14 +698,14 @@ def output(frac_,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_g
                         #print "d",i,j,k,l,field_gal_24[k][l][i][j] # test to check if the function actually returns the result globally
                         #print "d",i,j,k,l,field_gal_23[k][l][i][j] # test to check if the function actually returns the result globally
                         if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0):
-                            out[0] = k
-                            out[1] = l
-                            out[2] = i
-                            out[3] = j
-                            out[4] = np.int16(1.0*lens_gal_24bpz_[k][l][i][j][n]/field_gal_24_[k][l][i][j])
-                            out[5] = np.int16(1.0*lens_gal_23bpz_[k][l][i][j][n]/field_gal_23_[k][l][i][j])
-                            out[6] = np.int16(1.0*lens_zweight_24bpz_[k][l][i][j][n]/field_zweight_24_[k][l][i][j])
-                            out[7] = np.int16(1.0*lens_zweight_23bpz_[k][l][i][j][n]/field_zweight_23_[k][l][i][j])
+                            out[0] = np.int16(k)
+                            out[1] = np.int16(l)
+                            out[2] = np.int16(i)
+                            out[3] = np.int16(j)
+                            out[4] = np.float32(1.0*lens_gal_24bpz_[k][l][i][j][n]/field_gal_24_[k][l][i][j])
+                            out[5] = np.float32(1.0*lens_gal_23bpz_[k][l][i][j][n]/field_gal_23_[k][l][i][j])
+                            out[6] = np.float32(1.0*lens_zweight_24bpz_[k][l][i][j][n]/field_zweight_24_[k][l][i][j])
+                            out[7] = np.float32(1.0*lens_zweight_23bpz_[k][l][i][j][n]/field_zweight_23_[k][l][i][j])
                             out[8] = np.float32(1.0*lens_mass_24bpz_[k][l][i][j][n]/field_mass_24_[k][l][i][j])
                             out[9] = np.float32(1.0*lens_mass_23bpz_[k][l][i][j][n]/field_mass_23_[k][l][i][j])
                             out[10] = np.float32(1.0*lens_mass2_24bpz_[k][l][i][j][n]/field_mass2_24_[k][l][i][j])
@@ -775,49 +775,59 @@ def output(frac_,unmaskedcell_,overlap_,cells_on_a_side_,lens_gal_24bpz_,field_g
                             out[74] = np.float32(1.0*lens_convergencehalo_24eazy_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j])
                             out[75] = np.float32(1.0*lens_convergencehalo_23eazy_[k][l][i][j][n]/field_convergencehalo_23_[k][l][i][j])
                             if n == 0:
-                                if start0 == True: outlist0 = out
-                                else: outlist0 = np.c_[outlist0,out]
-                                start0 = False
+                                if start0 == True:
+                                    outlist0 = out
+                                    start0 = False
+                                outlist0 = np.c_[outlist0,out] # normally this line should start with else, but for some reason that makes it lose the first row and duplicate the second; this way it will duplicate the first line, and at the end I will mask its first instance
                             if n == 1:
-                                if start1 == True: outlist1 = out
-                                else: outlist1 = np.c_[outlist1,out]
-                                start1 = False
+                                if start1 == True:
+                                    outlist1 = out
+                                    start1 = False
+                                outlist1 = np.c_[outlist1,out]
                             if n == 2:
-                                if start2 == True: outlist2 = out
-                                else: outlist2 = np.c_[outlist2,out]
-                                start2 = False
+                                if start2 == True:
+                                    outlist2 = out
+                                    start2 = False
+                                outlist2 = np.c_[outlist2,out]
                             if n == 3:
-                                if start3 == True: outlist3 = out
-                                else: outlist3 = np.c_[outlist3,out]
-                                start3 = False
+                                if start3 == True:
+                                    outlist3 = out
+                                    start3 = False
+                                outlist3 = np.c_[outlist3,out]
                             if n == 4:
-                                if start4 == True: outlist4 = out
-                                else: outlist4 = np.c_[outlist4,out]
-                                start4 = False
+                                if start4 == True:
+                                    outlist4 = out
+                                    start4 = False
+                                outlist4 = np.c_[outlist4,out]
                             if n == 5:
-                                if start5 == True: outlist5 = out
-                                else: outlist5 = np.c_[outlist5,out]
-                                start5 = False
+                                if start5 == True:
+                                    outlist5 = out
+                                    start5 = False
+                                outlist5 = np.c_[outlist5,out]
                             if n == 6:
-                                if start6 == True: outlist6 = out
-                                else: outlist6 = np.c_[outlist6,out]
-                                start6 = False
+                                if start6 == True:
+                                    outlist6 = out
+                                    start6 = False
+                                outlist6 = np.c_[outlist6,out]
                             if n == 7:
-                                if start7 == True: outlist7 = out
-                                else: outlist7 = np.c_[outlist7,out]
-                                start7 = False
+                                if start7 == True:
+                                    outlist7 = out
+                                    start7 = False
+                                outlist7 = np.c_[outlist7,out]
                             if n == 8:
-                                if start8 == True: outlist8 = out
-                                else: outlist8 = np.c_[outlist8,out]
-                                start8 = False
+                                if start8 == True:
+                                    outlist8 = out
+                                    start8 = False
+                                outlist8 = np.c_[outlist8,out]
                             if n == 9:
-                                if start9 == True: outlist9 = out
-                                else: outlist9 = np.c_[outlist9,out]
-                                start9 = False
-    return outlist0,outlist1,outlist2,outlist3,outlist4,outlist5,outlist6,outlist7,outlist8,outlist9
+                                if start9 == True:
+                                    outlist9 = out
+                                    start9 = False
+                                outlist9 = np.c_[outlist9,out]
+    return outlist0[:,1:],outlist1[:,1:],outlist2[:,1:],outlist3[:,1:],outlist4[:,1:],outlist5[:,1:],outlist6[:,1:],outlist7[:,1:],outlist8[:,1:],outlist9[:,1:]
         
-outlist50_0,outlist50_1,outlist50_2,outlist50_3,outlist50_4,outlist50_5,outlist50_6,outlist50_7,outlist50_8,outlist50_9 = output(0.5,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
-outlist75_0,outlist75_1,outlist75_2,outlist75_3,outlist75_4,outlist75_5,outlist75_6,outlist75_7,outlist75_8,outlist75_9 = output(0.75,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
+outlist50_0,outlist50_1,outlist50_2,outlist50_3,outlist50_4,outlist50_5,outlist50_6,outlist50_7,outlist50_8,outlist50_9 = funcoutput(0.5,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
+outlist75_0,outlist75_1,outlist75_2,outlist75_3,outlist75_4,outlist75_5,outlist75_6,outlist75_7,outlist75_8,outlist75_9 = funcoutput(0.75,unmaskedcell,overlap,cells_on_a_side,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
                         
 names = ('1_overlap_x','2_overlap_y','3_cell_x','4_cell_y','5_lens_gal_24bpz','6_lens_gal_23bpz','7_lens_zweight_24bpz','8_lens_zweight_23bpz','9_lens_mass_24bpz','10_lens_mass_23bpz','11_lens_mass2_24bpz','12_lens_mass2_23bpz','13_lens_mass3_24bpz','14_lens_mass3_23bpz','15_lens_oneoverr_24bpz','16_lens_oneoverr_23bpz','17_lens_zoverr_24bpz','18_lens_zoverr_23bpz','19_lens_massoverr_24bpz','20_lens_massoverr_23bpz','21_lens_mass2overr_24bpz','22_lens_mass2overr_23bpz','23_lens_mass3overr_24bpz','24_lens_mass3overr_23bpz','25_lens_mass2rms_24bpz','26_lens_mass2rms_23bpz','27_lens_mass3rms_24bpz','28_lens_mass3rms_23bpz','29_lens_mass2overrms_24bpz','30_lens_mass2overrms_23bpz','31_lens_mass3overrms_24bpz','32_lens_mass3overrms_23bpz','33_lens_flexion_24bpz','34_lens_flexion_23bpz','35_lens_tidal_24bpz','36_lens_tidal_23bpz','37_lens_convergence_24bpz','38_lens_convergence_23bpz','39_lens_convergencehalo_24bpz','40_lens_convergencehalo_23bpz','41_lens_gal_24eazy','42_lens_gal_23eazy','43_lens_zweight_24eazy','44_lens_zweight_23eazy','45_lens_mass_24eazy','46_lens_mass_23eazy','47_lens_mass2_24eazy','48_lens_mass2_23eazy','49_lens_mass3_24eazy','50_lens_mass3_23eazy','51_lens_oneoverr_24eazy','52_lens_oneoverr_23eazy','53_lens_zoverr_24eazy','54_lens_zoverr_23eazy','55_lens_massoverr_24eazy','56_lens_massoverr_23eazy','57_lens_mass2overr_24eazy','58_lens_mass2overr_23eazy','59_lens_mass3overr_24eazy','60_lens_mass3overr_23eazy','61_lens_mass2rms_24eazy','62_lens_mass2rms_23eazy','63_lens_mass3rms_24eazy','64_lens_mass3rms_23eazy','65_lens_mass2overrms_24eazy','66_lens_mass2overrms_23eazy','67_lens_mass3overrms_24eazy','68_lens_mass3overrms_23eazy','69_lens_flexion_24eazy','70_lens_flexion_23eazy','71_lens_tidal_24eazy','72_lens_tidal_23eazy','73_lens_convergence_24eazy','74_lens_convergence_23eazy','75_lens_convergencehalo_24eazy','76_lens_convergencehalo_23eazy')
 dtype=(np.int16,np.int16,np.int16,np.int16,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32)
