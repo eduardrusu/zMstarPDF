@@ -787,6 +787,7 @@ def outputfunc(*argv):
             for i in range(cells_on_a_side):
                 for j in range(cells_on_a_side):
                     for n in range(10):
+                        print "xxx"
                         condition = False
                         if len(argv) == 109:
                             if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
@@ -891,7 +892,7 @@ def outputfunc(*argv):
                                 outeazy24[21] = np.float32(1.0*lens_convergencehalo_24eazy_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j])
                             print "aaa"
                             if n == 0:
-                                print "bbb" 
+                                print "bbb"
                                 if start0 == True:
                                     if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_0 = outbpz23
                                     if len(argv) == 55 or len(argv) == 109: outlisteazy23_0 = outeazy23
