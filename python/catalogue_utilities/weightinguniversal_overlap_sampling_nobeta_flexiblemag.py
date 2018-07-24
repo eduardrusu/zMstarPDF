@@ -199,7 +199,7 @@ if lensID == "J1206":
     z_l = 0.75
     limmag = 24
     brightmag = 18.05
-    photoz = 'bpz'
+    photoz = 'bpzeazy'
     pixnr = 1283
     pixlens = 0.187 * u.arcsec
 
