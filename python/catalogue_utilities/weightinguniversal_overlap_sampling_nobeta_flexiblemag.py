@@ -548,11 +548,11 @@ for k in range(overlap):
                     lensbpz_masked = np.delete(lensbpz_masked,np.where(lensbpz_masked[-1] != 0),axis=1) # remove objects inside a field mask
                     lensbpz_masked = lensbpz_masked[:-1] # delete the last column
                     
-                    lenscoords = np.copy(lenseazy[x_lens:y_lens + 1]) # copy the pixel coordinates
-                    lenscoords_fieldx = float(xlow)+(1.0 * lenscoords[1]/((2/pixlens.value) * radius))*(float(xhigh)-float(xlow))
-                    lenscoords_fieldy = float(ylow)+(1.0 * lenscoords[0]/((2/pixlens.value) * radius))*(float(yhigh)-float(ylow))
-                    lenscoords_field = msk[0].data[lenscoords_fieldx.astype(int),lenscoords_fieldy.astype(int)]
                     if photoz == 'bpzeazy':
+                        lenscoords = np.copy(lenseazy[x_lens:y_lens + 1]) # copy the pixel coordinates
+                        lenscoords_fieldx = float(xlow)+(1.0 * lenscoords[1]/((2/pixlens.value) * radius))*(float(xhigh)-float(xlow))
+                        lenscoords_fieldy = float(ylow)+(1.0 * lenscoords[0]/((2/pixlens.value) * radius))*(float(yhigh)-float(ylow))
+                        lenscoords_field = msk[0].data[lenscoords_fieldx.astype(int),lenscoords_fieldy.astype(int)]
                         lenseazy_masked = np.c_['0',lenseazy,lenscoords_field.reshape(1,lenscoords_field.shape[0])] # check if the lens catalogue objects fall inside field masks
                         lenseazy_masked = np.delete(lenseazy_masked,np.where(lenseazy_masked[-1] != 0),axis=1) # remove objects inside a field mask
                         lenseazy_masked = lenseazy_masked[:-1] # delete the last column
