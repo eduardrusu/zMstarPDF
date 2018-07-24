@@ -189,7 +189,7 @@ if lensID == "RX1131":
 if lensID == "WFI2033":
     z_s = 1.66
     z_l = 0.66
-    limmag = 23
+    limmag = 24
     brightmag = 16.90
     photoz = 'bpzeazy'
     pixnr = 915
