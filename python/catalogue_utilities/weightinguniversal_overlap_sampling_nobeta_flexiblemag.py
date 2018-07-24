@@ -891,7 +891,7 @@ def outputfunc(*argv):
                                 outeazy24[21] = np.float32(1.0*lens_convergencehalo_24eazy_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j])
                             print "aaa"
                             if n == 0:
-                            print "bbb"
+                                print "bbb" 
                                 if start0 == True:
                                     if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_0 = outbpz23
                                     if len(argv) == 55 or len(argv) == 109: outlisteazy23_0 = outeazy23
