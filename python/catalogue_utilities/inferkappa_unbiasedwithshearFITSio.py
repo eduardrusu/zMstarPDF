@@ -79,9 +79,9 @@ if lens == "WFI2033":
         constrwidth_gamma_inf = 0.139
         constrwidth_gamma_sup = 0.169
     if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.193
-        constrwidth_gamma_inf = 0.178
-        constrwidth_gamma_sup = 0.208
+        constr_gamma = 0.128
+        constrwidth_gamma_inf = 0.143
+        constrwidth_gamma_sup = 0.113
     if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
         constr_gamma = 0.10
         constrwidth_gamma_inf = 0.085

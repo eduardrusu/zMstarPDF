@@ -793,7 +793,7 @@ def outputfunc(*argv):
                         if len(argv) == 73:
                             if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
                         if len(argv) == 55:
-                            print k,l,i,j,n,unmaskedcell[k][l][i][j],np.min(lens_gal_23bpz_[k][l][i][j]),np.min(lens_gal_23eazy_[k][l][i][j]),field_gal_23_[k][l][i][j]
+                            print condition,k,l,i,j,n,unmaskedcell[k][l][i][j],np.min(lens_gal_23bpz_[k][l][i][j]),np.min(lens_gal_23eazy_[k][l][i][j]),field_gal_23_[k][l][i][j]
                             if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
                         if len(argv) == 37:
                             if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
