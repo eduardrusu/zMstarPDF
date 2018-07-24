@@ -189,9 +189,9 @@ if lensID == "RX1131":
 if lensID == "WFI2033":
     z_s = 1.66
     z_l = 0.66
-    limmag = 24
+    limmag = 23
     brightmag = 16.90
-    photoz = 'bpzeazy'
+    photoz = 'bpz'
     pixnr = 915
     pixlens = 0.2625 * u.arcsec
 if lensID == "J1206":
