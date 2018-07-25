@@ -74,22 +74,22 @@ increment4 = 2
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.154
-        constrwidth_gamma_inf = 0.139
-        constrwidth_gamma_sup = 0.169
-    if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.143
-        constrwidth_gamma_sup = 0.113
-    if other == 'fiducial' and (handpicked == 'handpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.10
-        constrwidth_gamma_inf = 0.085
-        constrwidth_gamma_sup = 0.115
-    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or float(zsup) > 0):
-        constr_gamma = 0.095
-        constrwidth_gamma_inf = 0.070
+    if other == 'fiducial' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.100
+        constrwidth_gamma_inf = 0.090
         constrwidth_gamma_sup = 0.110
+    if other == 'chameleon' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.128
+        constrwidth_gamma_inf = 0.118
+        constrwidth_gamma_sup = 0.138
+    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
+        constr_gamma = 0.095
+        constrwidth_gamma_inf = 0.085
+        constrwidth_gamma_sup = 0.105
+    if other == 'composite' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.148
+        constrwidth_gamma_inf = 0.138
+        constrwidth_gamma_sup = 0.158
     filters = "ugrizJHK"
     print 'shear: ',constr_gamma
 if lens == "J1206":
