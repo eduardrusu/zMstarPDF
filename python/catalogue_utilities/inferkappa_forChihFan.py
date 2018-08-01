@@ -7,9 +7,12 @@ import time
 
 start_time=time.time()
 
-models = ['noshear','powNFWG1G2','powNFWG1','powNFW','compNFW','powSIS']
-shear = [0,0.047,0.038,0.041,0.050,0.112]
-shearerr = [10,0.0062,0.0095,0.0099,0.0075,0.0070]
+#models = ['noshear','powNFWG1G2','powNFWG1','powNFW','compNFW','powSISG1']
+#shear = [0,0.047,0.038,0.041,0.050,0.011]
+#shearerr = [10,0.0062,0.0095,0.0099,0.0075,0.0070]
+models = ['powSISG1']
+shear = [0.011]
+shearerr = [0.0070]
 
 root = "/lfs08/rusucs/kappaplanes/"
 
