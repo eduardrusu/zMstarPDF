@@ -1,5 +1,5 @@
 # Given a folder with .fits RGB images and the input list for DAS Cutout, it produces a color-combined RGB using Humvi (https://github.com/drphilmarshall/HumVI/blob/master/examples/Examples.ipynb )
-# run as python HSCcolorcutouts.py /Volumes/LaCieSubaru/Gaia/cutouts1/ /Volumes/LaCieSubaru/Gaia/DelchambreHSC5arcsecunique_cutout1.cat
+# run as python HSCcolorcutouts.py /Volumes/LaCieSubaru/Gaia/cutout0/ /Volumes/LaCieSubaru/Gaia/DelchambreHSC5arcsecunique_cutout0.cat
 
 #from astropy.io import fits
 import numpy as np
