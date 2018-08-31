@@ -56,16 +56,22 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             posxy = np.array([-0.5 * L_field  + (1 + cellxy[0] + 0.5) * L_pix, -0.5 * L_field  + (1 + cellxy[1] + 0.5) * L_pix])
             #posxy = np.array([-0.5 * L_field  + (cellxy[0] + 0.5) * L_pix, -0.5 * L_field  + (cellxy[1] + 0.5) * L_pix])
             cellkappagamma = np.c_[cells,kappagamma[:,][(cellxy[0] * 4096 + cellxy[1]).astype(int)]]
-            index = griddata(posxy.T, cells, (cat[:,index_posx], cat[:,index_posy]), method='nearest')
-            indextest = griddata(posxy.T, cells, (posxy.T), method='nearest') # -> indextest = cells
-            sep = np.sqrt((posxy[0][index.astype(int)]-cat[:,index_posx])**2 + (posxy[1][index.astype(int)]-cat[:,index_posy])**2)*1/degree*3600 # many cells have sep>radius but this makes sense statistically, because I need to remove the cells which are on the edges and should be ignored, and also the fraction of objects inside the square cell but not inside the circular aperture, which is (4-3.14)/4=0.215
-            cat_msk = np.c_[cat,index,sep]
-            catinner = cat_msk[cat_msk[:,index_sep] <= innermsk] # so that I can count how many objects are inside the inner mask
-            cat_msk = cat_msk[cat_msk[:,index_sep] <= radius] # mask objects at distance larger than the aperture from the center
-            cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # uses the inner mask
-            cat_msk[:,index_sep][cat_msk[:,index_sep] < 10] = 10
-            #cat = np.c_[z,posx,posy,mstar,imag...]
+            count = np.zeros(np.shape(posxy)[1])
+            for k in range(np.shape(posxy)[1]):
+                print k
+                cat_msk = np.copy(cat)
+                sep = np.sqrt((posxy[0][k]-cat[:,index_posx])**2 + (posxy[1][k]-cat[:,index_posy])**2)*1/degree*3600
+                cat_msk = np.c_[cat,sep]
+                catinner = cat_msk[cat_msk[:,index_sep] <= innermsk] # so that I can count how many objects are inside the inner mask
+                cat_msk = cat_msk[cat_msk[:,index_sep] <= radius] # mask objects at distance larger than the aperture from the center
+                cat_msk = cat_msk[cat_msk[:,index_sep] > innermsk] # uses the inner mask
+                cat_msk[:,index_sep][cat_msk[:,index_sep] < 10] = 10
+                #cat = np.c_[z,posx,posy,mstar,imag...]
+                count[k] = len(cat_msk)
             
+            
+            
+
             w_gal_2X = np.bincount(cat_msk[:,index_index].astype(int)) # 2X stands for 23 or 24 limmag
             galinner = np.bincount(catinner[:,index_index].astype(int)) # counts objects inside the inner mask
             index_all = np.unique(index.astype(int)) # sorts all unique entries; galinner and w_gal_2X may contain fewer elements, because in some indexed cells (it seems largest index only) there may be no galaxies, so I need to expand them to include all indices
@@ -114,7 +120,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             if initialized != 0:
                 cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s_testinvertxy.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s_test.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
                 os.system('rm -f %s' % f)
                 cellkappagammafinal = cellkappagammastyle
                 initialized = 1
