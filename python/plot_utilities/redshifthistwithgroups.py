@@ -25,7 +25,7 @@ z2 = 0.123; z2_size = 6; z2_ra = 59; z2_raerr = 203; z2_dec = -212; z2_decerr = 
 z3 = 0.482; z3_size = 14; z3_ra = -230; z3_raerr = 67; z3_dec = -41; z3_decerr = 93
 z4 = 0.551; z4_size = 27; z4_ra = 127; z4_raerr = 98; z4_dec = -171; z4_decerr = 64
 z5 = 0.688; z5_size = 16; z5_ra = 92; z5_raerr = 68; z5_dec = -112; z5_decerr = 47
-z6 = 0.750; z6_size = 26; z6_ra = -33; z6_raerr = 54; z6_dec = 5; z6_decerr = 26
+z6 = 0.750; z6_size = 28; z6_ra = -18; z6_raerr = 49; z6_dec = 5; z6_decerr = 23
 z7 = 0.778; z7_size = 4; z7_ra = -227; z7_raerr = 30; z7_dec = -94; z7_decerr = 34
 
 plt.axvline(x=z1, color='k', linestyle='--')
@@ -65,4 +65,4 @@ plt.xlim(0, zlim)
 #plt.tight_layout()
 #fig.text(0.05, 0.5, 'photo-z', ha='center', va='center', size='20', rotation='vertical')
 #plt.title('HE0435 ugri specz-photz')
-plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/J1206/speczhist.png')
+plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/J1206/speczhist.pdf')

@@ -10,7 +10,7 @@ scale = 240.0 / pix
 maglim1 = 24
 maglim2 = 23
 z_l = 1.789
-x,y,i,photoz,spec,classify = np.loadtxt("/Users/cerusu/Dropbox/Davis_work/code/J1206/catalogues/i24at2sigma_iunconv_igrKconv_detectin_iunconv_corrisoautoerredit_short_withbpzlephareclass.cat",usecols=[0,1,10,30,42,49],unpack=True)
+x,y,i,photoz,spec,classify = np.loadtxt("/Users/cerusu/Dropbox/Davis_work/code/J1206/catalogues/i24at2sigma_iunconv_igrKconv_detectin_iunconv_corrisoautoerredit_short_withbpzlephareclassG3G4.cat",usecols=[0,1,10,30,42,49],unpack=True)
 largeflexshift_x = [638.5280,648.8843,651.0358,741.0764,597.2705,606.4540,603.4944]
 largeflexshift_y = [709.1356,661.3296,654.6971,758.0592,808.3246,670.5287,628.3240]
 
@@ -68,12 +68,12 @@ mask = fits.getdata("/Users/cerusu/Dropbox/Davis_work/code/J1206/catalogues/mskf
 
 plt.scatter(x_star_bright,y_star_bright,marker='*',edgecolors='k',s=30,linewidths=1)
 plt.scatter(x_star_faint,y_star_faint,marker='*',edgecolors='k',s=10,linewidths=1)
-plt.scatter(x_galnospec_bright,y_galnospec_bright,marker='o',edgecolors='none',s=30,linewidths=1,c=redshift_galnospec_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
-plt.scatter(x_galnospec_faint,y_galnospec_faint,marker='o',edgecolors='none',s=10,linewidths=1,c=redshift_galnospec_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
-plt.scatter(x_spec_bright,y_spec_bright,marker='s',edgecolors='none',linewidths=1,s=30,c=redshift_spec_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
-plt.scatter(x_spec_faint,y_spec_faint,marker='s',edgecolors='none',linewidths=1,s=10,c=redshift_spec_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
-plt.scatter(x_group_bright,y_group_bright,marker='s',edgecolors='k',linewidths=1,s=30,c=redshift_group_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
-plt.scatter(x_group_faint,y_group_faint,marker='s',edgecolors='k',linewidths=1,s=10,c=redshift_group_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_galnospec_bright,y_galnospec_bright,marker='o',edgecolors='k',s=30,linewidths=1,c=redshift_galnospec_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_galnospec_faint,y_galnospec_faint,marker='o',edgecolors='k',s=10,linewidths=1,c=redshift_galnospec_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_spec_bright,y_spec_bright,marker='s',edgecolors='k',linewidths=1,s=30,c=redshift_spec_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_spec_faint,y_spec_faint,marker='s',edgecolors='k',linewidths=1,s=10,c=redshift_spec_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_group_bright,y_group_bright,marker='s',edgecolors='k',linewidths=2,s=30,c=redshift_group_bright,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
+plt.scatter(x_group_faint,y_group_faint,marker='s',edgecolors='k',linewidths=2,s=10,c=redshift_group_faint,cmap = plt.cm.get_cmap("CMRmap"),alpha=0.6,vmin=0,vmax=zmax)
 plt.colorbar(format='%.1f')#,boundaries=[0,1.8])
 plt.scatter(largeflexshift_x,largeflexshift_y,marker='.',c='k',s=2)
 plt.imshow(image, cmap='gray_r', norm=LogNorm(), origin='lower', vmin=0.001, vmax=100)
@@ -86,4 +86,4 @@ fig.gca().add_artist(circle2)
 fig = plt.gca()
 fig.axes.get_xaxis().set_visible(False)
 fig.axes.get_yaxis().set_visible(False)
-plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/J1206/FOV_J1206.png', dpi=200, bbox_inches='tight')
+plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/J1206/FOV_J1206.pdf', dpi=200, bbox_inches='tight')
