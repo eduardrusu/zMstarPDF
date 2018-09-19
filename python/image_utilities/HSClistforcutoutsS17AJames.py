@@ -13,9 +13,14 @@ path = ''
 for i in range(len(s)):
     path = path + s[i] + '/'
 
-from astropy.table import Table
-t = Table.read(cat)
-coord = np.c_[t['ra'],t['dec']].T
+if ".fits" in cat:
+    from astropy.table import Table
+    t = Table.read(cat)
+    coord = np.c_[t['ra'],t['dec']].T
+else:
+    ra = 4
+    dec = 6
+    coord = np.loadtxt(cat,usecols=[ra,dec],unpack=True)
 head = '#? rerun      filter    ra       dec       sw     sh  # column descriptor\n'
 headpsf = '#? ra          dec      filter  type    rerun centered\n'
 rerun = 's18a_wide'
