@@ -1,0 +1,11 @@
+# searches for all objects (separately stars and galaxies) with clean photometry inside a given coordinate range; Remember to run on the latest data release
+
+# Shorthand alias for modelMag
+#FROM PhotoObj
+SELECT ra, dec, i, err_i, clean 
+FROM Galaxy
+WHERE CLEAN=1 AND ra BETWEEN 169.506 and 169.635 AND dec BETWEEN 7.637 and 7.896
+
+SELECT ra, dec, psfMag_i, psfMagerr_i, clean
+FROM Star
+WHERE CLEAN=1 AND ra BETWEEN 169.506 and 169.635 AND dec BETWEEN 7.637 and 7.896
