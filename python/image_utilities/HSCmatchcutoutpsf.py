@@ -40,7 +40,7 @@ for i in range(len(list_psf)):
 
 list_cutout_filter = np.empty(len(list_cutout),dtype="string")
 list_cutout_ra = np.zeros(len(list_cutout))
-list_cutout_dec = np.zeros(len(list_cutout)) 
+list_cutout_dec = np.zeros(len(list_cutout))
 for i in range(len(list_cutout)):
     if i % 1000 == 0: print i
     file = fits.open(list_cutout[i])
@@ -50,21 +50,18 @@ for i in range(len(list_cutout)):
     list_cutout_dec[i] = coord[1]
     file.close()
     str = list_cutout[i].split("-")
-    filter = str[7]
+    filter = str[5]
     list_cutout_filter[i] = filter
 
 out_cutout = np.c_[list_cutout,list_cutout_filter,list_cutout_ra,list_cutout_dec]
 out_psf = np.c_[list_psf,list_psf_filter,list_psf_ra,list_psf_dec]
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/cutouts_g.cat",out_cutout[out_cutout[:,1]=='G'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/cutouts_r.cat",out_cutout[out_cutout[:,1]=='R'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/cutouts_i.cat",out_cutout[out_cutout[:,1]=='I'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/cutouts_z.cat",out_cutout[out_cutout[:,1]=='Z'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/cutouts_y.cat",out_cutout[out_cutout[:,1]=='Y'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/psf_g.cat",out_psf[out_psf[:,1]=='G'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/psf_r.cat",out_psf[out_psf[:,1]=='R'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/psf_i.cat",out_psf[out_psf[:,1]=='I'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/psf_z.cat",out_psf[out_psf[:,1]=='Z'],'%s \t %s \t %s \t %s')
-np.savetxt("/Volumes/LaCieSubaru/Gaia/James/psf_y.cat",out_psf[out_psf[:,1]=='Y'],'%s \t %s \t %s \t %s')
-os.chdir("/Users/cerusu/GITHUB/zMstarPDF/python/image_utilities")
-#os.chdir(imgpath)
-#os.system("rm -f tmp.fits")
+np.savetxt("cutouts_g.cat",out_cutout[out_cutout[:,1]=='G'],'%s \t %s \t %s \t %s')
+np.savetxt("cutouts_r.cat",out_cutout[out_cutout[:,1]=='R'],'%s \t %s \t %s \t %s')
+np.savetxt("cutouts_i.cat",out_cutout[out_cutout[:,1]=='I'],'%s \t %s \t %s \t %s')
+np.savetxt("cutouts_z.cat",out_cutout[out_cutout[:,1]=='Z'],'%s \t %s \t %s \t %s')
+np.savetxt("cutouts_y.cat",out_cutout[out_cutout[:,1]=='Y'],'%s \t %s \t %s \t %s')
+np.savetxt("psf_g.cat",out_psf[out_psf[:,1]=='G'],'%s \t %s \t %s \t %s')
+np.savetxt("psf_r.cat",out_psf[out_psf[:,1]=='R'],'%s \t %s \t %s \t %s')
+np.savetxt("psf_i.cat",out_psf[out_psf[:,1]=='I'],'%s \t %s \t %s \t %s')
+np.savetxt("psf_z.cat",out_psf[out_psf[:,1]=='Z'],'%s \t %s \t %s \t %s')
+np.savetxt("psf_y.cat",out_psf[out_psf[:,1]=='Y'],'%s \t %s \t %s \t %s')
