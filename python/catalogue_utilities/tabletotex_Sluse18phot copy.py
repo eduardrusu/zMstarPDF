@@ -111,22 +111,9 @@ data[:,H][data[:,H] < 99] = data[:,H][data[:,H] < 99] + H_corr
 data[:,H_err][data[:,H] == 99] = 99
 data[:,K][data[:,K] < 99] = data[:,K][data[:,K] < 99] + K_corr
 data[:,K_err][data[:,K] == 99] = 99
-data[:,u][data[:,u] < 99] = data[:,u][data[:,u] < 99] + data[:,itot][data[:,u] < 99] - data[:,i][data[:,u] < 99]
-data[:,g][data[:,g] < 99] = data[:,g][data[:,g] < 99] + data[:,itot][data[:,g] < 99] - data[:,i][data[:,g] < 99]
-data[:,r][data[:,r] < 99] = data[:,r][data[:,r] < 99] + data[:,itot][data[:,r] < 99] - data[:,i][data[:,r] < 99]
-data[:,z][data[:,z] < 99] = data[:,z][data[:,z] < 99] + data[:,itot][data[:,z] < 99] - data[:,i][data[:,z] < 99]
-data[:,Y][data[:,Y] < 99] = data[:,Y][data[:,Y] < 99] + data[:,itot][data[:,Y] < 99] - data[:,i][data[:,Y] < 99]
-data[:,J][data[:,J] < 99] = data[:,J][data[:,J] < 99] + data[:,itot][data[:,J] < 99] - data[:,i][data[:,J] < 99]
-data[:,H][data[:,H] < 99] = data[:,H][data[:,H] < 99] + data[:,itot][data[:,H] < 99] - data[:,i][data[:,H] < 99]
-data[:,K][data[:,K] < 99] = data[:,K][data[:,K] < 99] + data[:,itot][data[:,K] < 99] - data[:,i][data[:,K] < 99]
-data[:,ch1][data[:,ch1] > -99] = data[:,ch1][data[:,ch1] > -99] + data[:,itot][data[:,ch1] > -99] - data[:,i][data[:,ch1] > -99]
-data[:,ch2][data[:,ch2] > -99] = data[:,ch2][data[:,ch2] > -99] + data[:,itot][data[:,ch2] > -99] - data[:,i][data[:,ch2] > -99]
-data[:,ch3][data[:,ch3] > -99] = data[:,ch3][data[:,ch3] > -99] + data[:,itot][data[:,ch3] > -99] - data[:,i][data[:,ch3] > -99]
-data[:,ch4][data[:,ch4] > -99] = data[:,ch4][data[:,ch4] > -99] + data[:,itot][data[:,ch4] > -99] - data[:,i][data[:,ch4] > -99]
-data[:,i][data[:,i] < 99] = data[:,i][data[:,i] < 99] + data[:,itot][data[:,i] < 99] - data[:,i][data[:,i] < 99] # needs to be placed here as the last line
 print np.shape(data)
 fileout = '/Users/cerusu/GITHUB/H0LiCOW/papers/WFI2033Environment/table_phot.tex'
-np.savetxt(fileout,np.c_[data[:,ra],data[:,dec],data[:,u],data[:,u_err],data[:,g],data[:,g_err],data[:,r],data[:,r_err],data[:,i],data[:,i_err],data[:,z],data[:,z_err],data[:,Y],data[:,Y_err],data[:,J],data[:,J_err],data[:,H],data[:,H_err],data[:,K],data[:,K_err],data[:,ch1],data[:,ch1_err],data[:,ch2],data[:,ch2_err],data[:,ch3],data[:,ch3_err],data[:,ch4],data[:,ch4_err]],fmt='%.5f & $%.5f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ \\\\')
+np.savetxt(fileout,np.c_[data[:,ra],data[:,dec],data[:,itot],data[:,itot_err],data[:,u],data[:,u_err],data[:,g],data[:,g_err],data[:,r],data[:,r_err],data[:,i],data[:,i_err],data[:,z],data[:,z_err],data[:,Y],data[:,Y_err],data[:,J],data[:,J_err],data[:,H],data[:,H_err],data[:,K],data[:,K_err],data[:,ch1],data[:,ch1_err],data[:,ch2],data[:,ch2_err],data[:,ch3],data[:,ch3_err],data[:,ch4],data[:,ch4_err]],fmt='%.5f & $%.5f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ & $%.2f \pm %.2f$ \\\\')
 strin = '-99.00 \\\pm -99.00'
 strout = '-'
 os.system("sed -i -e \'s/%s/%s/g\' %s" % (strin,strout,fileout))
