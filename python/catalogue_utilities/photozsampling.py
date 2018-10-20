@@ -8,9 +8,10 @@ import os
 from os import system
 import time
 
-file = "i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-filebpz = "/Users/eduardrusu/software/bpz-1.99.3/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
-fileeazy = "/Users/eduardrusu/software/eazy-1.00/inputs/OUTPUT/sample_i/"
+useeazy = 0
+file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+filebpz = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
+if useeazy == 1: fileeazy = "/Users/eduardrusu/software/eazy-1.00/inputs/OUTPUT/sample_i/"
 #file = "rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
 #filebpz = "/Users/eduardrusu/software/bpz-1.99.3/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
 #fileeazy = "/Users/eduardrusu/software/eazy-1.00/inputs/OUTPUT/sample_r/"
@@ -33,7 +34,7 @@ Ks_corr += 1.83
 
 # use the modified version of converttolephare_WFI2033.py:
 def lephare_noobs(data,fileout):
-    
+
     # a small number of objects in BPZ have good mags, but error on the mag 99; those objects should be good, and Ideally I would fix the errors one by one through closer examination. Here I just replace their errors with 1 mag
     data[u_err][np.abs(data[u_err]) == 99.00] = 1.00
     data[g_err][np.abs(data[g_err]) == 99.00] = 1.00
@@ -44,7 +45,7 @@ def lephare_noobs(data,fileout):
     data[J_err][np.abs(data[J_err]) == 99.00] = 1.00
     data[H_err][np.abs(data[H_err]) == 99.00] = 1.00
     data[Ks_err][np.abs(data[Ks_err]) == 99.00] = 1.00
-    
+
     # If not observed in a specific band, negative values (-99,-99) can be used for (mag,error)
     data[irac1] = -99
     data[irac1_err] = -99
@@ -54,7 +55,7 @@ def lephare_noobs(data,fileout):
     data[irac3_err] = -99
     data[irac4] = -99
     data[irac4_err] = -99
-    
+
     data[u_err][np.abs(data[u]) == 99.0] = -99.0
     data[g_err][np.abs(data[g]) == 99.0] = -99.0
     data[r_err][np.abs(data[r]) == 99.0] = -99.0
@@ -73,7 +74,7 @@ def lephare_noobs(data,fileout):
     data[J][np.abs(data[J]) == 99.0] = -99.0
     data[H][np.abs(data[H]) == 99.0] = -99.0
     data[Ks][np.abs(data[Ks]) == 99.0] = -99.0
-    
+
     # apply the corrections
     data[u][np.abs(data[u]) != 99.0] += u_corr
     data[g][np.abs(data[g]) != 99.0] += g_corr
@@ -84,7 +85,7 @@ def lephare_noobs(data,fileout):
     data[J][np.abs(data[J]) != 99.0] += J_corr
     data[H][np.abs(data[H]) != 99.0] += H_corr
     data[Ks][np.abs(data[Ks]) != 99.0] += Ks_corr
-    
+
     # LePhare thinks error bars = 0 means non-detection, so fix this
     data[u_err][data[u_err] == 0.00] = 0.01
     data[g_err][data[g_err] == 0.00] = 0.01
@@ -95,14 +96,14 @@ def lephare_noobs(data,fileout):
     data[J_err][data[J_err] == 0.00] = 0.01
     data[H_err][data[H_err] == 0.00] = 0.01
     data[Ks_err][data[Ks_err] == 0.00] = 0.01
-    
+
     str = "ID \t u \t u_err \t g \t g_err \t r \t r_err \t i \t i_err \t z \t z_err \t Y \t Y_err \t J \t J_err \t H \t H_err \t K \t Ks_err \t ch1 \t ch1_err \t ch2 \t ch2_err \t ch3 \t ch3_err \t ch4 \t ch4_err \t context z-spec \t string"
     dataout = np.c_[data[id],data[u],data[u_err],data[g],data[g_err],data[r],data[r_err],data[i],data[i_err],data[z],data[z_err],data[Y],data[Y_err],data[J],data[J_err],data[H],data[H_err],data[Ks],data[Ks_err],data[irac1],data[irac1_err],data[irac2],data[irac2_err],data[irac3],data[irac3_err],data[irac4],data[irac4_err],data[redshift]]
     np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t 8191 \t %.4f ')
 
 # use the modified version of converttolephare_noobs_WFI2033.py:
 def lephare(data,fileout):
-    
+
     # If not observed in a specific band, negative values (-99,-99) can be used for (mag,error)
     data[irac1] = -99
     data[irac1_err] = -99
@@ -112,7 +113,7 @@ def lephare(data,fileout):
     data[irac3_err] = -99
     data[irac4] = -99
     data[irac4_err] = -99
-    
+
     # a small number of objects in BPZ have good mags, but error on the mag 99; those objects should be good, and Ideally I would fix the errors one by one through closer examination. Here I just replace their errors with 1 mag
     data[u_err][np.abs(data[u_err]) == 99.00] = 1.00
     data[g_err][np.abs(data[g_err]) == 99.00] = 1.00
@@ -123,7 +124,7 @@ def lephare(data,fileout):
     data[J_err][np.abs(data[J_err]) == 99.00] = 1.00
     data[H_err][np.abs(data[H_err]) == 99.00] = 1.00
     data[Ks_err][np.abs(data[Ks_err]) == 99.00] = 1.00
-    
+
     # apply the corrections
     data[u][np.abs(data[u]) != 99.0] += u_corr
     data[g][np.abs(data[g]) != 99.0] += g_corr
@@ -134,7 +135,7 @@ def lephare(data,fileout):
     data[J][np.abs(data[J]) != 99.0] += J_corr
     data[H][np.abs(data[H]) != 99.0] += H_corr
     data[Ks][np.abs(data[Ks]) != 99.0] += Ks_corr
-    
+
     # correct the limiting mags
     data[u_err][np.abs(data[u]) == 99.0] += u_corr
     data[g_err][np.abs(data[g]) == 99.0] += g_corr
@@ -145,7 +146,7 @@ def lephare(data,fileout):
     data[J_err][np.abs(data[J]) == 99.0] += J_corr
     data[H_err][np.abs(data[H]) == 99.0] += H_corr
     data[Ks_err][np.abs(data[Ks]) == 99.0] += Ks_corr
-    
+
     # the format for nondetections is error=-1.0 and magnitude at 1-sigma
     data[u][np.abs(data[u]) == 99.0] = data[u_err][np.abs(data[u]) == 99.0]
     data[g][np.abs(data[g]) == 99.0] = data[g_err][np.abs(data[g]) == 99.0]
@@ -165,7 +166,7 @@ def lephare(data,fileout):
     data[J_err][np.abs(data[J_err]) > 20] = -1.0
     data[H_err][np.abs(data[H_err]) > 20] = -1.0
     data[Ks_err][np.abs(data[Ks_err]) > 20] = -1.0
-    
+
     # LePhare thinks error bars = 0 means non-detection, so fix this
     data[u_err][data[u_err] == 0.00] = 0.01
     data[g_err][data[g_err] == 0.00] = 0.01
@@ -176,7 +177,7 @@ def lephare(data,fileout):
     data[J_err][data[J_err] == 0.00] = 0.01
     data[H_err][data[H_err] == 0.00] = 0.01
     data[Ks_err][data[Ks_err] == 0.00] = 0.01
-    
+
     str = "ID \t u \t u_err \t g \t g_err \t r \t r_err \t i \t i_err \t z \t z_err \t Y \t Y_err \t J \t J_err \t H \t H_err \t K \t Ks_err \t ch1 \t ch1_err \t ch2 \t ch2_err \t ch3 \t ch3_err \t ch4 \t ch4_err \t context z-spec \t string"
     dataout = np.c_[data[id],data[u],data[u_err],data[g],data[g_err],data[r],data[r_err],data[i],data[i_err],data[z],data[z_err],data[Y],data[Y_err],data[J],data[J_err],data[H],data[H_err],data[Ks],data[Ks_err],data[irac1],data[irac1_err],data[irac2],data[irac2_err],data[irac3],data[irac3_err],data[irac4],data[irac4_err],data[redshift]]
     np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t 8191 \t %.4f ')
@@ -282,39 +283,39 @@ lephare_noobs(data,file[:-4] + "_noIRACbpzsample_noobs.cat")
 
 ###################
 # sampling from EAzY:
+if useeazy == 1:
+    lst = [x for x in os.listdir('%s' %fileeazy) if ('.pz' in x)]
+    samplez = np.zeros((len(lst),9)) # sample 9 times
 
-lst = [x for x in os.listdir('%s' %fileeazy) if ('.pz' in x)]
-samplez = np.zeros((len(lst),9)) # sample 9 times
+    gal = np.zeros(len(lst)) # array of all the ID of galaxies
+    for k in range(len(lst)):
+        gal[k] = int(lst[k].strip('.pz'))
+    gal = gal.astype(int)
 
-gal = np.zeros(len(lst)) # array of all the ID of galaxies
-for k in range(len(lst)):
-    gal[k] = int(lst[k].strip('.pz'))
-gal = gal.astype(int)
+    zgridint = np.arange(400)
+    nr = 0
+    for k in range(phot.shape[0]):
+        if int(phot[k][0]) in gal:
+            pdz = np.loadtxt('%s%s.pz' % (fileeazy,int(phot[k][0])), usecols = [3], unpack=True)
+            pdz = pdz/np.sum(pdz) # it needs to be normalized
+            custm = stats.rv_discrete(name='custm', values=(zgridint, pdz)) # ignore the first column, which is the ID
+            sample = custm.rvs(size = 9)
+            if phot[k][spec] < 0: # if no spectrum is available or if the object is a spectroscopic star
+                samplez[nr] = np.array([0.01 + 0.01 * sample[0],0.01 + 0.01 * sample[1],0.01 + 0.01 * sample[2],0.01 + 0.01 * sample[3],0.01 + 0.01 * sample[4],0.01 + 0.01 * sample[5],0.01 + 0.01 * sample[6],0.01 + 0.01 * sample[7],0.01 + 0.01 * sample[8]]) # because 0.01 is the redshift step
+            else:
+                samplez[nr] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
+            if nr != 0:
+                lephdata = np.c_[lephdata,phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
+            else:
+                lephdata = np.c_[phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
+            nr = nr + 1
 
-zgridint = np.arange(400)
-nr = 0
-for k in range(phot.shape[0]):
-    if int(phot[k][0]) in gal:
-        pdz = np.loadtxt('%s%s.pz' % (fileeazy,int(phot[k][0])), usecols = [3], unpack=True)
-        pdz = pdz/np.sum(pdz) # it needs to be normalized
-        custm = stats.rv_discrete(name='custm', values=(zgridint, pdz)) # ignore the first column, which is the ID
-        sample = custm.rvs(size = 9)
-        if phot[k][spec] < 0: # if no spectrum is available or if the object is a spectroscopic star
-            samplez[nr] = np.array([0.01 + 0.01 * sample[0],0.01 + 0.01 * sample[1],0.01 + 0.01 * sample[2],0.01 + 0.01 * sample[3],0.01 + 0.01 * sample[4],0.01 + 0.01 * sample[5],0.01 + 0.01 * sample[6],0.01 + 0.01 * sample[7],0.01 + 0.01 * sample[8]]) # because 0.01 is the redshift step
-        else:
-            samplez[nr] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
-        if nr != 0:
-            lephdata = np.c_[lephdata,phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
-        else:
-            lephdata = np.c_[phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
-        nr = nr + 1
+            samplez = samplez.reshape(samplez.size)
+            lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
 
-samplez = samplez.reshape(samplez.size)
-lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
-
-data = np.copy(lephdata)
-#lephare(data,file[:-4] + "_eazysample.cat")
-lephare(data,file[:-4] + "_noIRACeazysample.cat")
-data = np.copy(lephdata)
-#lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat")
-lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat")
+            data = np.copy(lephdata)
+            #lephare(data,file[:-4] + "_eazysample.cat")
+            lephare(data,file[:-4] + "_noIRACeazysample.cat")
+            data = np.copy(lephdata)
+            #lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat")
+            lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat")
