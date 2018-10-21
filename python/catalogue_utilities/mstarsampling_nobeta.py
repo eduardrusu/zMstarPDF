@@ -42,9 +42,9 @@ def sample(median,stdlow,stdhigh): # samples from different standard deviation g
 #massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
 #massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
 #massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
-masterfile = "/Users/eduardrusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+masterfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
 #massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACbpzsample_combined.cat.MAG_BC03_I09.lephareout"
-massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
+massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
 #massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
 #massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
 
@@ -217,4 +217,3 @@ for i in range(master.shape[0]):
 #np.savetxt(masterfile[:-4] + "_WFI2033noIRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
 np.savetxt(masterfile[:-4] + "_WFI2033IRACbpz_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
 #np.savetxt(masterfile[:-4] + "_WFI2033IRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
-

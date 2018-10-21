@@ -261,7 +261,8 @@ for k in range(pdz.shape[0]): # for each galaxy
     custm = stats.rv_discrete(name='custm', values=(zgridint, pdz[k][1:])) # ignore the first column, which is the ID
     sample = custm.rvs(size = 9)
     if phot[k][spec] < 0: # if no spectrum is available or if the object is a spectroscopic star
-        samplez[k] = np.array([0.01 * sample[0],0.01 * sample[1],0.01 * sample[2],0.01 * sample[3],0.01 * sample[4],0.01 * sample[5],0.01 * sample[6],0.01 * sample[7],0.01 * sample[8]]) # because 0.01 is the redshift step
+        samplez[k] = np.array([np.max([0.01 * sample[0],0.01]),np.max([0.01 * sample[1],0.01]),np.max([0.01 * sample[2],0.01]),np.max([0.01 * sample[3],0.01]),np.max([0.01 * sample[4],0.01]),np.max([0.01 * sample[5],0.01]),np.max([0.01 * sample[6],0.01]),np.max([0.01 * sample[7],0.01]),np.max([0.01 * sample[8],0.01])])
+        # because 0.01 is the redshift step; the minimum redshift accepted by LePhare is 0.01
     else:
         samplez[k] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
     for j in range(phot.shape[0]): # match the two files by ID
