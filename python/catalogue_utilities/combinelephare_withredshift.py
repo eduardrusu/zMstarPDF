@@ -30,4 +30,3 @@ fileout = file[:-28] + "_combined.cat.MAG_BC03_I09.lephareout"
 str = "ID \t z \t chi_best \t chi_star \t mass_best \t mass_inf \t mass_med \t mass_sup"
 dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]]
 np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.3f \t %.3f \t %.3f \t %.3f ')
-

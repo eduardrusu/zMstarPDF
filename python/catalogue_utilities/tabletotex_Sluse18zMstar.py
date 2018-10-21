@@ -18,8 +18,8 @@ mass_best = 92
 mass_inf = 93
 mass_med = 94
 mass_sup = 95
-class_bpz = 98
-data = np.loadtxt(filein,usecols=[ra,dec,itot,spec,z_eazy,z_inf,z_sup,mass_best,mass_inf,mass_med,mass_sup,class_bpz],unpack=False)
+class_eazy = 98
+data = np.loadtxt(filein,usecols=[ra,dec,itot,spec,z_eazy,z_inf,z_sup,mass_best,mass_inf,mass_med,mass_sup,class_eazy],unpack=False)
 print np.shape(data)
 ra = 0
 dec = 1
@@ -32,7 +32,7 @@ mass_best = 7
 mass_inf = 8
 mass_med = 9
 mass_sup = 10
-class_bpz = 11
+class_eazy = 11
 lens = SkyCoord(308.4253, -47.39528, unit='deg')
 x = SkyCoord(243.079849, 53.012886, unit='deg')
 x = SkyCoord(data[:,ra], data[:,dec], unit='deg')
@@ -63,7 +63,7 @@ data[:,mass_sup][(data[:,mass_sup] < 0) & (data[:,itot]>20) & (data[:,itot]<21)]
 data[:,mass_sup][(data[:,mass_sup] < 0) & (data[:,itot]>21) & (data[:,itot]<22)] = data[:,mass_best][(data[:,mass_sup] < 0) & (data[:,itot]>21) & (data[:,itot]<22)] + errbar22
 data[:,mass_sup][(data[:,mass_sup] < 0) & (data[:,itot]>21)] = data[:,mass_best][(data[:,mass_sup] < 0) & (data[:,itot]>21)] + errbar23
 data = data[data[:,itot] <= 23]
-data = data[data[:,class_bpz] >= 0]
+data = data[data[:,class_eazy] >= 0]
 data = data[data[:,sep] <= 120]
 data[:,z_eazy][data[:,spec] > 0] = data[:,spec][data[:,spec] > 0]
 data[:,z_inf][data[:,spec] > 0] = data[:,spec][data[:,spec] > 0]

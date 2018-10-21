@@ -1,7 +1,7 @@
 # CE Rusu, Feb 14 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
-# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_24galphotmstar.fits /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 5 IRAC deti meds removegrouphandpicked -1 -1
-# the code produces output for two different limiting mags: 23 and 24, or for just 23, depending on the lens
+# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobeta.py WFI2033 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_limmaggalphotmstar.fits /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/WFI2033 45 5 IRAC deti meds removegrouphandpicked -1 -1
+# the code produces output for two different limiting mags: limbright and 24, or for just limbright (typically 23) in case limmag < 24
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
 # definitions:
@@ -24,15 +24,11 @@ import sys
 import os
 from scipy import ndimage
 from scipy import special
-#from scipy import stats
-#from scipy.interpolate import griddata
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-#import distances
 import time
-#import pandas as pd
 import astropy.table as table
 from astropy.table import Table
 
@@ -164,6 +160,7 @@ if lensID == "B1608":
     z_s = 1.39
     z_l = 0.63
     limmag = 24
+    limbright = 23
     photoz = 'bpzeazy'
     pixnr = 1200
     pixlens = 0.200 * u.arcsec
@@ -171,6 +168,7 @@ if lensID == "HE0435":
     z_s = 1.69
     z_l = 0.455
     limmag = 24
+    limbright = 23
     brightmag = 17.48
     pixnr = 1200
     pixlens = 0.200 * u.arcsec
@@ -178,18 +176,21 @@ if lensID == "HE1104":
     z_s = 2.32
     z_l = 0.73
     limmag = 24
+    limbright = 23
     pixnr = 1200
     pixlens = 0.200 * u.arcsec
 if lensID == "RX1131":
     z_s = 0.66
     z_l = 0.295
     limmag = 24
+    limbright = 23
     pixnr = 1200
     pixlens = 0.200 * u.arcsec
 if lensID == "WFI2033":
     z_s = 1.66
     z_l = 0.66
-    limmag = 23
+    limmag = 22.5
+    limbright = 22.5
     brightmag = 16.90
     photoz = 'bpzeazy'
     pixnr = 915
@@ -198,6 +199,7 @@ if lensID == "J1206":
     z_s = 1.80
     z_l = 0.75
     limmag = 23
+    limbright = 23
     brightmag = 18.05
     photoz = 'bpz'
     pixnr = 1283
@@ -326,83 +328,83 @@ cells_on_a_side = int((len(msk[0].data[1]) * pixCFHT.value) / (2 * radius)) - 1
 print "Cells on a side: ", cells_on_a_side
 centerfieldspix = np.zeros((overlap,overlap,2))
 unmaskedcell = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-    
+
 # Declare the weighted counts:
 
-if limmag == 24: lens_gal_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_gal_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_zweight_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_zweight_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass2_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass2_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass3_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass3_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_oneoverr_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_oneoverr_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_zoverr_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_zoverr_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_massoverr_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_massoverr_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass2overr_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass2overr_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass3overr_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass3overr_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass2rms_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass2rms_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass3rms_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass3rms_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass2overrms_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass2overrms_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_mass3overrms_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_mass3overrms_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_flexion_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_flexion_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_tidal_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_tidal_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_convergence_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_convergence_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-if limmag == 24: lens_convergencehalo_24bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-lens_convergencehalo_23bpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_gal_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_gal_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_zweight_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_zweight_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass2_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass2_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass3_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass3_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_oneoverr_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_oneoverr_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_zoverr_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_zoverr_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_massoverr_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_massoverr_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass2overr_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass2overr_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass3overr_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass3overr_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass2rms_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass2rms_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass3rms_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass3rms_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass2overrms_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass2overrms_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_mass3overrms_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_mass3overrms_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_flexion_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_flexion_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_tidal_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_tidal_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_convergence_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_convergence_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+if limmag != limbright: lens_convergencehalo_limmagbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+lens_convergencehalo_limbrightbpz = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
 
 if photoz == 'bpzeazy':
-    if limmag == 24: lens_gal_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_gal_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_zweight_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_zweight_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass2_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass2_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass3_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass3_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_oneoverr_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_oneoverr_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_zoverr_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_zoverr_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_massoverr_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_massoverr_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass2overr_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass2overr_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass3overr_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass3overr_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass2rms_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass2rms_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass3rms_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass3rms_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass2overrms_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass2overrms_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_mass3overrms_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_mass3overrms_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_flexion_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_flexion_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_tidal_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_tidal_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_convergence_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_convergence_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    if limmag == 24: lens_convergencehalo_24eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
-    lens_convergencehalo_23eazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_gal_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_gal_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_zweight_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_zweight_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass2_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass2_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass3_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass3_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_oneoverr_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_oneoverr_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_zoverr_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_zoverr_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_massoverr_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_massoverr_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass2overr_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass2overr_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass3overr_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass3overr_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass2rms_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass2rms_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass3rms_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass3rms_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass2overrms_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass2overrms_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_mass3overrms_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_mass3overrms_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_flexion_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_flexion_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_tidal_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_tidal_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_convergence_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_convergence_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    if limmag != limbright: lens_convergencehalo_limmageazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
+    lens_convergencehalo_limbrighteazy = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side,samples))
 
 print("Initialization of lens catalogue was completed in %0.1f seconds" % (time.time() - start_time))
 
@@ -473,42 +475,42 @@ field[cell_xpix] = fieldpix[1] # the physical image y axis, in agreement with th
 field[cell_ypix] = fieldpix[0]
 
 # declarations
-if limmag == 24: field_gal_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_gal_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_zweight_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_zweight_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass2_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass2_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass3_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass3_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_oneoverr_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_oneoverr_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_zoverr_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_zoverr_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_massoverr_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_massoverr_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass2overr_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass2overr_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass3overr_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass3overr_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass2rms_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass2rms_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass3rms_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass3rms_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass2overrms_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass2overrms_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_mass3overrms_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_mass3overrms_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_flexion_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_flexion_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_tidal_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_tidal_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_convergence_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_convergence_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag == 24: field_convergencehalo_24 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-field_convergencehalo_23 = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_gal_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_gal_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_zweight_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_zweight_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass2_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass2_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass3_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass3_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright field_oneoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_oneoverr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_zoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_zoverr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_massoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_massoverr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass2overr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass2overr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass3overr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass3overr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass2rms_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass2rms_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass3rms_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass3rms_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass2overrms_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass2overrms_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_mass3overrms_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_mass3overrms_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_flexion_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_flexion_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_tidal_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_tidal_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_convergence_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_convergence_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_convergencehalo_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+field_convergencehalo_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 
 print("Initialization of field catalogue was completed in %0.1f seconds" % (time.time() - start_timefield))
 
@@ -524,7 +526,7 @@ for k in range(overlap):
         for i in range(cells_on_a_side):
             for j in range(cells_on_a_side):
                 '''Define the center of each cell as a matrix of pixel centers and choose which cells to discard because of large masked area'''
-                
+
                 xlow = (2.0 * radius * (u.arcsec / pixCFHT).value) * i + (2.0 * radius * (u.arcsec / pixCFHT).value) * k / overlap   # coordinates of cell edges in the field mask; here x axis refers to the array axis, so the image y axis
                 xhigh = (2.0 * radius * (u.arcsec / pixCFHT).value) * i + (2.0 * radius * (u.arcsec / pixCFHT).value) + (2.0 * radius * (u.arcsec / pixCFHT).value) * k / overlap
                 ylow = (2.0 * radius * (u.arcsec / pixCFHT).value) * j + (2.0 * radius * (u.arcsec / pixCFHT).value) * l / overlap
@@ -536,10 +538,10 @@ for k in range(overlap):
                 unmaskedfieldy = ylow + (1.0 * unmaskedlens[1]/((2/pixlens.value) * radius)) * (yhigh - ylow)
                 unmaskedfield = msk[0].data[unmaskedfieldx.astype(int),unmaskedfieldy.astype(int)] # even if the pixel scales for field and lens are different, the size of this array is the number of unmasked pixels in the lens mask; int is needed here to read from msk
                 unmaskedcell[k][l][i][j] = unmaskedfield[unmaskedfield == 0].size / float(np.pi * ((radius * (u.arcsec/pixlens).value) ** 2)) # specifies the fraction of the surface of the circular aperture inside the cell, that is not covered by any masks
-    
+
                 if unmaskedcell[k][l][i][j] >= 0.5: # only work on fields with > 50% of their surface not covered by masks; among those, also work later on > 75%
                     ''' Mask the lens catalogue using the field submask corresponding to each cell'''
-        
+
                     lenscoords = np.copy(lensbpz[x_lens:y_lens + 1]) # copy the pixel coordinates
                     lenscoords_fieldx = float(xlow)+(1.0 * lenscoords[1]/((2/pixlens.value) * radius))*(float(xhigh)-float(xlow)) # project the lens catalogue onto the field mask; this is good, because it matches the formula for unmaskedfieldx
                     lenscoords_fieldy = float(ylow)+(1.0 * lenscoords[0]/((2/pixlens.value) * radius))*(float(yhigh)-float(ylow))
@@ -547,7 +549,7 @@ for k in range(overlap):
                     lensbpz_masked = np.c_['0',lensbpz,lenscoords_field.reshape(1,lenscoords_field.shape[0])] # check if the lens catalogue objects fall inside field masks; I tested that this expresion gives the correct order of the rows
                     lensbpz_masked = np.delete(lensbpz_masked,np.where(lensbpz_masked[-1] != 0),axis=1) # remove objects inside a field mask
                     lensbpz_masked = lensbpz_masked[:-1] # delete the last column
-                    
+
                     if photoz == 'bpzeazy':
                         lenscoords = np.copy(lenseazy[x_lens:y_lens + 1]) # copy the pixel coordinates
                         lenscoords_fieldx = float(xlow)+(1.0 * lenscoords[1]/((2/pixlens.value) * radius))*(float(xhigh)-float(xlow))
@@ -556,46 +558,46 @@ for k in range(overlap):
                         lenseazy_masked = np.c_['0',lenseazy,lenscoords_field.reshape(1,lenscoords_field.shape[0])] # check if the lens catalogue objects fall inside field masks
                         lenseazy_masked = np.delete(lenseazy_masked,np.where(lenseazy_masked[-1] != 0),axis=1) # remove objects inside a field mask
                         lenseazy_masked = lenseazy_masked[:-1] # delete the last column
-                
+
                     for n in range(samples):
                         lensbpz_maskedlimmag = np.copy(lensbpz_masked)
                         if photoz == 'bpzeazy': lenseazy_maskedlimmag = np.copy(lenseazy_masked)
                         if n == 0:
-                            if limmag == 24:
-                                lensbpz_masked24 = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > 24) | (lensbpz_maskedlimmag[z_lens] > z_s)),axis=1)
-                                lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[z_lens] >= zinf) & (lensbpz_masked24[z_lens] <= zsup)),axis=1) # remove the redshift slice
-                                if photoz == 'bpzeazy': lenseazy_masked24 = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > 24) | (lenseazy_maskedlimmag[z_lens] > z_s)),axis=1)
-                                if photoz == 'bpzeazy': lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[z_lens] >= zinf) & (lenseazy_masked24[z_lens] <= zsup)),axis=1)
-                            lensbpz_masked23 = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > 23) | (lensbpz_maskedlimmag[z_lens] > z_s)),axis=1)
-                            lensbpz_masked23 = np.delete(lensbpz_masked23,np.where((lensbpz_masked23[z_lens] >= zinf) & (lensbpz_masked23[z_lens] <= zsup)),axis=1)
-                            if photoz == 'bpzeazy': lenseazy_masked23 = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > 23) | (lenseazy_maskedlimmag[z_lens] > z_s)),axis=1)
-                            if photoz == 'bpzeazy': lenseazy_masked23 = np.delete(lenseazy_masked23,np.where((lenseazy_masked23[z_lens] >= zinf) & (lenseazy_masked23[z_lens] <= zsup)),axis=1)
+                            if limmag != limbright:
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > limmag) | (lensbpz_maskedlimmag[z_lens] > z_s)),axis=1)
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[z_lens] >= zinf) & (lensbpz_maskedlimmag[z_lens] <= zsup)),axis=1) # remove the redshift slice
+                                if photoz == 'bpzeazy': lenseazy_maskedlimmag = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > limmag) | (lenseazy_maskedlimmag[z_lens] > z_s)),axis=1)
+                                if photoz == 'bpzeazy': lenseazy_maskedlimmag = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[z_lens] >= zinf) & (lenseazy_maskedlimmag[z_lens] <= zsup)),axis=1)
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > limbright) | (lensbpz_maskedlimmag[z_lens] > z_s)),axis=1)
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimbright,np.where((lensbpz_maskedlimbright[z_lens] >= zinf) & (lensbpz_maskedlimbright[z_lens] <= zsup)),axis=1)
+                            if photoz == 'bpzeazy': lenseazy_maskedlimbright = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > limbright) | (lenseazy_maskedlimmag[z_lens] > z_s)),axis=1)
+                            if photoz == 'bpzeazy': lenseazy_maskedlimbright = np.delete(lenseazy_maskedlimbright,np.where((lenseazy_maskedlimbright[z_lens] >= zinf) & (lenseazy_maskedlimbright[z_lens] <= zsup)),axis=1)
                         else:
                             for o in range(lensbpz_maskedlimmag.shape[1]):
                                 lensbpz_maskedlimmag[i_lens][o] = np.random.normal(lensbpz_maskedlimmag[i_lens][o], np.max([lensbpz_maskedlimmag[i_err_lens][o],0.005]),1)[0]
                             if photoz == 'bpzeazy':
                                 for o in range(lenseazy_maskedlimmag.shape[1]):
                                     lenseazy_maskedlimmag[i_lens][o] = np.random.normal(lenseazy_maskedlimmag[i_lens][o], np.max([lenseazy_maskedlimmag[i_err_lens][o],0.005]),1)[0]
-                            if limmag == 24:
-                                lensbpz_masked24 = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > 24) | (lensbpz_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
-                                lensbpz_masked24 = np.delete(lensbpz_masked24,np.where((lensbpz_masked24[z_lens + n * 3] >= zinf) & (lensbpz_masked24[z_lens + n * 3] <= zsup)),axis=1)  # remove the redshift slice
-                                if photoz == 'bpzeazy': lenseazy_masked24 = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > 24) | (lenseazy_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
-                                if photoz == 'bpzeazy': lenseazy_masked24 = np.delete(lenseazy_masked24,np.where((lenseazy_masked24[z_lens + n * 3] >= zinf) & (lenseazy_masked24[z_lens + n * 3] <= zsup)),axis=1)
-                            lensbpz_masked23 = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > 23) | (lensbpz_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
-                            lensbpz_masked23 = np.delete(lensbpz_masked23,np.where((lensbpz_masked23[z_lens + n * 3] >= zinf) & (lensbpz_masked23[z_lens + n * 3] <= zsup)),axis=1)
-                            if photoz == 'bpzeazy': lenseazy_masked23 = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > 23) | (lenseazy_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
-                            if photoz == 'bpzeazy': lenseazy_masked23 = np.delete(lenseazy_masked23,np.where((lenseazy_masked23[z_lens + n * 3] >= zinf) & (lenseazy_masked23[z_lens + n * 3] <= zsup)),axis=1)
-                        if limmag == 24:
-                            lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz = lensinit(lensbpz_masked24,lens_gal_24bpz,lens_zweight_24bpz,lens_mass_24bpz,lens_mass2_24bpz,lens_mass3_24bpz,lens_oneoverr_24bpz,lens_zoverr_24bpz,lens_massoverr_24bpz,lens_mass2overr_24bpz,lens_mass3overr_24bpz,lens_flexion_24bpz,lens_tidal_24bpz,lens_convergence_24bpz,lens_convergencehalo_24bpz,lens_mass2rms_24bpz,lens_mass3rms_24bpz,lens_mass2overrms_24bpz,lens_mass3overrms_24bpz)
-                        #print "d ",lens_gal_24bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-                        lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz = lensinit(lensbpz_masked23,lens_gal_23bpz,lens_zweight_23bpz,lens_mass_23bpz,lens_mass2_23bpz,lens_mass3_23bpz,lens_oneoverr_23bpz,lens_zoverr_23bpz,lens_massoverr_23bpz,lens_mass2overr_23bpz,lens_mass3overr_23bpz,lens_flexion_23bpz,lens_tidal_23bpz,lens_convergence_23bpz,lens_convergencehalo_23bpz,lens_mass2rms_23bpz,lens_mass3rms_23bpz,lens_mass2overrms_23bpz,lens_mass3overrms_23bpz)
-                        #print "d ",lens_gal_23bpz[k][l][i][j][n]# test to check if the function actually returns the result globally
+                            if limmag != limbright:
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > limmag) | (lensbpz_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[z_lens + n * 3] >= zinf) & (lensbpz_maskedlimmag[z_lens + n * 3] <= zsup)),axis=1)  # remove the redshift slice
+                                if photoz == 'bpzeazy': lenseazy_maskedlimmag = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > limmag) | (lenseazy_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
+                                if photoz == 'bpzeazy': lenseazy_maskedlimmag = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[z_lens + n * 3] >= zinf) & (lenseazy_maskedlimmag[z_lens + n * 3] <= zsup)),axis=1)
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[i_lens] > limbright) | (lensbpz_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimbright,np.where((lensbpz_maskedlimbright[z_lens + n * 3] >= zinf) & (lensbpz_maskedlimbright[z_lens + n * 3] <= zsup)),axis=1)
+                            if photoz == 'bpzeazy': lenseazy_maskedlimbright = np.delete(lenseazy_maskedlimmag,np.where((lenseazy_maskedlimmag[i_lens] > limbright) | (lenseazy_maskedlimmag[z_lens + n * 3] > z_s)),axis=1)
+                            if photoz == 'bpzeazy': lenseazy_maskedlimbright = np.delete(lenseazy_maskedlimbright,np.where((lenseazy_maskedlimbright[z_lens + n * 3] >= zinf) & (lenseazy_maskedlimbright[z_lens + n * 3] <= zsup)),axis=1)
+                        if limmag != limbright:
+                            lens_gal_limmagbpz,lens_zweight_limmagbpz,lens_mass_limmagbpz,lens_mass2_limmagbpz,lens_mass3_limmagbpz,lens_oneoverr_limmagbpz,lens_zoverr_limmagbpz,lens_massoverr_limmagbpz,lens_mass2overr_limmagbpz,lens_mass3overr_limmagbpz,lens_flexion_limmagbpz,lens_tidal_limmagbpz,lens_convergence_limmagbpz,lens_convergencehalo_limmagbpz,lens_mass2rms_limmagbpz,lens_mass3rms_limmagbpz,lens_mass2overrms_limmagbpz,lens_mass3overrms_limmagbpz = lensinit(lensbpz_maskedlimmag,lens_gal_limmagbpz,lens_zweight_limmagbpz,lens_mass_limmagbpz,lens_mass2_limmagbpz,lens_mass3_limmagbpz,lens_oneoverr_limmagbpz,lens_zoverr_limmagbpz,lens_massoverr_limmagbpz,lens_mass2overr_limmagbpz,lens_mass3overr_limmagbpz,lens_flexion_limmagbpz,lens_tidal_limmagbpz,lens_convergence_limmagbpz,lens_convergencehalo_limmagbpz,lens_mass2rms_limmagbpz,lens_mass3rms_limmagbpz,lens_mass2overrms_limmagbpz,lens_mass3overrms_limmagbpz)
+                        #print "d ",lens_gal_limmagbpz[k][l][i][j][n]# test to check if the function actually returns the result globally
+                        lens_gal_limbrightbpz,lens_zweight_limbrightbpz,lens_mass_limbrightbpz,lens_mass2_limbrightbpz,lens_mass3_limbrightbpz,lens_oneoverr_limbrightbpz,lens_zoverr_limbrightbpz,lens_massoverr_limbrightbpz,lens_mass2overr_limbrightbpz,lens_mass3overr_limbrightbpz,lens_flexion_limbrightbpz,lens_tidal_limbrightbpz,lens_convergence_limbrightbpz,lens_convergencehalo_limbrightbpz,lens_mass2rms_limbrightbpz,lens_mass3rms_limbrightbpz,lens_mass2overrms_limbrightbpz,lens_mass3overrms_limbrightbpz = lensinit(lensbpz_maskedlimbright,lens_gal_limbrightbpz,lens_zweight_limbrightbpz,lens_mass_limbrightbpz,lens_mass2_limbrightbpz,lens_mass3_limbrightbpz,lens_oneoverr_limbrightbpz,lens_zoverr_limbrightbpz,lens_massoverr_limbrightbpz,lens_mass2overr_limbrightbpz,lens_mass3overr_limbrightbpz,lens_flexion_limbrightbpz,lens_tidal_limbrightbpz,lens_convergence_limbrightbpz,lens_convergencehalo_limbrightbpz,lens_mass2rms_limbrightbpz,lens_mass3rms_limbrightbpz,lens_mass2overrms_limbrightbpz,lens_mass3overrms_limbrightbpz)
+                        #print "d ",lens_gal_limbrightbpz[k][l][i][j][n]# test to check if the function actually returns the result globally
                         if photoz == 'bpzeazy':
-                            if limmag == 24:
-                                lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy = lensinit(lenseazy_masked24,lens_gal_24eazy,lens_zweight_24eazy,lens_mass_24eazy,lens_mass2_24eazy,lens_mass3_24eazy,lens_oneoverr_24eazy,lens_zoverr_24eazy,lens_massoverr_24eazy,lens_mass2overr_24eazy,lens_mass3overr_24eazy,lens_flexion_24eazy,lens_tidal_24eazy,lens_convergence_24eazy,lens_convergencehalo_24eazy,lens_mass2rms_24eazy,lens_mass3rms_24eazy,lens_mass2overrms_24eazy,lens_mass3overrms_24eazy)
-                            #print "d ",lens_gal_24eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
-                            lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy = lensinit(lenseazy_masked23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy)
-                            #print "d ",lens_gal_23eazy[k][l][i][j][n]# test to check if the function actually returns the result globally
+                            if limmag != limbright:
+                                lens_gal_limmageazy,lens_zweight_limmageazy,lens_mass_limmageazy,lens_mass2_limmageazy,lens_mass3_limmageazy,lens_oneoverr_limmageazy,lens_zoverr_limmageazy,lens_massoverr_limmageazy,lens_mass2overr_limmageazy,lens_mass3overr_limmageazy,lens_flexion_limmageazy,lens_tidal_limmageazy,lens_convergence_limmageazy,lens_convergencehalo_limmageazy,lens_mass2rms_limmageazy,lens_mass3rms_limmageazy,lens_mass2overrms_limmageazy,lens_mass3overrms_limmageazy = lensinit(lenseazy_maskedlimmag,lens_gal_limmageazy,lens_zweight_limmageazy,lens_mass_limmageazy,lens_mass2_limmageazy,lens_mass3_limmageazy,lens_oneoverr_limmageazy,lens_zoverr_limmageazy,lens_massoverr_limmageazy,lens_mass2overr_limmageazy,lens_mass3overr_limmageazy,lens_flexion_limmageazy,lens_tidal_limmageazy,lens_convergence_limmageazy,lens_convergencehalo_limmageazy,lens_mass2rms_limmageazy,lens_mass3rms_limmageazy,lens_mass2overrms_limmageazy,lens_mass3overrms_limmageazy)
+                            #print "d ",lens_gal_limmageazy[k][l][i][j][n]# test to check if the function actually returns the result globally
+                            lens_gal_limbrighteazy,lens_zweight_limbrighteazy,lens_mass_limbrighteazy,lens_mass2_limbrighteazy,lens_mass3_limbrighteazy,lens_oneoverr_limbrighteazy,lens_zoverr_limbrighteazy,lens_massoverr_limbrighteazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limbrighteazy,lens_flexion_limbrighteazy,lens_tidal_limbrighteazy,lens_convergence_limbrighteazy,lens_convergencehalo_limbrighteazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limbrighteazy = lensinit(lenseazy_maskedlimbright,lens_gal_limbrighteazy,lens_zweight_limbrighteazy,lens_mass_limbrighteazy,lens_mass2_limbrighteazy,lens_mass3_limbrighteazy,lens_oneoverr_limbrighteazy,lens_zoverr_limbrighteazy,lens_massoverr_limbrighteazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limbrighteazy,lens_flexion_limbrighteazy,lens_tidal_limbrighteazy,lens_convergence_limbrighteazy,lens_convergencehalo_limbrighteazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limbrighteazy)
+                            #print "d ",lens_gal_limbrighteazy[k][l][i][j][n]# test to check if the function actually returns the result globally
 
                     '''Compute weights for the field catalogue'''
                     field_masked = np.copy(field)
@@ -609,16 +611,17 @@ for k in range(overlap):
                     temp2 = np.array([field_masked[cell_ypix] + (pixnr - (2/pixlens.value) * radius)/2]).astype(int)
                     temp1[temp1==pixnr] = pixnr - 1
                     temp2[temp2==pixnr] = pixnr - 1
-                    field_masked_24 = np.delete(field_masked,np.where(msk_lens[0].data[temp1,temp2] != 0),axis=1) # remove field objects falling inside the lens mask; needed to account for the fact that the mask is always pixnr pixels on a side
-                    #if np.max(field_masked_24[cell_sep]) > radius: print "a", np.max(field_masked_24[cell_sep]) # testing; due to the pixelated mask, there are objects very close to the radius limit but just very slightly (subarcsec) away; I will not do anything about this
-                    field_masked_23 = np.delete(field_masked_24,np.where(field_masked_24[i_field] > 23),axis=1)
-                    w_gal_24 = np.shape(field_masked_24)[1]
-                    w_gal_23 = np.shape(field_masked_23)[1]
-                    #mmm = np.copy(field_convergencehalo_23)
-                    if limmag == 24:
-                       field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24 = fieldinit(field_masked_24,w_gal_24,field_gal_24,field_zweight_24,field_mass_24,field_mass2_24,field_mass3_24,field_oneoverr_24,field_zoverr_24,field_massoverr_24,field_mass2overr_24,field_mass3overr_24,field_mass2rms_24,field_mass3rms_24,field_mass2overrms_24,field_mass3overrms_24,field_flexion_24,field_tidal_24,field_convergence_24,field_convergencehalo_24)
-                    field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23 = fieldinit(field_masked_23,w_gal_23,field_gal_23,field_zweight_23,field_mass_23,field_mass2_23,field_mass3_23,field_oneoverr_23,field_zoverr_23,field_massoverr_23,field_mass2overr_23,field_mass3overr_23,field_mass2rms_23,field_mass3rms_23,field_mass2overrms_23,field_mass3overrms_23,field_flexion_23,field_tidal_23,field_convergence_23,field_convergencehalo_23)
-                    #print np.min(mmm - field_convergencehalo_23)
+                    field_masked_limmag = np.delete(field_masked,np.where(msk_lens[0].data[temp1,temp2] != 0),axis=1) # remove field objects falling inside the lens mask; needed to account for the fact that the mask is always pixnr pixels on a side
+                    #if np.max(field_masked_limmag[cell_sep]) > radius: print "a", np.max(field_masked_limmag[cell_sep]) # testing; due to the pixelated mask, there are objects very close to the radius limit but just very slightly (subarcsec) away; I will not do anything about this
+                    field_masked_limmag = np.delete(field_masked_limmag,np.where(field_masked_limmag[i_field] > limmag),axis=1)
+                    field_masked_limbright = np.delete(field_masked_limmag,np.where(field_masked_limmag[i_field] > limbright),axis=1)
+                    w_gal_limmag = np.shape(field_masked_limmag)[1]
+                    w_gal_limbright = np.shape(field_masked_limbright)[1]
+                    #mmm = np.copy(field_convergencehalo_limbright)
+                    if limmag != limbright:
+                       field_gal_limmag,field_zweight_limmag,field_mass_limmag,field_mass2_limmag,field_mass3_limmag,field_oneoverr_limmag,field_zoverr_limmag,field_massoverr_limmag,field_mass2overr_limmag,field_mass3overr_limmag,field_mass2rms_limmag,field_mass3rms_limmag,field_mass2overrms_limmag,field_mass3overrms_limmag,field_flexion_limmag,field_tidal_limmag,field_convergence_limmag,field_convergencehalo_limmag = fieldinit(field_masked_limmag,w_gal_limmag,field_gal_limmag,field_zweight_limmag,field_mass_limmag,field_mass2_limmag,field_mass3_limmag,field_oneoverr_limmag,field_zoverr_limmag,field_massoverr_limmag,field_mass2overr_limmag,field_mass3overr_limmag,field_mass2rms_limmag,field_mass3rms_limmag,field_mass2overrms_limmag,field_mass3overrms_limmag,field_flexion_limmag,field_tidal_limmag,field_convergence_limmag,field_convergencehalo_limmag)
+                    field_gal_limbright,field_zweight_limbright,field_mass_limbright,field_mass2_limbright,field_mass3_limbright,field_oneoverr_limbright,field_zoverr_limbright,field_massoverr_limbright,field_mass2overr_limbright,field_mass3overr_limbright,field_mass2rms_limbright,field_mass3rms_limbright,field_mass2overrms_limbright,field_mass3overrms_limbright,field_flexion_limbright,field_tidal_limbright,field_convergence_limbright,field_convergencehalo_limbright = fieldinit(field_masked_limbright,w_gal_limbright,field_gal_limbright,field_zweight_limbright,field_mass_limbright,field_mass2_limbright,field_mass3_limbright,field_oneoverr_limbright,field_zoverr_limbright,field_massoverr_limbright,field_mass2overr_limbright,field_mass3overr_limbright,field_mass2rms_limbright,field_mass3rms_limbright,field_mass2overrms_limbright,field_mass3overrms_limbright,field_flexion_limbright,field_tidal_limbright,field_convergence_limbright,field_convergencehalo_limbright)
+                    #print np.min(mmm - field_convergencehalo_limbright)
 
                     ''' TEST THAT BOTH THE LENS AND FIELD CATALOGUE ARE PROPERLY MASKED AND MATCHED AGAINST EACHOTHER (BROUGHT THE LENS CATALOGUE TO FIELD PIXEL SCALE)'''
                     #if (k == 0) and (l == 0) and (i == 18) and (j == 15): # tested for radius 45, not appropriate for 120
@@ -646,8 +649,8 @@ for k in range(overlap):
                         #data = data[(pixnr - (2/pixlens.value) * radius)/2 : pixnr - (pixnr - (2/pixlens.value) * radius)/2,(pixnr - (2/pixlens.value) * radius)/2 : pixnr - (pixnr - (2/pixlens.value) * radius)/2]
                         #data = scipy.ndimage.interpolation.zoom(data,0.2626/0.187)
                         #fits.writeto("/Users/perseus/Desktop/CFHTLenSmasks/test_lens_lensmaskrescaled.fits", data, header, clobber=True)
-                        #field_masked_24[RA_field],field_masked_24[DEC_field]
-                        #np.savetxt("/Users/perseus/Desktop/CFHTLenSmasks/test_field_wcs.reg",np.c_[field_masked_24[RA_field],field_masked_24[DEC_field]],fmt='j2000; circle %s %s 2\"')
+                        #field_masked_limmag[RA_field],field_masked_limmag[DEC_field]
+                        #np.savetxt("/Users/perseus/Desktop/CFHTLenSmasks/test_field_wcs.reg",np.c_[field_masked_limmag[RA_field],field_masked_limmag[DEC_field]],fmt='j2000; circle %s %s 2\"')
 
 msk_lens.close()
 msk.close()
@@ -665,123 +668,123 @@ print "Writing output..."
 count = "Fields above .75 and .50 limits: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
 mskname = 'msk%sarcsecrad%sarcsecgap.fits'[0:-5] % (radius,inner)
-fcount = open('%s/%s_wghtratios_%s_%s_%s_%s_%s_zgap%s_%s%s_count.cat' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_24galphotmstar
+fcount = open('%s/%s_wghtratios_%s_%s_%s_%s_%s_zgap%s_%s%s_count.cat' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_limmaggalphotmstar
 fcount.write(count)
 fcount.close()
 
-fout50_bpz23_0 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_0 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_1 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_1 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_2 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_2 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_3 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_3 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_4 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_4 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_5 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_5 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_6 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_6 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_7 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_7 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_8 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_8 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout50_bpz23_9 = '%s/%s_wghtratios_50_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-fout75_bpz23_9 = '%s/%s_wghtratios_75_%s_%s_23_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_0 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_0 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_1 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_1 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_2 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_2 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_3 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_3 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_4 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_4 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_5 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_5 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_6 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_6 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_7 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_7 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_8 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_8 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout50_bpzlimbright_9 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+fout75_bpzlimbright_9 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
 #os.system('rm -f %s' % fout50_0) # '-f' ignores non-existent files
 if photoz == 'bpzeazy':
-    fout50_eazy23_0 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_0 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_1 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_1 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_2 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_2 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_3 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_3 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_4 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_4 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_5 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_5 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_6 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_6 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_7 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_7 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_8 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_8 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_eazy23_9 = '%s/%s_wghtratios_50_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_eazy23_9 = '%s/%s_wghtratios_75_%s_%s_23_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-if limmag == 24:
-    fout50_bpz24_0 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_0 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_1 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_1 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_2 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_2 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_3 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_3 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_4 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_4 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_5 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_5 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_6 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_6 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_7 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_7 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_8 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_8 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout50_bpz24_9 = '%s/%s_wghtratios_50_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-    fout75_bpz24_9 = '%s/%s_wghtratios_75_%s_%s_24_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_0 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_0 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_1 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_1 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_2 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_2 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_3 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_3 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_4 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_4 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_5 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_5 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_6 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_6 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_7 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_7 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_8 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_8 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout50_eazylimbright_9 = '%s/%s_wghtratios_50_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+    fout75_eazylimbright_9 = '%s/%s_wghtratios_75_%s_%s_%s_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,det,irac,type,zinf,zsup,suffix)
+if limmag != brightmag:
+    fout50_bpzlimmag_0 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_0 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_1 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_1 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_2 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_2 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_3 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_3 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_4 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_4 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_5 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_5 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_6 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_6 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_7 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_7 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_8 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_8 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout50_bpzlimmag_9 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+    fout75_bpzlimmag_9 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
     if photoz == 'bpzeazy':
-        fout50_eazy24_0 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_0 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_1 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_1 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_2 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_2 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_3 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_3 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_4 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_4 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_5 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_5 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_6 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_6 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_7 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_7 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_8 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_8 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout50_eazy24_9 = '%s/%s_wghtratios_50_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
-        fout75_eazy24_9 = '%s/%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_0 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_0 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_1 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_1 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_2 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_2 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_3 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_3 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_4 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_4 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_5 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_5 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_6 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_6 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_7 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_7 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_8 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_8 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout50_eazylimmag_9 = '%s/%s_wghtratios_50_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
+        fout75_eazylimmag_9 = '%s/%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix)
 
 def outputfunc(*argv):
     start0 = True; start1 = True; start2 = True; start3 = True; start4 = True; start5 = True; start6 = True; start7 = True; start8 = True; start9 = True
     if len(argv) == 109:
-        '''23 24 bpz eazy'''
-        # frac,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy
-        frac_ = argv[0]; lens_gal_24bpz_ = argv[1]; field_gal_24_ = argv[2]; lens_gal_23bpz_ = argv[3]; field_gal_23_ = argv[4]; lens_zweight_24bpz_ = argv[5]; field_zweight_24_ = argv[6]; lens_zweight_23bpz_ = argv[7]; field_zweight_23_ = argv[8]; lens_mass_24bpz_ = argv[9]; field_mass_24_ = argv[10]; lens_mass_23bpz_ = argv[11]; field_mass_23_ = argv[12]; lens_mass2_24bpz_ = argv[13]; field_mass2_24_ = argv[14]; lens_mass2_23bpz_ = argv[15]; field_mass2_23_ = argv[16]; lens_mass3_24bpz_ = argv[17]; field_mass3_24_ = argv[18]; lens_mass3_23bpz_ = argv[19]; field_mass3_23_ = argv[20]; lens_oneoverr_24bpz_ = argv[21]; field_oneoverr_24_ = argv[22]; lens_oneoverr_23bpz_ = argv[23]; field_oneoverr_23_ = argv[24]; lens_zoverr_24bpz_ = argv[25]; field_zoverr_24_ = argv[26]; lens_zoverr_23bpz_ = argv[27]; field_zoverr_23_ = argv[28]; lens_massoverr_24bpz_ = argv[29]; field_massoverr_24_ = argv[30]; lens_massoverr_23bpz_ = argv[31]; field_massoverr_23_ = argv[32]; lens_mass2overr_24bpz_ = argv[33]; field_mass2overr_24_ = argv[34]; lens_mass2overr_23bpz_ = argv[35]; field_mass2overr_23_ = argv[36]; lens_mass3overr_24bpz_ = argv[37]; field_mass3overr_24_ = argv[38]; lens_mass3overr_23bpz_ = argv[39]; field_mass3overr_23_ = argv[40]; lens_mass2rms_24bpz_ = argv[41]; field_mass2rms_24_ = argv[42]; lens_mass2rms_23bpz_ = argv[43]; field_mass2rms_23_ = argv[44]; lens_mass3rms_24bpz_ = argv[45]; field_mass3rms_24_ = argv[46]; lens_mass3rms_23bpz_ = argv[47]; field_mass3rms_23_ = argv[48]; lens_mass2overrms_24bpz_ = argv[49]; field_mass2overrms_24_ = argv[50]; lens_mass2overrms_23bpz_ = argv[51]; field_mass2overrms_23_ = argv[52]; lens_mass3overrms_24bpz_ = argv[53]; field_mass3overrms_24_ = argv[54]; lens_mass3overrms_23bpz_ = argv[55]; field_mass3overrms_23_ = argv[56]; lens_flexion_24bpz_ = argv[57]; field_flexion_24_ = argv[58]; lens_flexion_23bpz_ = argv[59]; field_flexion_23_ = argv[60]; lens_tidal_24bpz_ = argv[61]; field_tidal_24_ = argv[62]; lens_tidal_23bpz_ = argv[63]; field_tidal_23_ = argv[64]; lens_convergence_24bpz_ = argv[65]; field_convergence_24_ = argv[66]; lens_convergence_23bpz_ = argv[67]; field_convergence_23_ = argv[68]; lens_convergencehalo_24bpz_ = argv[69]; field_convergencehalo_24_ = argv[70]; lens_convergencehalo_23bpz_ = argv[71]; field_convergencehalo_23_ = argv[72]; lens_gal_24eazy_ = argv[73]; lens_gal_23eazy_ = argv[74]; lens_zweight_24eazy_ = argv[75]; lens_zweight_23eazy_ = argv[76]; lens_mass_24eazy_ = argv[77]; lens_mass_23eazy_ = argv[78]; lens_mass2_24eazy_ = argv[79]; lens_mass2_23eazy_ = argv[80]; lens_mass3_24eazy_ = argv[81]; lens_mass3_23eazy_ = argv[82]; lens_oneoverr_24eazy_ = argv[83]; lens_oneoverr_23eazy_ = argv[84]; lens_zoverr_24eazy_ = argv[85]; lens_zoverr_23eazy_ = argv[86]; lens_massoverr_24eazy_ = argv[87]; lens_massoverr_23eazy_ = argv[88]; lens_mass2overr_24eazy_ = argv[89]; lens_mass2overr_23eazy_ = argv[90]; lens_mass3overr_24eazy_ = argv[91]; lens_mass3overr_23eazy_ = argv[92]; lens_mass2rms_24eazy_ = argv[93]; lens_mass2rms_23eazy_ = argv[94]; lens_mass3rms_24eazy_ = argv[95]; lens_mass3rms_23eazy_ = argv[96]; lens_mass2overrms_24eazy_ = argv[97]; lens_mass2overrms_23eazy_ = argv[98]; lens_mass3overrms_24eazy_ = argv[99]; lens_mass3overrms_23eazy_ = argv[100]; lens_flexion_24eazy_ = argv[101]; lens_flexion_23eazy_ = argv[102]; lens_tidal_24eazy_ = argv[103]; lens_tidal_23eazy_ = argv[104]; lens_convergence_24eazy_ = argv[105]; lens_convergence_23eazy_ = argv[106]; lens_convergencehalo_24eazy_ = argv[107]; lens_convergencehalo_23eazy_ = argv[108]
-        outbpz23 = np.zeros(22)
-        outbpz24 = np.zeros(22)
-        outeazy24 = np.zeros(22)
-        outeazy23 = np.zeros(22)
+        '''limbright limmag bpz eazy'''
+        # frac,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limmageazy,lens_gal_limbrighteazy,lens_zweight_limmageazy,lens_zweight_limbrighteazy,lens_mass_limmageazy,lens_mass_limbrighteazy,lens_mass2_limmageazy,lens_mass2_limbrighteazy,lens_mass3_limmageazy,lens_mass3_limbrighteazy,lens_oneoverr_limmageazy,lens_oneoverr_limbrighteazy,lens_zoverr_limmageazy,lens_zoverr_limbrighteazy,lens_massoverr_limmageazy,lens_massoverr_limbrighteazy,lens_mass2overr_limmageazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limmageazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limmageazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limmageazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limmageazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limmageazy,lens_mass3overrms_limbrighteazy,lens_flexion_limmageazy,lens_flexion_limbrighteazy,lens_tidal_limmageazy,lens_tidal_limbrighteazy,lens_convergence_limmageazy,lens_convergence_limbrighteazy,lens_convergencehalo_limmageazy,lens_convergencehalo_limbrighteazy
+        frac_ = argv[0]; lens_gal_limmagbpz_ = argv[1]; field_gal_limmag_ = argv[2]; lens_gal_limbrightbpz_ = argv[3]; field_gal_limbright_ = argv[4]; lens_zweight_limmagbpz_ = argv[5]; field_zweight_limmag_ = argv[6]; lens_zweight_limbrightbpz_ = argv[7]; field_zweight_limbright_ = argv[8]; lens_mass_limmagbpz_ = argv[9]; field_mass_limmag_ = argv[10]; lens_mass_limbrightbpz_ = argv[11]; field_mass_limbright_ = argv[12]; lens_mass2_limmagbpz_ = argv[13]; field_mass2_limmag_ = argv[14]; lens_mass2_limbrightbpz_ = argv[15]; field_mass2_limbright_ = argv[16]; lens_mass3_limmagbpz_ = argv[17]; field_mass3_limmag_ = argv[18]; lens_mass3_limbrightbpz_ = argv[19]; field_mass3_limbright_ = argv[20]; lens_oneoverr_limmagbpz_ = argv[21]; field_oneoverr_limmag_ = argv[22]; lens_oneoverr_limbrightbpz_ = argv[23]; field_oneoverr_limbright_ = argv[24]; lens_zoverr_limmagbpz_ = argv[25]; field_zoverr_limmag_ = argv[26]; lens_zoverr_limbrightbpz_ = argv[27]; field_zoverr_limbright_ = argv[28]; lens_massoverr_limmagbpz_ = argv[29]; field_massoverr_limmag_ = argv[30]; lens_massoverr_limbrightbpz_ = argv[31]; field_massoverr_limbright_ = argv[32]; lens_mass2overr_limmagbpz_ = argv[33]; field_mass2overr_limmag_ = argv[34]; lens_mass2overr_limbrightbpz_ = argv[35]; field_mass2overr_limbright_ = argv[36]; lens_mass3overr_limmagbpz_ = argv[37]; field_mass3overr_limmag_ = argv[38]; lens_mass3overr_limbrightbpz_ = argv[39]; field_mass3overr_limbright_ = argv[40]; lens_mass2rms_limmagbpz_ = argv[41]; field_mass2rms_limmag_ = argv[42]; lens_mass2rms_limbrightbpz_ = argv[43]; field_mass2rms_limbright_ = argv[44]; lens_mass3rms_limmagbpz_ = argv[45]; field_mass3rms_limmag_ = argv[46]; lens_mass3rms_limbrightbpz_ = argv[47]; field_mass3rms_limbright_ = argv[48]; lens_mass2overrms_limmagbpz_ = argv[49]; field_mass2overrms_limmag_ = argv[50]; lens_mass2overrms_limbrightbpz_ = argv[51]; field_mass2overrms_limbright_ = argv[52]; lens_mass3overrms_limmagbpz_ = argv[53]; field_mass3overrms_limmag_ = argv[54]; lens_mass3overrms_limbrightbpz_ = argv[55]; field_mass3overrms_limbright_ = argv[56]; lens_flexion_limmagbpz_ = argv[57]; field_flexion_limmag_ = argv[58]; lens_flexion_limbrightbpz_ = argv[59]; field_flexion_limbright_ = argv[60]; lens_tidal_limmagbpz_ = argv[61]; field_tidal_limmag_ = argv[62]; lens_tidal_limbrightbpz_ = argv[63]; field_tidal_limbright_ = argv[64]; lens_convergence_limmagbpz_ = argv[65]; field_convergence_limmag_ = argv[66]; lens_convergence_limbrightbpz_ = argv[67]; field_convergence_limbright_ = argv[68]; lens_convergencehalo_limmagbpz_ = argv[69]; field_convergencehalo_limmag_ = argv[70]; lens_convergencehalo_limbrightbpz_ = argv[71]; field_convergencehalo_limbright_ = argv[72]; lens_gal_limmageazy_ = argv[73]; lens_gal_limbrighteazy_ = argv[74]; lens_zweight_limmageazy_ = argv[75]; lens_zweight_limbrighteazy_ = argv[76]; lens_mass_limmageazy_ = argv[77]; lens_mass_limbrighteazy_ = argv[78]; lens_mass2_limmageazy_ = argv[79]; lens_mass2_limbrighteazy_ = argv[80]; lens_mass3_limmageazy_ = argv[81]; lens_mass3_limbrighteazy_ = argv[82]; lens_oneoverr_limmageazy_ = argv[83]; lens_oneoverr_limbrighteazy_ = argv[84]; lens_zoverr_limmageazy_ = argv[85]; lens_zoverr_limbrighteazy_ = argv[86]; lens_massoverr_limmageazy_ = argv[87]; lens_massoverr_limbrighteazy_ = argv[88]; lens_mass2overr_limmageazy_ = argv[89]; lens_mass2overr_limbrighteazy_ = argv[90]; lens_mass3overr_limmageazy_ = argv[91]; lens_mass3overr_limbrighteazy_ = argv[92]; lens_mass2rms_limmageazy_ = argv[93]; lens_mass2rms_limbrighteazy_ = argv[94]; lens_mass3rms_limmageazy_ = argv[95]; lens_mass3rms_limbrighteazy_ = argv[96]; lens_mass2overrms_limmageazy_ = argv[97]; lens_mass2overrms_limbrighteazy_ = argv[98]; lens_mass3overrms_limmageazy_ = argv[99]; lens_mass3overrms_limbrighteazy_ = argv[100]; lens_flexion_limmageazy_ = argv[101]; lens_flexion_limbrighteazy_ = argv[102]; lens_tidal_limmageazy_ = argv[103]; lens_tidal_limbrighteazy_ = argv[104]; lens_convergence_limmageazy_ = argv[105]; lens_convergence_limbrighteazy_ = argv[106]; lens_convergencehalo_limmageazy_ = argv[107]; lens_convergencehalo_limbrighteazy_ = argv[108]
+        outbpzlimbright = np.zeros(22)
+        outbpzlimmag = np.zeros(22)
+        outeazylimmag = np.zeros(22)
+        outeazylimbright = np.zeros(22)
     if len(argv) == 73:
-        '''23 24 bpz'''
-        # frac,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23
-        frac_ = argv[0]; lens_gal_24bpz_ = argv[1]; field_gal_24_ = argv[2]; lens_gal_23bpz_ = argv[3]; field_gal_23_ = argv[4]; lens_zweight_24bpz_ = argv[5]; field_zweight_24_ = argv[6]; lens_zweight_23bpz_ = argv[7]; field_zweight_23_ = argv[8]; lens_mass_24bpz_ = argv[9]; field_mass_24_ = argv[10]; lens_mass_23bpz_ = argv[11]; field_mass_23_ = argv[12]; lens_mass2_24bpz_ = argv[13]; field_mass2_24_ = argv[14]; lens_mass2_23bpz_ = argv[15]; field_mass2_23_ = argv[16]; lens_mass3_24bpz_ = argv[17]; field_mass3_24_ = argv[18]; lens_mass3_23bpz_ = argv[19]; field_mass3_23_ = argv[20]; lens_oneoverr_24bpz_ = argv[21]; field_oneoverr_24_ = argv[22]; lens_oneoverr_23bpz_ = argv[23]; field_oneoverr_23_ = argv[24]; lens_zoverr_24bpz_ = argv[25]; field_zoverr_24_ = argv[26]; lens_zoverr_23bpz_ = argv[27]; field_zoverr_23_ = argv[28]; lens_massoverr_24bpz_ = argv[29]; field_massoverr_24_ = argv[30]; lens_massoverr_23bpz_ = argv[31]; field_massoverr_23_ = argv[32]; lens_mass2overr_24bpz_ = argv[33]; field_mass2overr_24_ = argv[34]; lens_mass2overr_23bpz_ = argv[35]; field_mass2overr_23_ = argv[36]; lens_mass3overr_24bpz_ = argv[37]; field_mass3overr_24_ = argv[38]; lens_mass3overr_23bpz_ = argv[39]; field_mass3overr_23_ = argv[40]; lens_mass2rms_24bpz_ = argv[41]; field_mass2rms_24_ = argv[42]; lens_mass2rms_23bpz_ = argv[43]; field_mass2rms_23_ = argv[44]; lens_mass3rms_24bpz_ = argv[45]; field_mass3rms_24_ = argv[46]; lens_mass3rms_23bpz_ = argv[47]; field_mass3rms_23_ = argv[48]; lens_mass2overrms_24bpz_ = argv[49]; field_mass2overrms_24_ = argv[50]; lens_mass2overrms_23bpz_ = argv[51]; field_mass2overrms_23_ = argv[52]; lens_mass3overrms_24bpz_ = argv[53]; field_mass3overrms_24_ = argv[54]; lens_mass3overrms_23bpz_ = argv[55]; field_mass3overrms_23_ = argv[56]; lens_flexion_24bpz_ = argv[57]; field_flexion_24_ = argv[58]; lens_flexion_23bpz_ = argv[59]; field_flexion_23_ = argv[60]; lens_tidal_24bpz_ = argv[61]; field_tidal_24_ = argv[62]; lens_tidal_23bpz_ = argv[63]; field_tidal_23_ = argv[64]; lens_convergence_24bpz_ = argv[65]; field_convergence_24_ = argv[66]; lens_convergence_23bpz_ = argv[67]; field_convergence_23_ = argv[68]; lens_convergencehalo_24bpz_ = argv[69]; field_convergencehalo_24_ = argv[70]; lens_convergencehalo_23bpz_ = argv[71]; field_convergencehalo_23_ = argv[72]
-        outbpz23 = np.zeros(22)
-        outbpz24 = np.zeros(22)
+        '''limbright limmag bpz'''
+        # frac,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright
+        frac_ = argv[0]; lens_gal_limmagbpz_ = argv[1]; field_gal_limmag_ = argv[2]; lens_gal_limbrightbpz_ = argv[3]; field_gal_limbright_ = argv[4]; lens_zweight_limmagbpz_ = argv[5]; field_zweight_limmag_ = argv[6]; lens_zweight_limbrightbpz_ = argv[7]; field_zweight_limbright_ = argv[8]; lens_mass_limmagbpz_ = argv[9]; field_mass_limmag_ = argv[10]; lens_mass_limbrightbpz_ = argv[11]; field_mass_limbright_ = argv[12]; lens_mass2_limmagbpz_ = argv[13]; field_mass2_limmag_ = argv[14]; lens_mass2_limbrightbpz_ = argv[15]; field_mass2_limbright_ = argv[16]; lens_mass3_limmagbpz_ = argv[17]; field_mass3_limmag_ = argv[18]; lens_mass3_limbrightbpz_ = argv[19]; field_mass3_limbright_ = argv[20]; lens_oneoverr_limmagbpz_ = argv[21]; field_oneoverr_limmag_ = argv[22]; lens_oneoverr_limbrightbpz_ = argv[23]; field_oneoverr_limbright_ = argv[24]; lens_zoverr_limmagbpz_ = argv[25]; field_zoverr_limmag_ = argv[26]; lens_zoverr_limbrightbpz_ = argv[27]; field_zoverr_limbright_ = argv[28]; lens_massoverr_limmagbpz_ = argv[29]; field_massoverr_limmag_ = argv[30]; lens_massoverr_limbrightbpz_ = argv[31]; field_massoverr_limbright_ = argv[32]; lens_mass2overr_limmagbpz_ = argv[33]; field_mass2overr_limmag_ = argv[34]; lens_mass2overr_limbrightbpz_ = argv[35]; field_mass2overr_limbright_ = argv[36]; lens_mass3overr_limmagbpz_ = argv[37]; field_mass3overr_limmag_ = argv[38]; lens_mass3overr_limbrightbpz_ = argv[39]; field_mass3overr_limbright_ = argv[40]; lens_mass2rms_limmagbpz_ = argv[41]; field_mass2rms_limmag_ = argv[42]; lens_mass2rms_limbrightbpz_ = argv[43]; field_mass2rms_limbright_ = argv[44]; lens_mass3rms_limmagbpz_ = argv[45]; field_mass3rms_limmag_ = argv[46]; lens_mass3rms_limbrightbpz_ = argv[47]; field_mass3rms_limbright_ = argv[48]; lens_mass2overrms_limmagbpz_ = argv[49]; field_mass2overrms_limmag_ = argv[50]; lens_mass2overrms_limbrightbpz_ = argv[51]; field_mass2overrms_limbright_ = argv[52]; lens_mass3overrms_limmagbpz_ = argv[53]; field_mass3overrms_limmag_ = argv[54]; lens_mass3overrms_limbrightbpz_ = argv[55]; field_mass3overrms_limbright_ = argv[56]; lens_flexion_limmagbpz_ = argv[57]; field_flexion_limmag_ = argv[58]; lens_flexion_limbrightbpz_ = argv[59]; field_flexion_limbright_ = argv[60]; lens_tidal_limmagbpz_ = argv[61]; field_tidal_limmag_ = argv[62]; lens_tidal_limbrightbpz_ = argv[63]; field_tidal_limbright_ = argv[64]; lens_convergence_limmagbpz_ = argv[65]; field_convergence_limmag_ = argv[66]; lens_convergence_limbrightbpz_ = argv[67]; field_convergence_limbright_ = argv[68]; lens_convergencehalo_limmagbpz_ = argv[69]; field_convergencehalo_limmag_ = argv[70]; lens_convergencehalo_limbrightbpz_ = argv[71]; field_convergencehalo_limbright_ = argv[72]
+        outbpzlimbright = np.zeros(22)
+        outbpzlimmag = np.zeros(22)
     if len(argv) == 55:
-        '''23 bpz eazy'''
-        # frac,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy
-        frac_ = argv[0]; lens_gal_23bpz_ = argv[1]; field_gal_23_ = argv[2]; lens_zweight_23bpz_ = argv[3]; field_zweight_23_ = argv[4]; lens_mass_23bpz_ = argv[5]; field_mass_23_ = argv[6]; lens_mass2_23bpz_ = argv[7]; field_mass2_23_ = argv[8]; lens_mass3_23bpz_ = argv[9]; field_mass3_23_ = argv[10]; lens_oneoverr_23bpz_ = argv[11]; field_oneoverr_23_ = argv[12]; lens_zoverr_23bpz_ = argv[13]; field_zoverr_23_ = argv[14]; lens_massoverr_23bpz_ = argv[15]; field_massoverr_23_ = argv[16]; lens_mass2overr_23bpz_ = argv[17]; field_mass2overr_23_ = argv[18]; lens_mass3overr_23bpz_ = argv[19]; field_mass3overr_23_ = argv[20]; lens_mass2rms_23bpz_ = argv[21]; field_mass2rms_23_ = argv[22]; lens_mass3rms_23bpz_ = argv[23]; field_mass3rms_23_ = argv[24]; lens_mass2overrms_23bpz_ = argv[25]; field_mass2overrms_23_ = argv[26]; lens_mass3overrms_23bpz_ = argv[27]; field_mass3overrms_23_ = argv[28]; lens_flexion_23bpz_ = argv[29]; field_flexion_23_ = argv[30]; lens_tidal_23bpz_ = argv[31]; field_tidal_23_ = argv[32]; lens_convergence_23bpz_ = argv[33]; field_convergence_23_ = argv[34]; lens_convergencehalo_23bpz_ = argv[35]; field_convergencehalo_23_ = argv[36]; lens_gal_23eazy_ = argv[37]; lens_zweight_23eazy_ = argv[38]; lens_mass_23eazy_ = argv[39]; lens_mass2_23eazy_ = argv[40]; lens_mass3_23eazy_ = argv[41]; lens_oneoverr_23eazy_ = argv[42]; lens_zoverr_23eazy_ = argv[43]; lens_massoverr_23eazy_ = argv[44]; lens_mass2overr_23eazy_ = argv[45]; lens_mass3overr_23eazy_ = argv[46]; lens_mass2rms_23eazy_ = argv[47]; lens_mass3rms_23eazy_ = argv[48]; lens_mass2overrms_23eazy_ = argv[49]; lens_mass3overrms_23eazy_ = argv[50]; lens_flexion_23eazy_ = argv[51]; lens_tidal_23eazy_ = argv[52]; lens_convergence_23eazy_ = argv[53]; lens_convergencehalo_23eazy_ = argv[54]
-        outbpz23 = np.zeros(22)
-        outeazy23 = np.zeros(22)
+        '''limbright bpz eazy'''
+        # frac,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limbrighteazy,lens_zweight_limbrighteazy,lens_mass_limbrighteazy,lens_mass2_limbrighteazy,lens_mass3_limbrighteazy,lens_oneoverr_limbrighteazy,lens_zoverr_limbrighteazy,lens_massoverr_limbrighteazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limbrighteazy,lens_flexion_limbrighteazy,lens_tidal_limbrighteazy,lens_convergence_limbrighteazy,lens_convergencehalo_limbrighteazy
+        frac_ = argv[0]; lens_gal_limbrightbpz_ = argv[1]; field_gal_limbright_ = argv[2]; lens_zweight_limbrightbpz_ = argv[3]; field_zweight_limbright_ = argv[4]; lens_mass_limbrightbpz_ = argv[5]; field_mass_limbright_ = argv[6]; lens_mass2_limbrightbpz_ = argv[7]; field_mass2_limbright_ = argv[8]; lens_mass3_limbrightbpz_ = argv[9]; field_mass3_limbright_ = argv[10]; lens_oneoverr_limbrightbpz_ = argv[11]; field_oneoverr_limbright_ = argv[12]; lens_zoverr_limbrightbpz_ = argv[13]; field_zoverr_limbright_ = argv[14]; lens_massoverr_limbrightbpz_ = argv[15]; field_massoverr_limbright_ = argv[16]; lens_mass2overr_limbrightbpz_ = argv[17]; field_mass2overr_limbright_ = argv[18]; lens_mass3overr_limbrightbpz_ = argv[19]; field_mass3overr_limbright_ = argv[20]; lens_mass2rms_limbrightbpz_ = argv[21]; field_mass2rms_limbright_ = argv[22]; lens_mass3rms_limbrightbpz_ = argv[23]; field_mass3rms_limbright_ = argv[24]; lens_mass2overrms_limbrightbpz_ = argv[25]; field_mass2overrms_limbright_ = argv[26]; lens_mass3overrms_limbrightbpz_ = argv[27]; field_mass3overrms_limbright_ = argv[28]; lens_flexion_limbrightbpz_ = argv[29]; field_flexion_limbright_ = argv[30]; lens_tidal_limbrightbpz_ = argv[31]; field_tidal_limbright_ = argv[32]; lens_convergence_limbrightbpz_ = argv[33]; field_convergence_limbright_ = argv[34]; lens_convergencehalo_limbrightbpz_ = argv[35]; field_convergencehalo_limbright_ = argv[36]; lens_gal_limbrighteazy_ = argv[37]; lens_zweight_limbrighteazy_ = argv[38]; lens_mass_limbrighteazy_ = argv[39]; lens_mass2_limbrighteazy_ = argv[40]; lens_mass3_limbrighteazy_ = argv[41]; lens_oneoverr_limbrighteazy_ = argv[42]; lens_zoverr_limbrighteazy_ = argv[43]; lens_massoverr_limbrighteazy_ = argv[44]; lens_mass2overr_limbrighteazy_ = argv[45]; lens_mass3overr_limbrighteazy_ = argv[46]; lens_mass2rms_limbrighteazy_ = argv[47]; lens_mass3rms_limbrighteazy_ = argv[48]; lens_mass2overrms_limbrighteazy_ = argv[49]; lens_mass3overrms_limbrighteazy_ = argv[50]; lens_flexion_limbrighteazy_ = argv[51]; lens_tidal_limbrighteazy_ = argv[52]; lens_convergence_limbrighteazy_ = argv[53]; lens_convergencehalo_limbrighteazy_ = argv[54]
+        outbpzlimbright = np.zeros(22)
+        outeazylimbright = np.zeros(22)
     if len(argv) == 37:
-        '''23 bpz'''
-        # frac,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23
-        frac_ = argv[0]; lens_gal_23bpz_ = argv[1]; field_gal_23_ = argv[2]; lens_zweight_23bpz_ = argv[3]; field_zweight_23_ = argv[4]; lens_mass_23bpz_ = argv[5]; field_mass_23_ = argv[6]; lens_mass2_23bpz_ = argv[7]; field_mass2_23_ = argv[8]; lens_mass3_23bpz_ = argv[9]; field_mass3_23_ = argv[10]; lens_oneoverr_23bpz_ = argv[11]; field_oneoverr_23_ = argv[12]; lens_zoverr_23bpz_ = argv[13]; field_zoverr_23_ = argv[14]; lens_massoverr_23bpz_ = argv[15]; field_massoverr_23_ = argv[16]; lens_mass2overr_23bpz_ = argv[17]; field_mass2overr_23_ = argv[18]; lens_mass3overr_23bpz_ = argv[19]; field_mass3overr_23_ = argv[20]; lens_mass2rms_23bpz_ = argv[21]; field_mass2rms_23_ = argv[22]; lens_mass3rms_23bpz_ = argv[23]; field_mass3rms_23_ = argv[24]; lens_mass2overrms_23bpz_ = argv[25]; field_mass2overrms_23_ = argv[26]; lens_mass3overrms_23bpz_ = argv[27]; field_mass3overrms_23_ = argv[28]; lens_flexion_23bpz_ = argv[29]; field_flexion_23_ = argv[30]; lens_tidal_23bpz_ = argv[31]; field_tidal_23_ = argv[32]; lens_convergence_23bpz_ = argv[33]; field_convergence_23_ = argv[34]; lens_convergencehalo_23bpz_ = argv[35]; field_convergencehalo_23_ = argv[36]
-        outbpz23 = np.zeros(22)
-    
+        '''limbright bpz'''
+        # frac,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright
+        frac_ = argv[0]; lens_gal_limbrightbpz_ = argv[1]; field_gal_limbright_ = argv[2]; lens_zweight_limbrightbpz_ = argv[3]; field_zweight_limbright_ = argv[4]; lens_mass_limbrightbpz_ = argv[5]; field_mass_limbright_ = argv[6]; lens_mass2_limbrightbpz_ = argv[7]; field_mass2_limbright_ = argv[8]; lens_mass3_limbrightbpz_ = argv[9]; field_mass3_limbright_ = argv[10]; lens_oneoverr_limbrightbpz_ = argv[11]; field_oneoverr_limbright_ = argv[12]; lens_zoverr_limbrightbpz_ = argv[13]; field_zoverr_limbright_ = argv[14]; lens_massoverr_limbrightbpz_ = argv[15]; field_massoverr_limbright_ = argv[16]; lens_mass2overr_limbrightbpz_ = argv[17]; field_mass2overr_limbright_ = argv[18]; lens_mass3overr_limbrightbpz_ = argv[19]; field_mass3overr_limbright_ = argv[20]; lens_mass2rms_limbrightbpz_ = argv[21]; field_mass2rms_limbright_ = argv[22]; lens_mass3rms_limbrightbpz_ = argv[23]; field_mass3rms_limbright_ = argv[24]; lens_mass2overrms_limbrightbpz_ = argv[25]; field_mass2overrms_limbright_ = argv[26]; lens_mass3overrms_limbrightbpz_ = argv[27]; field_mass3overrms_limbright_ = argv[28]; lens_flexion_limbrightbpz_ = argv[29]; field_flexion_limbright_ = argv[30]; lens_tidal_limbrightbpz_ = argv[31]; field_tidal_limbright_ = argv[32]; lens_convergence_limbrightbpz_ = argv[33]; field_convergence_limbright_ = argv[34]; lens_convergencehalo_limbrightbpz_ = argv[35]; field_convergencehalo_limbright_ = argv[36]
+        outbpzlimbright = np.zeros(22)
+
     for k in range(overlap):
         for l in range(overlap):
             for i in range(cells_on_a_side):
@@ -789,327 +792,327 @@ def outputfunc(*argv):
                     for n in range(10):
                         condition = False
                         if len(argv) == 109:
-                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_24eazy_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
+                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_limmagbpz_[k][l][i][j]) != 0) & (np.min(lens_gal_limbrightbpz_[k][l][i][j]) != 0) & (np.min(lens_gal_limmageazy_[k][l][i][j]) != 0) & (np.min(lens_gal_limbrighteazy_[k][l][i][j]) != 0) & (field_gal_limmag_[k][l][i][j] != 0) & (field_gal_limbright_[k][l][i][j] != 0): condition = True
                         if len(argv) == 73:
-                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_24bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (field_gal_24_[k][l][i][j] != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
+                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_limmagbpz_[k][l][i][j]) != 0) & (np.min(lens_gal_limbrightbpz_[k][l][i][j]) != 0) & (field_gal_limmag_[k][l][i][j] != 0) & (field_gal_limbright_[k][l][i][j] != 0): condition = True
                         if len(argv) == 55:
-                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (np.min(lens_gal_23eazy_[k][l][i][j]) != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
+                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_limbrightbpz_[k][l][i][j]) != 0) & (np.min(lens_gal_limbrighteazy_[k][l][i][j]) != 0) & (field_gal_limbright_[k][l][i][j] != 0): condition = True
                         if len(argv) == 37:
-                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_23bpz_[k][l][i][j]) != 0) & (field_gal_23_[k][l][i][j] != 0): condition = True
+                            if (unmaskedcell[k][l][i][j] >= frac_) & (np.min(lens_gal_limbrightbpz_[k][l][i][j]) != 0) & (field_gal_limbright_[k][l][i][j] != 0): condition = True
                         if condition == True:
                             if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109:
-                                outbpz23[0] = np.int16(k)
-                                outbpz23[1] = np.int16(l)
-                                outbpz23[2] = np.int16(i)
-                                outbpz23[3] = np.int16(j)
-                                outbpz23[4] = np.float32(1.0*lens_gal_23bpz_[k][l][i][j][n]/field_gal_23_[k][l][i][j])
-                                outbpz23[5] = np.float32(1.0*lens_zweight_23bpz_[k][l][i][j][n]/field_zweight_23_[k][l][i][j])
-                                outbpz23[6] = np.float32(1.0*lens_mass_23bpz_[k][l][i][j][n]/field_mass_23_[k][l][i][j])
-                                outbpz23[7] = np.float32(1.0*lens_mass2_23bpz_[k][l][i][j][n]/field_mass2_23_[k][l][i][j])
-                                outbpz23[8] = np.float32(1.0*lens_mass3_23bpz_[k][l][i][j][n]/field_mass3_23_[k][l][i][j])
-                                outbpz23[9] = np.float32(1.0*lens_oneoverr_23bpz_[k][l][i][j][n]/field_oneoverr_23_[k][l][i][j])
-                                outbpz23[10] = np.float32(1.0*lens_zoverr_23bpz_[k][l][i][j][n]/field_zoverr_23_[k][l][i][j])
-                                outbpz23[11] = np.float32(1.0*lens_massoverr_23bpz_[k][l][i][j][n]/field_massoverr_23_[k][l][i][j])
-                                outbpz23[12] = np.float32(1.0*lens_mass2overr_23bpz_[k][l][i][j][n]/field_mass2overr_23_[k][l][i][j])
-                                outbpz23[13] = np.float32(1.0*lens_mass3overr_23bpz_[k][l][i][j][n]/field_mass3overr_23_[k][l][i][j])
-                                outbpz23[14] = np.float32(1.0*lens_mass2rms_23bpz_[k][l][i][j][n]/field_mass2rms_23_[k][l][i][j])
-                                outbpz23[15] = np.float32(1.0*lens_mass3rms_23bpz_[k][l][i][j][n]/field_mass3rms_23_[k][l][i][j])
-                                outbpz23[16] = np.float32(1.0*lens_mass2overrms_23bpz_[k][l][i][j][n]/field_mass2overrms_23_[k][l][i][j])
-                                outbpz23[17] = np.float32(1.0*lens_mass3overrms_23bpz_[k][l][i][j][n]/field_mass3overrms_23_[k][l][i][j])
-                                outbpz23[18] = np.float32(1.0*lens_flexion_23bpz_[k][l][i][j][n]/field_flexion_23_[k][l][i][j])
-                                outbpz23[19] = np.float32(1.0*lens_tidal_23bpz_[k][l][i][j][n]/field_tidal_23_[k][l][i][j])
-                                outbpz23[20] = np.float32(1.0*lens_convergence_23bpz_[k][l][i][j][n]/field_convergence_23_[k][l][i][j])
-                                outbpz23[21] = np.float32(1.0*lens_convergencehalo_23bpz_[k][l][i][j][n]/field_convergencehalo_23_[k][l][i][j])
+                                outbpzlimbright[0] = np.int16(k)
+                                outbpzlimbright[1] = np.int16(l)
+                                outbpzlimbright[2] = np.int16(i)
+                                outbpzlimbright[3] = np.int16(j)
+                                outbpzlimbright[4] = np.float32(1.0*lens_gal_limbrightbpz_[k][l][i][j][n]/field_gal_limbright_[k][l][i][j])
+                                outbpzlimbright[5] = np.float32(1.0*lens_zweight_limbrightbpz_[k][l][i][j][n]/field_zweight_limbright_[k][l][i][j])
+                                outbpzlimbright[6] = np.float32(1.0*lens_mass_limbrightbpz_[k][l][i][j][n]/field_mass_limbright_[k][l][i][j])
+                                outbpzlimbright[7] = np.float32(1.0*lens_mass2_limbrightbpz_[k][l][i][j][n]/field_mass2_limbright_[k][l][i][j])
+                                outbpzlimbright[8] = np.float32(1.0*lens_mass3_limbrightbpz_[k][l][i][j][n]/field_mass3_limbright_[k][l][i][j])
+                                outbpzlimbright[9] = np.float32(1.0*lens_oneoverr_limbrightbpz_[k][l][i][j][n]/field_oneoverr_limbright_[k][l][i][j])
+                                outbpzlimbright[10] = np.float32(1.0*lens_zoverr_limbrightbpz_[k][l][i][j][n]/field_zoverr_limbright_[k][l][i][j])
+                                outbpzlimbright[11] = np.float32(1.0*lens_massoverr_limbrightbpz_[k][l][i][j][n]/field_massoverr_limbright_[k][l][i][j])
+                                outbpzlimbright[12] = np.float32(1.0*lens_mass2overr_limbrightbpz_[k][l][i][j][n]/field_mass2overr_limbright_[k][l][i][j])
+                                outbpzlimbright[13] = np.float32(1.0*lens_mass3overr_limbrightbpz_[k][l][i][j][n]/field_mass3overr_limbright_[k][l][i][j])
+                                outbpzlimbright[14] = np.float32(1.0*lens_mass2rms_limbrightbpz_[k][l][i][j][n]/field_mass2rms_limbright_[k][l][i][j])
+                                outbpzlimbright[15] = np.float32(1.0*lens_mass3rms_limbrightbpz_[k][l][i][j][n]/field_mass3rms_limbright_[k][l][i][j])
+                                outbpzlimbright[16] = np.float32(1.0*lens_mass2overrms_limbrightbpz_[k][l][i][j][n]/field_mass2overrms_limbright_[k][l][i][j])
+                                outbpzlimbright[17] = np.float32(1.0*lens_mass3overrms_limbrightbpz_[k][l][i][j][n]/field_mass3overrms_limbright_[k][l][i][j])
+                                outbpzlimbright[18] = np.float32(1.0*lens_flexion_limbrightbpz_[k][l][i][j][n]/field_flexion_limbright_[k][l][i][j])
+                                outbpzlimbright[19] = np.float32(1.0*lens_tidal_limbrightbpz_[k][l][i][j][n]/field_tidal_limbright_[k][l][i][j])
+                                outbpzlimbright[20] = np.float32(1.0*lens_convergence_limbrightbpz_[k][l][i][j][n]/field_convergence_limbright_[k][l][i][j])
+                                outbpzlimbright[21] = np.float32(1.0*lens_convergencehalo_limbrightbpz_[k][l][i][j][n]/field_convergencehalo_limbright_[k][l][i][j])
                             if len(argv) == 55 or len(argv) == 109:
-                                outeazy23[0] = np.int16(k)
-                                outeazy23[1] = np.int16(l)
-                                outeazy23[2] = np.int16(i)
-                                outeazy23[3] = np.int16(j)
-                                outeazy23[4] = np.float32(1.0*lens_gal_23eazy_[k][l][i][j][n]/field_gal_23_[k][l][i][j])
-                                outeazy23[5] = np.float32(1.0*lens_zweight_23eazy_[k][l][i][j][n]/field_zweight_23_[k][l][i][j])
-                                outeazy23[6] = np.float32(1.0*lens_mass_23eazy_[k][l][i][j][n]/field_mass_23_[k][l][i][j])
-                                outeazy23[7] = np.float32(1.0*lens_mass2_23eazy_[k][l][i][j][n]/field_mass2_23_[k][l][i][j])
-                                outeazy23[8] = np.float32(1.0*lens_mass3_23eazy_[k][l][i][j][n]/field_mass3_23_[k][l][i][j])
-                                outeazy23[9] = np.float32(1.0*lens_oneoverr_23eazy_[k][l][i][j][n]/field_oneoverr_23_[k][l][i][j])
-                                outeazy23[10] = np.float32(1.0*lens_zoverr_23eazy_[k][l][i][j][n]/field_zoverr_23_[k][l][i][j])
-                                outeazy23[11] = np.float32(1.0*lens_massoverr_23eazy_[k][l][i][j][n]/field_massoverr_23_[k][l][i][j])
-                                outeazy23[12] = np.float32(1.0*lens_mass2overr_23eazy_[k][l][i][j][n]/field_mass2overr_23_[k][l][i][j])
-                                outeazy23[13] = np.float32(1.0*lens_mass3overr_23eazy_[k][l][i][j][n]/field_mass3overr_23_[k][l][i][j])
-                                outeazy23[14] = np.float32(1.0*lens_mass2rms_23eazy_[k][l][i][j][n]/field_mass2rms_23_[k][l][i][j])
-                                outeazy23[15] = np.float32(1.0*lens_mass3rms_23eazy_[k][l][i][j][n]/field_mass3rms_23_[k][l][i][j])
-                                outeazy23[16] = np.float32(1.0*lens_mass2overrms_23eazy_[k][l][i][j][n]/field_mass2overrms_23_[k][l][i][j])
-                                outeazy23[17] = np.float32(1.0*lens_mass3overrms_23eazy_[k][l][i][j][n]/field_mass3overrms_23_[k][l][i][j])
-                                outeazy23[18] = np.float32(1.0*lens_flexion_23eazy_[k][l][i][j][n]/field_flexion_23_[k][l][i][j])
-                                outeazy23[19] = np.float32(1.0*lens_tidal_23eazy_[k][l][i][j][n]/field_tidal_23_[k][l][i][j])
-                                outeazy23[20] = np.float32(1.0*lens_convergence_23eazy_[k][l][i][j][n]/field_convergence_23_[k][l][i][j])
-                                outeazy23[21] = np.float32(1.0*lens_convergencehalo_23eazy_[k][l][i][j][n]/field_convergencehalo_23_[k][l][i][j])
+                                outeazylimbright[0] = np.int16(k)
+                                outeazylimbright[1] = np.int16(l)
+                                outeazylimbright[2] = np.int16(i)
+                                outeazylimbright[3] = np.int16(j)
+                                outeazylimbright[4] = np.float32(1.0*lens_gal_limbrighteazy_[k][l][i][j][n]/field_gal_limbright_[k][l][i][j])
+                                outeazylimbright[5] = np.float32(1.0*lens_zweight_limbrighteazy_[k][l][i][j][n]/field_zweight_limbright_[k][l][i][j])
+                                outeazylimbright[6] = np.float32(1.0*lens_mass_limbrighteazy_[k][l][i][j][n]/field_mass_limbright_[k][l][i][j])
+                                outeazylimbright[7] = np.float32(1.0*lens_mass2_limbrighteazy_[k][l][i][j][n]/field_mass2_limbright_[k][l][i][j])
+                                outeazylimbright[8] = np.float32(1.0*lens_mass3_limbrighteazy_[k][l][i][j][n]/field_mass3_limbright_[k][l][i][j])
+                                outeazylimbright[9] = np.float32(1.0*lens_oneoverr_limbrighteazy_[k][l][i][j][n]/field_oneoverr_limbright_[k][l][i][j])
+                                outeazylimbright[10] = np.float32(1.0*lens_zoverr_limbrighteazy_[k][l][i][j][n]/field_zoverr_limbright_[k][l][i][j])
+                                outeazylimbright[11] = np.float32(1.0*lens_massoverr_limbrighteazy_[k][l][i][j][n]/field_massoverr_limbright_[k][l][i][j])
+                                outeazylimbright[12] = np.float32(1.0*lens_mass2overr_limbrighteazy_[k][l][i][j][n]/field_mass2overr_limbright_[k][l][i][j])
+                                outeazylimbright[13] = np.float32(1.0*lens_mass3overr_limbrighteazy_[k][l][i][j][n]/field_mass3overr_limbright_[k][l][i][j])
+                                outeazylimbright[14] = np.float32(1.0*lens_mass2rms_limbrighteazy_[k][l][i][j][n]/field_mass2rms_limbright_[k][l][i][j])
+                                outeazylimbright[15] = np.float32(1.0*lens_mass3rms_limbrighteazy_[k][l][i][j][n]/field_mass3rms_limbright_[k][l][i][j])
+                                outeazylimbright[16] = np.float32(1.0*lens_mass2overrms_limbrighteazy_[k][l][i][j][n]/field_mass2overrms_limbright_[k][l][i][j])
+                                outeazylimbright[17] = np.float32(1.0*lens_mass3overrms_limbrighteazy_[k][l][i][j][n]/field_mass3overrms_limbright_[k][l][i][j])
+                                outeazylimbright[18] = np.float32(1.0*lens_flexion_limbrighteazy_[k][l][i][j][n]/field_flexion_limbright_[k][l][i][j])
+                                outeazylimbright[19] = np.float32(1.0*lens_tidal_limbrighteazy_[k][l][i][j][n]/field_tidal_limbright_[k][l][i][j])
+                                outeazylimbright[20] = np.float32(1.0*lens_convergence_limbrighteazy_[k][l][i][j][n]/field_convergence_limbright_[k][l][i][j])
+                                outeazylimbright[21] = np.float32(1.0*lens_convergencehalo_limbrighteazy_[k][l][i][j][n]/field_convergencehalo_limbright_[k][l][i][j])
                             if len(argv) == 73 or len(argv) == 109:
-                                outbpz24[0] = np.int16(k)
-                                outbpz24[1] = np.int16(l)
-                                outbpz24[2] = np.int16(i)
-                                outbpz24[3] = np.int16(j)
-                                outbpz24[4] = np.float32(1.0*lens_gal_24bpz_[k][l][i][j][n]/field_gal_24_[k][l][i][j])
-                                outbpz24[5] = np.float32(1.0*lens_zweight_24bpz_[k][l][i][j][n]/field_zweight_24_[k][l][i][j])
-                                outbpz24[6] = np.float32(1.0*lens_mass_24bpz_[k][l][i][j][n]/field_mass_24_[k][l][i][j])
-                                outbpz24[7] = np.float32(1.0*lens_mass2_24bpz_[k][l][i][j][n]/field_mass2_24_[k][l][i][j])
-                                outbpz24[8] = np.float32(1.0*lens_mass3_24bpz_[k][l][i][j][n]/field_mass3_24_[k][l][i][j])
-                                outbpz24[9] = np.float32(1.0*lens_oneoverr_24bpz_[k][l][i][j][n]/field_oneoverr_24_[k][l][i][j])
-                                outbpz24[10] = np.float32(1.0*lens_zoverr_24bpz_[k][l][i][j][n]/field_zoverr_24_[k][l][i][j])
-                                outbpz24[11] = np.float32(1.0*lens_massoverr_24bpz_[k][l][i][j][n]/field_massoverr_24_[k][l][i][j])
-                                outbpz24[12] = np.float32(1.0*lens_mass2overr_24bpz_[k][l][i][j][n]/field_mass2overr_24_[k][l][i][j])
-                                outbpz24[13] = np.float32(1.0*lens_mass3overr_24bpz_[k][l][i][j][n]/field_mass3overr_24_[k][l][i][j])
-                                outbpz24[14] = np.float32(1.0*lens_mass2rms_24bpz_[k][l][i][j][n]/field_mass2rms_24_[k][l][i][j])
-                                outbpz24[15] = np.float32(1.0*lens_mass3rms_24bpz_[k][l][i][j][n]/field_mass3rms_24_[k][l][i][j])
-                                outbpz24[16] = np.float32(1.0*lens_mass2overrms_24bpz_[k][l][i][j][n]/field_mass2overrms_24_[k][l][i][j])
-                                outbpz24[17] = np.float32(1.0*lens_mass3overrms_24bpz_[k][l][i][j][n]/field_mass3overrms_24_[k][l][i][j])
-                                outbpz24[18] = np.float32(1.0*lens_flexion_24bpz_[k][l][i][j][n]/field_flexion_24_[k][l][i][j])
-                                outbpz24[19] = np.float32(1.0*lens_tidal_24bpz_[k][l][i][j][n]/field_tidal_24_[k][l][i][j])
-                                outbpz24[20] = np.float32(1.0*lens_convergence_24bpz_[k][l][i][j][n]/field_convergence_24_[k][l][i][j])
-                                outbpz24[21] = np.float32(1.0*lens_convergencehalo_24bpz_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j])
+                                outbpzlimmag[0] = np.int16(k)
+                                outbpzlimmag[1] = np.int16(l)
+                                outbpzlimmag[2] = np.int16(i)
+                                outbpzlimmag[3] = np.int16(j)
+                                outbpzlimmag[4] = np.float32(1.0*lens_gal_limmagbpz_[k][l][i][j][n]/field_gal_limmag_[k][l][i][j])
+                                outbpzlimmag[5] = np.float32(1.0*lens_zweight_limmagbpz_[k][l][i][j][n]/field_zweight_limmag_[k][l][i][j])
+                                outbpzlimmag[6] = np.float32(1.0*lens_mass_limmagbpz_[k][l][i][j][n]/field_mass_limmag_[k][l][i][j])
+                                outbpzlimmag[7] = np.float32(1.0*lens_mass2_limmagbpz_[k][l][i][j][n]/field_mass2_limmag_[k][l][i][j])
+                                outbpzlimmag[8] = np.float32(1.0*lens_mass3_limmagbpz_[k][l][i][j][n]/field_mass3_limmag_[k][l][i][j])
+                                outbpzlimmag[9] = np.float32(1.0*lens_oneoverr_limmagbpz_[k][l][i][j][n]/field_oneoverr_limmag_[k][l][i][j])
+                                outbpzlimmag[10] = np.float32(1.0*lens_zoverr_limmagbpz_[k][l][i][j][n]/field_zoverr_limmag_[k][l][i][j])
+                                outbpzlimmag[11] = np.float32(1.0*lens_massoverr_limmagbpz_[k][l][i][j][n]/field_massoverr_limmag_[k][l][i][j])
+                                outbpzlimmag[12] = np.float32(1.0*lens_mass2overr_limmagbpz_[k][l][i][j][n]/field_mass2overr_limmag_[k][l][i][j])
+                                outbpzlimmag[13] = np.float32(1.0*lens_mass3overr_limmagbpz_[k][l][i][j][n]/field_mass3overr_limmag_[k][l][i][j])
+                                outbpzlimmag[14] = np.float32(1.0*lens_mass2rms_limmagbpz_[k][l][i][j][n]/field_mass2rms_limmag_[k][l][i][j])
+                                outbpzlimmag[15] = np.float32(1.0*lens_mass3rms_limmagbpz_[k][l][i][j][n]/field_mass3rms_limmag_[k][l][i][j])
+                                outbpzlimmag[16] = np.float32(1.0*lens_mass2overrms_limmagbpz_[k][l][i][j][n]/field_mass2overrms_limmag_[k][l][i][j])
+                                outbpzlimmag[17] = np.float32(1.0*lens_mass3overrms_limmagbpz_[k][l][i][j][n]/field_mass3overrms_limmag_[k][l][i][j])
+                                outbpzlimmag[18] = np.float32(1.0*lens_flexion_limmagbpz_[k][l][i][j][n]/field_flexion_limmag_[k][l][i][j])
+                                outbpzlimmag[19] = np.float32(1.0*lens_tidal_limmagbpz_[k][l][i][j][n]/field_tidal_limmag_[k][l][i][j])
+                                outbpzlimmag[20] = np.float32(1.0*lens_convergence_limmagbpz_[k][l][i][j][n]/field_convergence_limmag_[k][l][i][j])
+                                outbpzlimmag[21] = np.float32(1.0*lens_convergencehalo_limmagbpz_[k][l][i][j][n]/field_convergencehalo_limmag_[k][l][i][j])
                             if len(argv) == 109:
-                                outeazy24[0] = np.int16(k)
-                                outeazy24[1] = np.int16(l)
-                                outeazy24[2] = np.int16(i)
-                                outeazy24[3] = np.int16(j)
-                                outeazy24[4] = np.float32(1.0*lens_gal_24eazy_[k][l][i][j][n]/field_gal_24_[k][l][i][j])
-                                outeazy24[5] = np.float32(1.0*lens_zweight_24eazy_[k][l][i][j][n]/field_zweight_24_[k][l][i][j])
-                                outeazy24[6] = np.float32(1.0*lens_mass_24eazy_[k][l][i][j][n]/field_mass_24_[k][l][i][j])
-                                outeazy24[7] = np.float32(1.0*lens_mass2_24eazy_[k][l][i][j][n]/field_mass2_24_[k][l][i][j])
-                                outeazy24[8] = np.float32(1.0*lens_mass3_24eazy_[k][l][i][j][n]/field_mass3_24_[k][l][i][j])
-                                outeazy24[9] = np.float32(1.0*lens_oneoverr_24eazy_[k][l][i][j][n]/field_oneoverr_24_[k][l][i][j])
-                                outeazy24[10] = np.float32(1.0*lens_zoverr_24eazy_[k][l][i][j][n]/field_zoverr_24_[k][l][i][j])
-                                outeazy24[11] = np.float32(1.0*lens_massoverr_24eazy_[k][l][i][j][n]/field_massoverr_24_[k][l][i][j])
-                                outeazy24[12] = np.float32(1.0*lens_mass2overr_24eazy_[k][l][i][j][n]/field_mass2overr_24_[k][l][i][j])
-                                outeazy24[13] = np.float32(1.0*lens_mass3overr_24eazy_[k][l][i][j][n]/field_mass3overr_24_[k][l][i][j])
-                                outeazy24[14] = np.float32(1.0*lens_mass2rms_24eazy_[k][l][i][j][n]/field_mass2rms_24_[k][l][i][j])
-                                outeazy24[15] = np.float32(1.0*lens_mass3rms_24eazy_[k][l][i][j][n]/field_mass3rms_24_[k][l][i][j])
-                                outeazy24[16] = np.float32(1.0*lens_mass2overrms_24eazy_[k][l][i][j][n]/field_mass2overrms_24_[k][l][i][j])
-                                outeazy24[17] = np.float32(1.0*lens_mass3overrms_24eazy_[k][l][i][j][n]/field_mass3overrms_24_[k][l][i][j])
-                                outeazy24[18] = np.float32(1.0*lens_flexion_24eazy_[k][l][i][j][n]/field_flexion_24_[k][l][i][j])
-                                outeazy24[19] = np.float32(1.0*lens_tidal_24eazy_[k][l][i][j][n]/field_tidal_24_[k][l][i][j])
-                                outeazy24[20] = np.float32(1.0*lens_convergence_24eazy_[k][l][i][j][n]/field_convergence_24_[k][l][i][j])
-                                outeazy24[21] = np.float32(1.0*lens_convergencehalo_24eazy_[k][l][i][j][n]/field_convergencehalo_24_[k][l][i][j])
+                                outeazylimmag[0] = np.int16(k)
+                                outeazylimmag[1] = np.int16(l)
+                                outeazylimmag[2] = np.int16(i)
+                                outeazylimmag[3] = np.int16(j)
+                                outeazylimmag[4] = np.float32(1.0*lens_gal_limmageazy_[k][l][i][j][n]/field_gal_limmag_[k][l][i][j])
+                                outeazylimmag[5] = np.float32(1.0*lens_zweight_limmageazy_[k][l][i][j][n]/field_zweight_limmag_[k][l][i][j])
+                                outeazylimmag[6] = np.float32(1.0*lens_mass_limmageazy_[k][l][i][j][n]/field_mass_limmag_[k][l][i][j])
+                                outeazylimmag[7] = np.float32(1.0*lens_mass2_limmageazy_[k][l][i][j][n]/field_mass2_limmag_[k][l][i][j])
+                                outeazylimmag[8] = np.float32(1.0*lens_mass3_limmageazy_[k][l][i][j][n]/field_mass3_limmag_[k][l][i][j])
+                                outeazylimmag[9] = np.float32(1.0*lens_oneoverr_limmageazy_[k][l][i][j][n]/field_oneoverr_limmag_[k][l][i][j])
+                                outeazylimmag[10] = np.float32(1.0*lens_zoverr_limmageazy_[k][l][i][j][n]/field_zoverr_limmag_[k][l][i][j])
+                                outeazylimmag[11] = np.float32(1.0*lens_massoverr_limmageazy_[k][l][i][j][n]/field_massoverr_limmag_[k][l][i][j])
+                                outeazylimmag[12] = np.float32(1.0*lens_mass2overr_limmageazy_[k][l][i][j][n]/field_mass2overr_limmag_[k][l][i][j])
+                                outeazylimmag[13] = np.float32(1.0*lens_mass3overr_limmageazy_[k][l][i][j][n]/field_mass3overr_limmag_[k][l][i][j])
+                                outeazylimmag[14] = np.float32(1.0*lens_mass2rms_limmageazy_[k][l][i][j][n]/field_mass2rms_limmag_[k][l][i][j])
+                                outeazylimmag[15] = np.float32(1.0*lens_mass3rms_limmageazy_[k][l][i][j][n]/field_mass3rms_limmag_[k][l][i][j])
+                                outeazylimmag[16] = np.float32(1.0*lens_mass2overrms_limmageazy_[k][l][i][j][n]/field_mass2overrms_limmag_[k][l][i][j])
+                                outeazylimmag[17] = np.float32(1.0*lens_mass3overrms_limmageazy_[k][l][i][j][n]/field_mass3overrms_limmag_[k][l][i][j])
+                                outeazylimmag[18] = np.float32(1.0*lens_flexion_limmageazy_[k][l][i][j][n]/field_flexion_limmag_[k][l][i][j])
+                                outeazylimmag[19] = np.float32(1.0*lens_tidal_limmageazy_[k][l][i][j][n]/field_tidal_limmag_[k][l][i][j])
+                                outeazylimmag[20] = np.float32(1.0*lens_convergence_limmageazy_[k][l][i][j][n]/field_convergence_limmag_[k][l][i][j])
+                                outeazylimmag[21] = np.float32(1.0*lens_convergencehalo_limmageazy_[k][l][i][j][n]/field_convergencehalo_limmag_[k][l][i][j])
                             if n == 0:
                                 if start0 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_0 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_0 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_0 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_0 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_0 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_0 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_0 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_0 = outeazylimmag
                                     start0 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_0 = np.c_[outlistbpz23_0,outbpz23] # normally this line should start with else, but for some reason that makes it lose the first row and duplicate the second; this way it will duplicate the first line, and at the end I will mask its first instance
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_0 = np.c_[outlisteazy23_0,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_0 = np.c_[outlistbpz24_0,outbpz24]
-                                if len(argv) == 109: outlisteazy24_0 = np.c_[outlisteazy24_0,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_0 = np.c_[outlistbpzlimbright_0,outbpzlimbright] # normally this line should start with else, but for some reason that makes it lose the first row and duplicate the second; this way it will duplicate the first line, and at the end I will mask its first instance
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_0 = np.c_[outlisteazylimbright_0,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_0 = np.c_[outlistbpzlimmag_0,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_0 = np.c_[outlisteazylimmag_0,outeazylimmag]
                             if n == 1:
                                 if start1 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_1 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_1 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_1 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_1 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_1 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_1 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_1 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_1 = outeazylimmag
                                     start1 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_1 = np.c_[outlistbpz23_1,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_1 = np.c_[outlisteazy23_1,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_1 = np.c_[outlistbpz24_1,outbpz24]
-                                if len(argv) == 109: outlisteazy24_1 = np.c_[outlisteazy24_1,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_1 = np.c_[outlistbpzlimbright_1,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_1 = np.c_[outlisteazylimbright_1,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_1 = np.c_[outlistbpzlimmag_1,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_1 = np.c_[outlisteazylimmag_1,outeazylimmag]
                             if n == 2:
                                 if start2 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_2 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_2 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_2 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_2 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_2 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_2 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_2 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_2 = outeazylimmag
                                     start2 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_2 = np.c_[outlistbpz23_2,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_2 = np.c_[outlisteazy23_2,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_2 = np.c_[outlistbpz24_2,outbpz24]
-                                if len(argv) == 109: outlisteazy24_2 = np.c_[outlisteazy24_2,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_2 = np.c_[outlistbpzlimbright_2,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_2 = np.c_[outlisteazylimbright_2,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_2 = np.c_[outlistbpzlimmag_2,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_2 = np.c_[outlisteazylimmag_2,outeazylimmag]
                             if n == 3:
                                 if start3 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_3 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_3 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_3 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_3 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_3 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_3 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_3 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_3 = outeazylimmag
                                     start3 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_3 = np.c_[outlistbpz23_3,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_3 = np.c_[outlisteazy23_3,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_3 = np.c_[outlistbpz24_3,outbpz24]
-                                if len(argv) == 109: outlisteazy24_3 = np.c_[outlisteazy24_3,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_3 = np.c_[outlistbpzlimbright_3,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_3 = np.c_[outlisteazylimbright_3,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_3 = np.c_[outlistbpzlimmag_3,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_3 = np.c_[outlisteazylimmag_3,outeazylimmag]
                             if n == 4:
                                 if start4 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_4 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_4 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_4 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_4 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_4 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_4 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_4 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_4 = outeazylimmag
                                     start4 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_4 = np.c_[outlistbpz23_4,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_4 = np.c_[outlisteazy23_4,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_4 = np.c_[outlistbpz24_4,outbpz24]
-                                if len(argv) == 109: outlisteazy24_4 = np.c_[outlisteazy24_4,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_4 = np.c_[outlistbpzlimbright_4,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_4 = np.c_[outlisteazylimbright_4,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_4 = np.c_[outlistbpzlimmag_4,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_4 = np.c_[outlisteazylimmag_4,outeazylimmag]
                             if n == 5:
                                 if start5 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_5 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_5 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_5 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_5 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_5 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_5 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_5 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_5 = outeazylimmag
                                     start5 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_5 = np.c_[outlistbpz23_5,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_5 = np.c_[outlisteazy23_5,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_5 = np.c_[outlistbpz24_5,outbpz24]
-                                if len(argv) == 109: outlisteazy24_5 = np.c_[outlisteazy24_5,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_5 = np.c_[outlistbpzlimbright_5,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_5 = np.c_[outlisteazylimbright_5,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_5 = np.c_[outlistbpzlimmag_5,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_5 = np.c_[outlisteazylimmag_5,outeazylimmag]
                             if n == 6:
                                 if start6 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_6 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_6 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_6 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_6 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_6 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_6 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_6 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_6 = outeazylimmag
                                     start6 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_6 = np.c_[outlistbpz23_6,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_6 = np.c_[outlisteazy23_6,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_6 = np.c_[outlistbpz24_6,outbpz24]
-                                if len(argv) == 109: outlisteazy24_6 = np.c_[outlisteazy24_6,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_6 = np.c_[outlistbpzlimbright_6,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_6 = np.c_[outlisteazylimbright_6,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_6 = np.c_[outlistbpzlimmag_6,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_6 = np.c_[outlisteazylimmag_6,outeazylimmag]
                             if n == 7:
                                 if start7 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_7 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_7 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_7 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_7 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_7 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_7 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_7 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_7 = outeazylimmag
                                     start7 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_7 = np.c_[outlistbpz23_7,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_7 = np.c_[outlisteazy23_7,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_7 = np.c_[outlistbpz24_7,outbpz24]
-                                if len(argv) == 109: outlisteazy24_7 = np.c_[outlisteazy24_7,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_7 = np.c_[outlistbpzlimbright_7,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_7 = np.c_[outlisteazylimbright_7,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_7 = np.c_[outlistbpzlimmag_7,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_7 = np.c_[outlisteazylimmag_7,outeazylimmag]
                             if n == 8:
                                 if start8 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_8 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_8 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_8 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_8 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_8 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_8 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_8 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_8 = outeazylimmag
                                     start8 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_8 = np.c_[outlistbpz23_8,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_8 = np.c_[outlisteazy23_8,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_8 = np.c_[outlistbpz24_8,outbpz24]
-                                if len(argv) == 109: outlisteazy24_8 = np.c_[outlisteazy24_8,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_8 = np.c_[outlistbpzlimbright_8,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_8 = np.c_[outlisteazylimbright_8,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_8 = np.c_[outlistbpzlimmag_8,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_8 = np.c_[outlisteazylimmag_8,outeazylimmag]
                             if n == 9:
                                 if start9 == True:
-                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_9 = outbpz23
-                                    if len(argv) == 55 or len(argv) == 109: outlisteazy23_9 = outeazy23
-                                    if len(argv) == 73 or len(argv) == 109: outlistbpz24_9 = outbpz24
-                                    if len(argv) == 109: outlisteazy24_9 = outeazy24
+                                    if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_9 = outbpzlimbright
+                                    if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_9 = outeazylimbright
+                                    if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_9 = outbpzlimmag
+                                    if len(argv) == 109: outlisteazylimmag_9 = outeazylimmag
                                     start9 = False
-                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpz23_9 = np.c_[outlistbpz23_9,outbpz23]
-                                if len(argv) == 55 or len(argv) == 109: outlisteazy23_9 = np.c_[outlisteazy23_9,outeazy23]
-                                if len(argv) == 73 or len(argv) == 109: outlistbpz24_9 = np.c_[outlistbpz24_9,outbpz24]
-                                if len(argv) == 109: outlisteazy24_9 = np.c_[outlisteazy24_9,outeazy24]
+                                if len(argv) == 37 or len(argv) == 55 or len(argv) == 73 or len(argv) == 109: outlistbpzlimbright_9 = np.c_[outlistbpzlimbright_9,outbpzlimbright]
+                                if len(argv) == 55 or len(argv) == 109: outlisteazylimbright_9 = np.c_[outlisteazylimbright_9,outeazylimbright]
+                                if len(argv) == 73 or len(argv) == 109: outlistbpzlimmag_9 = np.c_[outlistbpzlimmag_9,outbpzlimmag]
+                                if len(argv) == 109: outlisteazylimmag_9 = np.c_[outlisteazylimmag_9,outeazylimmag]
 
-    if len(argv) == 109: return outlistbpz23_0[:,1:],outlistbpz23_1[:,1:],outlistbpz23_2[:,1:],outlistbpz23_3[:,1:],outlistbpz23_4[:,1:],outlistbpz23_5[:,1:],outlistbpz23_6[:,1:],outlistbpz23_7[:,1:],outlistbpz23_8[:,1:],outlistbpz23_9[:,1:],outlisteazy23_0[:,1:],outlisteazy23_1[:,1:],outlisteazy23_2[:,1:],outlisteazy23_3[:,1:],outlisteazy23_4[:,1:],outlisteazy23_5[:,1:],outlisteazy23_6[:,1:],outlisteazy23_7[:,1:],outlisteazy23_8[:,1:],outlisteazy23_9[:,1:],outlistbpz24_0[:,1:],outlistbpz24_1[:,1:],outlistbpz24_2[:,1:],outlistbpz24_3[:,1:],outlistbpz24_4[:,1:],outlistbpz24_5[:,1:],outlistbpz24_6[:,1:],outlistbpz24_7[:,1:],outlistbpz24_8[:,1:],outlistbpz24_9[:,1:],outlisteazy24_0[:,1:],outlisteazy24_1[:,1:],outlisteazy24_2[:,1:],outlisteazy24_3[:,1:],outlisteazy24_4[:,1:],outlisteazy24_5[:,1:],outlisteazy24_6[:,1:],outlisteazy24_7[:,1:],outlisteazy24_8[:,1:],outlisteazy24_9[:,1:]
-    if len(argv) == 73: return outlistbpz23_0[:,1:],outlistbpz23_1[:,1:],outlistbpz23_2[:,1:],outlistbpz23_3[:,1:],outlistbpz23_4[:,1:],outlistbpz23_5[:,1:],outlistbpz23_6[:,1:],outlistbpz23_7[:,1:],outlistbpz23_8[:,1:],outlistbpz23_9[:,1:],outlistbpz24_0[:,1:],outlistbpz24_1[:,1:],outlistbpz24_2[:,1:],outlistbpz24_3[:,1:],outlistbpz24_4[:,1:],outlistbpz24_5[:,1:],outlistbpz24_6[:,1:],outlistbpz24_7[:,1:],outlistbpz24_8[:,1:],outlistbpz24_9[:,1:]
-    if len(argv) == 55: return outlistbpz23_0[:,1:],outlistbpz23_1[:,1:],outlistbpz23_2[:,1:],outlistbpz23_3[:,1:],outlistbpz23_4[:,1:],outlistbpz23_5[:,1:],outlistbpz23_6[:,1:],outlistbpz23_7[:,1:],outlistbpz23_8[:,1:],outlistbpz23_9[:,1:],outlisteazy23_0[:,1:],outlisteazy23_1[:,1:],outlisteazy23_2[:,1:],outlisteazy23_3[:,1:],outlisteazy23_4[:,1:],outlisteazy23_5[:,1:],outlisteazy23_6[:,1:],outlisteazy23_7[:,1:],outlisteazy23_8[:,1:],outlisteazy23_9[:,1:]
-    if len(argv) == 37: return outlistbpz23_0[:,1:],outlistbpz23_1[:,1:],outlistbpz23_2[:,1:],outlistbpz23_3[:,1:],outlistbpz23_4[:,1:],outlistbpz23_5[:,1:],outlistbpz23_6[:,1:],outlistbpz23_7[:,1:],outlistbpz23_8[:,1:],outlistbpz23_9[:,1:]
+    if len(argv) == 109: return outlistbpzlimbright_0[:,1:],outlistbpzlimbright_1[:,1:],outlistbpzlimbright_2[:,1:],outlistbpzlimbright_3[:,1:],outlistbpzlimbright_4[:,1:],outlistbpzlimbright_5[:,1:],outlistbpzlimbright_6[:,1:],outlistbpzlimbright_7[:,1:],outlistbpzlimbright_8[:,1:],outlistbpzlimbright_9[:,1:],outlisteazylimbright_0[:,1:],outlisteazylimbright_1[:,1:],outlisteazylimbright_2[:,1:],outlisteazylimbright_3[:,1:],outlisteazylimbright_4[:,1:],outlisteazylimbright_5[:,1:],outlisteazylimbright_6[:,1:],outlisteazylimbright_7[:,1:],outlisteazylimbright_8[:,1:],outlisteazylimbright_9[:,1:],outlistbpzlimmag_0[:,1:],outlistbpzlimmag_1[:,1:],outlistbpzlimmag_2[:,1:],outlistbpzlimmag_3[:,1:],outlistbpzlimmag_4[:,1:],outlistbpzlimmag_5[:,1:],outlistbpzlimmag_6[:,1:],outlistbpzlimmag_7[:,1:],outlistbpzlimmag_8[:,1:],outlistbpzlimmag_9[:,1:],outlisteazylimmag_0[:,1:],outlisteazylimmag_1[:,1:],outlisteazylimmag_2[:,1:],outlisteazylimmag_3[:,1:],outlisteazylimmag_4[:,1:],outlisteazylimmag_5[:,1:],outlisteazylimmag_6[:,1:],outlisteazylimmag_7[:,1:],outlisteazylimmag_8[:,1:],outlisteazylimmag_9[:,1:]
+    if len(argv) == 73: return outlistbpzlimbright_0[:,1:],outlistbpzlimbright_1[:,1:],outlistbpzlimbright_2[:,1:],outlistbpzlimbright_3[:,1:],outlistbpzlimbright_4[:,1:],outlistbpzlimbright_5[:,1:],outlistbpzlimbright_6[:,1:],outlistbpzlimbright_7[:,1:],outlistbpzlimbright_8[:,1:],outlistbpzlimbright_9[:,1:],outlistbpzlimmag_0[:,1:],outlistbpzlimmag_1[:,1:],outlistbpzlimmag_2[:,1:],outlistbpzlimmag_3[:,1:],outlistbpzlimmag_4[:,1:],outlistbpzlimmag_5[:,1:],outlistbpzlimmag_6[:,1:],outlistbpzlimmag_7[:,1:],outlistbpzlimmag_8[:,1:],outlistbpzlimmag_9[:,1:]
+    if len(argv) == 55: return outlistbpzlimbright_0[:,1:],outlistbpzlimbright_1[:,1:],outlistbpzlimbright_2[:,1:],outlistbpzlimbright_3[:,1:],outlistbpzlimbright_4[:,1:],outlistbpzlimbright_5[:,1:],outlistbpzlimbright_6[:,1:],outlistbpzlimbright_7[:,1:],outlistbpzlimbright_8[:,1:],outlistbpzlimbright_9[:,1:],outlisteazylimbright_0[:,1:],outlisteazylimbright_1[:,1:],outlisteazylimbright_2[:,1:],outlisteazylimbright_3[:,1:],outlisteazylimbright_4[:,1:],outlisteazylimbright_5[:,1:],outlisteazylimbright_6[:,1:],outlisteazylimbright_7[:,1:],outlisteazylimbright_8[:,1:],outlisteazylimbright_9[:,1:]
+    if len(argv) == 37: return outlistbpzlimbright_0[:,1:],outlistbpzlimbright_1[:,1:],outlistbpzlimbright_2[:,1:],outlistbpzlimbright_3[:,1:],outlistbpzlimbright_4[:,1:],outlistbpzlimbright_5[:,1:],outlistbpzlimbright_6[:,1:],outlistbpzlimbright_7[:,1:],outlistbpzlimbright_8[:,1:],outlistbpzlimbright_9[:,1:]
 
 names = ('1_overlap_x','2_overlap_y','3_cell_x','4_cell_y','5_lens_gal','6_lens_zweight','7_lens_mass','8_lens_mass2','9_lens_mass3','10_lens_oneoverr','11_lens_zoverr','12_lens_massoverr','13_lens_mass2overr','14_lens_mass3overr','15_lens_mass2rms','16_lens_mass3rms','17_lens_mass2overrms','18_lens_mass3overrms','19_lens_flexion','20_lens_tidal','21_lens_convergence','22_lens_convergencehalo')
 dtype=(np.int16,np.int16,np.int16,np.int16,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32)
 
-if limmag == 24 and photoz == 'bpzeazy':
-        outlist50bpz23_0,outlist50bpz23_1,outlist50bpz23_2,outlist50bpz23_3,outlist50bpz23_4,outlist50bpz23_5,outlist50bpz23_6,outlist50bpz23_7,outlist50bpz23_8,outlist50bpz23_9,outlist50eazy23_0,outlist50eazy23_1,outlist50eazy23_2,outlist50eazy23_3,outlist50eazy23_4,outlist50eazy23_5,outlist50eazy23_6,outlist50eazy23_7,outlist50eazy23_8,outlist50eazy23_9,outlist50bpz24_0,outlist50bpz24_1,outlist50bpz24_2,outlist50bpz24_3,outlist50bpz24_4,outlist50bpz24_5,outlist50bpz24_6,outlist50bpz24_7,outlist50bpz24_8,outlist50bpz24_9,outlist50eazy24_0,outlist50eazy24_1,outlist50eazy24_2,outlist50eazy24_3,outlist50eazy24_4,outlist50eazy24_5,outlist50eazy24_6,outlist50eazy24_7,outlist50eazy24_8,outlist50eazy24_9 = outputfunc(0.5,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
-        outlist75bpz23_0,outlist75bpz23_1,outlist75bpz23_2,outlist75bpz23_3,outlist75bpz23_4,outlist75bpz23_5,outlist75bpz23_6,outlist75bpz23_7,outlist75bpz23_8,outlist75bpz23_9,outlist75eazy23_0,outlist75eazy23_1,outlist75eazy23_2,outlist75eazy23_3,outlist75eazy23_4,outlist75eazy23_5,outlist75eazy23_6,outlist75eazy23_7,outlist75eazy23_8,outlist75eazy23_9,outlist75bpz24_0,outlist75bpz24_1,outlist75bpz24_2,outlist75bpz24_3,outlist75bpz24_4,outlist75bpz24_5,outlist75bpz24_6,outlist75bpz24_7,outlist75bpz24_8,outlist75bpz24_9,outlist75eazy24_0,outlist75eazy24_1,outlist75eazy24_2,outlist75eazy24_3,outlist75eazy24_4,outlist75eazy24_5,outlist75eazy24_6,outlist75eazy24_7,outlist75eazy24_8,outlist75eazy24_9 = outputfunc(0.75,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_24eazy,lens_gal_23eazy,lens_zweight_24eazy,lens_zweight_23eazy,lens_mass_24eazy,lens_mass_23eazy,lens_mass2_24eazy,lens_mass2_23eazy,lens_mass3_24eazy,lens_mass3_23eazy,lens_oneoverr_24eazy,lens_oneoverr_23eazy,lens_zoverr_24eazy,lens_zoverr_23eazy,lens_massoverr_24eazy,lens_massoverr_23eazy,lens_mass2overr_24eazy,lens_mass2overr_23eazy,lens_mass3overr_24eazy,lens_mass3overr_23eazy,lens_mass2rms_24eazy,lens_mass2rms_23eazy,lens_mass3rms_24eazy,lens_mass3rms_23eazy,lens_mass2overrms_24eazy,lens_mass2overrms_23eazy,lens_mass3overrms_24eazy,lens_mass3overrms_23eazy,lens_flexion_24eazy,lens_flexion_23eazy,lens_tidal_24eazy,lens_tidal_23eazy,lens_convergence_24eazy,lens_convergence_23eazy,lens_convergencehalo_24eazy,lens_convergencehalo_23eazy)
-    
-if limmag == 24 and photoz == 'bpz':
-        outlist50bpz23_0,outlist50bpz23_1,outlist50bpz23_2,outlist50bpz23_3,outlist50bpz23_4,outlist50bpz23_5,outlist50bpz23_6,outlist50bpz23_7,outlist50bpz23_8,outlist50bpz23_9,outlist50bpz24_0,outlist50bpz24_1,outlist50bpz24_2,outlist50bpz24_3,outlist50bpz24_4,outlist50bpz24_5,outlist50bpz24_6,outlist50bpz24_7,outlist50bpz24_8,outlist50bpz24_9 = outputfunc(0.5,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23)
-        outlist75bpz23_0,outlist75bpz23_1,outlist75bpz23_2,outlist75bpz23_3,outlist75bpz23_4,outlist75bpz23_5,outlist75bpz23_6,outlist75bpz23_7,outlist75bpz23_8,outlist75bpz23_9,outlist75bpz24_0,outlist75bpz24_1,outlist75bpz24_2,outlist75bpz24_3,outlist75bpz24_4,outlist75bpz24_5,outlist75bpz24_6,outlist75bpz24_7,outlist75bpz24_8,outlist75bpz24_9 = outputfunc(0.75,lens_gal_24bpz,field_gal_24,lens_gal_23bpz,field_gal_23,lens_zweight_24bpz,field_zweight_24,lens_zweight_23bpz,field_zweight_23,lens_mass_24bpz,field_mass_24,lens_mass_23bpz,field_mass_23,lens_mass2_24bpz,field_mass2_24,lens_mass2_23bpz,field_mass2_23,lens_mass3_24bpz,field_mass3_24,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_24bpz,field_oneoverr_24,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_24bpz,field_zoverr_24,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_24bpz,field_massoverr_24,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_24bpz,field_mass2overr_24,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_24bpz,field_mass3overr_24,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_24bpz,field_mass2rms_24,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_24bpz,field_mass3rms_24,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_24bpz,field_mass2overrms_24,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_24bpz,field_mass3overrms_24,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_24bpz,field_flexion_24,lens_flexion_23bpz,field_flexion_23,lens_tidal_24bpz,field_tidal_24,lens_tidal_23bpz,field_tidal_23,lens_convergence_24bpz,field_convergence_24,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_24bpz,field_convergencehalo_24,lens_convergencehalo_23bpz,field_convergencehalo_23)
+if limmag != limbright and photoz == 'bpzeazy':
+        outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimbright_5,outlist50bpzlimbright_6,outlist50bpzlimbright_7,outlist50bpzlimbright_8,outlist50bpzlimbright_9,outlist50eazylimbright_0,outlist50eazylimbright_1,outlist50eazylimbright_2,outlist50eazylimbright_3,outlist50eazylimbright_4,outlist50eazylimbright_5,outlist50eazylimbright_6,outlist50eazylimbright_7,outlist50eazylimbright_8,outlist50eazylimbright_9,outlist50bpzlimmag_0,outlist50bpzlimmag_1,outlist50bpzlimmag_2,outlist50bpzlimmag_3,outlist50bpzlimmag_4,outlist50bpzlimmag_5,outlist50bpzlimmag_6,outlist50bpzlimmag_7,outlist50bpzlimmag_8,outlist50bpzlimmag_9,outlist50eazylimmag_0,outlist50eazylimmag_1,outlist50eazylimmag_2,outlist50eazylimmag_3,outlist50eazylimmag_4,outlist50eazylimmag_5,outlist50eazylimmag_6,outlist50eazylimmag_7,outlist50eazylimmag_8,outlist50eazylimmag_9 = outputfunc(0.5,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limmageazy,lens_gal_limbrighteazy,lens_zweight_limmageazy,lens_zweight_limbrighteazy,lens_mass_limmageazy,lens_mass_limbrighteazy,lens_mass2_limmageazy,lens_mass2_limbrighteazy,lens_mass3_limmageazy,lens_mass3_limbrighteazy,lens_oneoverr_limmageazy,lens_oneoverr_limbrighteazy,lens_zoverr_limmageazy,lens_zoverr_limbrighteazy,lens_massoverr_limmageazy,lens_massoverr_limbrighteazy,lens_mass2overr_limmageazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limmageazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limmageazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limmageazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limmageazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limmageazy,lens_mass3overrms_limbrighteazy,lens_flexion_limmageazy,lens_flexion_limbrighteazy,lens_tidal_limmageazy,lens_tidal_limbrighteazy,lens_convergence_limmageazy,lens_convergence_limbrighteazy,lens_convergencehalo_limmageazy,lens_convergencehalo_limbrighteazy)
+        outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimbright_5,outlist75bpzlimbright_6,outlist75bpzlimbright_7,outlist75bpzlimbright_8,outlist75bpzlimbright_9,outlist75eazylimbright_0,outlist75eazylimbright_1,outlist75eazylimbright_2,outlist75eazylimbright_3,outlist75eazylimbright_4,outlist75eazylimbright_5,outlist75eazylimbright_6,outlist75eazylimbright_7,outlist75eazylimbright_8,outlist75eazylimbright_9,outlist75bpzlimmag_0,outlist75bpzlimmag_1,outlist75bpzlimmag_2,outlist75bpzlimmag_3,outlist75bpzlimmag_4,outlist75bpzlimmag_5,outlist75bpzlimmag_6,outlist75bpzlimmag_7,outlist75bpzlimmag_8,outlist75bpzlimmag_9,outlist75eazylimmag_0,outlist75eazylimmag_1,outlist75eazylimmag_2,outlist75eazylimmag_3,outlist75eazylimmag_4,outlist75eazylimmag_5,outlist75eazylimmag_6,outlist75eazylimmag_7,outlist75eazylimmag_8,outlist75eazylimmag_9 = outputfunc(0.75,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limmageazy,lens_gal_limbrighteazy,lens_zweight_limmageazy,lens_zweight_limbrighteazy,lens_mass_limmageazy,lens_mass_limbrighteazy,lens_mass2_limmageazy,lens_mass2_limbrighteazy,lens_mass3_limmageazy,lens_mass3_limbrighteazy,lens_oneoverr_limmageazy,lens_oneoverr_limbrighteazy,lens_zoverr_limmageazy,lens_zoverr_limbrighteazy,lens_massoverr_limmageazy,lens_massoverr_limbrighteazy,lens_mass2overr_limmageazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limmageazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limmageazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limmageazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limmageazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limmageazy,lens_mass3overrms_limbrighteazy,lens_flexion_limmageazy,lens_flexion_limbrighteazy,lens_tidal_limmageazy,lens_tidal_limbrighteazy,lens_convergence_limmageazy,lens_convergence_limbrighteazy,lens_convergencehalo_limmageazy,lens_convergencehalo_limbrighteazy)
 
-if limmag == 23 and photoz == 'bpzeazy':
-        outlist50bpz23_0,outlist50bpz23_1,outlist50bpz23_2,outlist50bpz23_3,outlist50bpz23_4,outlist50bpz23_5,outlist50bpz23_6,outlist50bpz23_7,outlist50bpz23_8,outlist50bpz23_9,outlist50eazy23_0,outlist50eazy23_1,outlist50eazy23_2,outlist50eazy23_3,outlist50eazy23_4,outlist50eazy23_5,outlist50eazy23_6,outlist50eazy23_7,outlist50eazy23_8,outlist50eazy23_9 = outputfunc(0.50,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy)
-        outlist75bpz23_0,outlist75bpz23_1,outlist75bpz23_2,outlist75bpz23_3,outlist75bpz23_4,outlist75bpz23_5,outlist75bpz23_6,outlist75bpz23_7,outlist75bpz23_8,outlist75bpz23_9,outlist75eazy23_0,outlist75eazy23_1,outlist75eazy23_2,outlist75eazy23_3,outlist75eazy23_4,outlist75eazy23_5,outlist75eazy23_6,outlist75eazy23_7,outlist75eazy23_8,outlist75eazy23_9 = outputfunc(0.75,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23,lens_gal_23eazy,lens_zweight_23eazy,lens_mass_23eazy,lens_mass2_23eazy,lens_mass3_23eazy,lens_oneoverr_23eazy,lens_zoverr_23eazy,lens_massoverr_23eazy,lens_mass2overr_23eazy,lens_mass3overr_23eazy,lens_mass2rms_23eazy,lens_mass3rms_23eazy,lens_mass2overrms_23eazy,lens_mass3overrms_23eazy,lens_flexion_23eazy,lens_tidal_23eazy,lens_convergence_23eazy,lens_convergencehalo_23eazy)
-    
-if limmag == 23 and photoz == 'bpz':
-        outlist50bpz23_0,outlist50bpz23_1,outlist50bpz23_2,outlist50bpz23_3,outlist50bpz23_4,outlist50bpz23_5,outlist50bpz23_6,outlist50bpz23_7,outlist50bpz23_8,outlist50bpz23_9 = outputfunc(0.50,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23)
-        outlist75bpz23_0,outlist75bpz23_1,outlist75bpz23_2,outlist75bpz23_3,outlist75bpz23_4,outlist75bpz23_5,outlist75bpz23_6,outlist75bpz23_7,outlist75bpz23_8,outlist75bpz23_9 = outputfunc(0.75,lens_gal_23bpz,field_gal_23,lens_zweight_23bpz,field_zweight_23,lens_mass_23bpz,field_mass_23,lens_mass2_23bpz,field_mass2_23,lens_mass3_23bpz,field_mass3_23,lens_oneoverr_23bpz,field_oneoverr_23,lens_zoverr_23bpz,field_zoverr_23,lens_massoverr_23bpz,field_massoverr_23,lens_mass2overr_23bpz,field_mass2overr_23,lens_mass3overr_23bpz,field_mass3overr_23,lens_mass2rms_23bpz,field_mass2rms_23,lens_mass3rms_23bpz,field_mass3rms_23,lens_mass2overrms_23bpz,field_mass2overrms_23,lens_mass3overrms_23bpz,field_mass3overrms_23,lens_flexion_23bpz,field_flexion_23,lens_tidal_23bpz,field_tidal_23,lens_convergence_23bpz,field_convergence_23,lens_convergencehalo_23bpz,field_convergencehalo_23)
+if limmag != limbright and photoz == 'bpz':
+        outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimbright_5,outlist50bpzlimbright_6,outlist50bpzlimbright_7,outlist50bpzlimbright_8,outlist50bpzlimbright_9,outlist50bpzlimmag_0,outlist50bpzlimmag_1,outlist50bpzlimmag_2,outlist50bpzlimmag_3,outlist50bpzlimmag_4,outlist50bpzlimmag_5,outlist50bpzlimmag_6,outlist50bpzlimmag_7,outlist50bpzlimmag_8,outlist50bpzlimmag_9 = outputfunc(0.5,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
+        outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimbright_5,outlist75bpzlimbright_6,outlist75bpzlimbright_7,outlist75bpzlimbright_8,outlist75bpzlimbright_9,outlist75bpzlimmag_0,outlist75bpzlimmag_1,outlist75bpzlimmag_2,outlist75bpzlimmag_3,outlist75bpzlimmag_4,outlist75bpzlimmag_5,outlist75bpzlimmag_6,outlist75bpzlimmag_7,outlist75bpzlimmag_8,outlist75bpzlimmag_9 = outputfunc(0.75,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
 
-if (limmag == 23 and photoz == 'bpz') or (limmag == 23 and photoz == 'bpzeazy') or (limmag == 24 and photoz == 'bpz') or (limmag == 24 and photoz == 'bpzeazy'):
-        t = table.Table(outlist50bpz23_0.T, names=names, dtype=dtype); t.write(fout50_bpz23_0,overwrite=True)
-        t = table.Table(outlist75bpz23_0.T, names=names, dtype=dtype); t.write(fout75_bpz23_0,overwrite=True)
-        t = table.Table(outlist50bpz23_1.T, names=names, dtype=dtype); t.write(fout50_bpz23_1,overwrite=True)
-        t = table.Table(outlist75bpz23_1.T, names=names, dtype=dtype); t.write(fout75_bpz23_1,overwrite=True)
-        t = table.Table(outlist50bpz23_2.T, names=names, dtype=dtype); t.write(fout50_bpz23_2,overwrite=True)
-        t = table.Table(outlist75bpz23_2.T, names=names, dtype=dtype); t.write(fout75_bpz23_2,overwrite=True)
-        t = table.Table(outlist50bpz23_3.T, names=names, dtype=dtype); t.write(fout50_bpz23_3,overwrite=True)
-        t = table.Table(outlist75bpz23_3.T, names=names, dtype=dtype); t.write(fout75_bpz23_3,overwrite=True)
-        t = table.Table(outlist50bpz23_4.T, names=names, dtype=dtype); t.write(fout50_bpz23_4,overwrite=True)
-        t = table.Table(outlist75bpz23_4.T, names=names, dtype=dtype); t.write(fout75_bpz23_4,overwrite=True)
-        t = table.Table(outlist50bpz23_5.T, names=names, dtype=dtype); t.write(fout50_bpz23_5,overwrite=True)
-        t = table.Table(outlist75bpz23_5.T, names=names, dtype=dtype); t.write(fout75_bpz23_5,overwrite=True)
-        t = table.Table(outlist50bpz23_6.T, names=names, dtype=dtype); t.write(fout50_bpz23_6,overwrite=True)
-        t = table.Table(outlist75bpz23_6.T, names=names, dtype=dtype); t.write(fout75_bpz23_6,overwrite=True)
-        t = table.Table(outlist50bpz23_7.T, names=names, dtype=dtype); t.write(fout50_bpz23_7,overwrite=True)
-        t = table.Table(outlist75bpz23_7.T, names=names, dtype=dtype); t.write(fout75_bpz23_7,overwrite=True)
-        t = table.Table(outlist50bpz23_8.T, names=names, dtype=dtype); t.write(fout50_bpz23_8,overwrite=True)
-        t = table.Table(outlist75bpz23_8.T, names=names, dtype=dtype); t.write(fout75_bpz23_8,overwrite=True)
-        t = table.Table(outlist50bpz23_9.T, names=names, dtype=dtype); t.write(fout50_bpz23_9,overwrite=True)
-        t = table.Table(outlist75bpz23_9.T, names=names, dtype=dtype); t.write(fout75_bpz23_9,overwrite=True)
-if (limmag == 23 and photoz == 'bpzeazy') or (limmag == 24 and photoz == 'bpzeazy'):
-        t = table.Table(outlist50eazy23_0.T, names=names, dtype=dtype); t.write(fout50_eazy23_0,overwrite=True)
-        t = table.Table(outlist75eazy23_0.T, names=names, dtype=dtype); t.write(fout75_eazy23_0,overwrite=True)
-        t = table.Table(outlist50eazy23_1.T, names=names, dtype=dtype); t.write(fout50_eazy23_1,overwrite=True)
-        t = table.Table(outlist75eazy23_1.T, names=names, dtype=dtype); t.write(fout75_eazy23_1,overwrite=True)
-        t = table.Table(outlist50eazy23_2.T, names=names, dtype=dtype); t.write(fout50_eazy23_2,overwrite=True)
-        t = table.Table(outlist75eazy23_2.T, names=names, dtype=dtype); t.write(fout75_eazy23_2,overwrite=True)
-        t = table.Table(outlist50eazy23_3.T, names=names, dtype=dtype); t.write(fout50_eazy23_3,overwrite=True)
-        t = table.Table(outlist75eazy23_3.T, names=names, dtype=dtype); t.write(fout75_eazy23_3,overwrite=True)
-        t = table.Table(outlist50eazy23_4.T, names=names, dtype=dtype); t.write(fout50_eazy23_4,overwrite=True)
-        t = table.Table(outlist75eazy23_4.T, names=names, dtype=dtype); t.write(fout75_eazy23_4,overwrite=True)
-        t = table.Table(outlist50eazy23_5.T, names=names, dtype=dtype); t.write(fout50_eazy23_5,overwrite=True)
-        t = table.Table(outlist75eazy23_5.T, names=names, dtype=dtype); t.write(fout75_eazy23_5,overwrite=True)
-        t = table.Table(outlist50eazy23_6.T, names=names, dtype=dtype); t.write(fout50_eazy23_6,overwrite=True)
-        t = table.Table(outlist75eazy23_6.T, names=names, dtype=dtype); t.write(fout75_eazy23_6,overwrite=True)
-        t = table.Table(outlist50eazy23_7.T, names=names, dtype=dtype); t.write(fout50_eazy23_7,overwrite=True)
-        t = table.Table(outlist75eazy23_7.T, names=names, dtype=dtype); t.write(fout75_eazy23_7,overwrite=True)
-        t = table.Table(outlist50eazy23_8.T, names=names, dtype=dtype); t.write(fout50_eazy23_8,overwrite=True)
-        t = table.Table(outlist75eazy23_8.T, names=names, dtype=dtype); t.write(fout75_eazy23_8,overwrite=True)
-        t = table.Table(outlist50eazy23_9.T, names=names, dtype=dtype); t.write(fout50_eazy23_9,overwrite=True)
-        t = table.Table(outlist75eazy23_9.T, names=names, dtype=dtype); t.write(fout75_eazy23_9,overwrite=True)
-if (limmag == 24 and photoz == 'bpz') or (limmag == 24 and photoz == 'bpzeazy'):
-        t = table.Table(outlist50bpz24_0.T, names=names, dtype=dtype); t.write(fout50_bpz24_0,overwrite=True)
-        t = table.Table(outlist75bpz24_0.T, names=names, dtype=dtype); t.write(fout75_bpz24_0,overwrite=True)
-        t = table.Table(outlist50bpz24_1.T, names=names, dtype=dtype); t.write(fout50_bpz24_1,overwrite=True)
-        t = table.Table(outlist75bpz24_1.T, names=names, dtype=dtype); t.write(fout75_bpz24_1,overwrite=True)
-        t = table.Table(outlist50bpz24_2.T, names=names, dtype=dtype); t.write(fout50_bpz24_2,overwrite=True)
-        t = table.Table(outlist75bpz24_2.T, names=names, dtype=dtype); t.write(fout75_bpz24_2,overwrite=True)
-        t = table.Table(outlist50bpz24_3.T, names=names, dtype=dtype); t.write(fout50_bpz24_3,overwrite=True)
-        t = table.Table(outlist75bpz24_3.T, names=names, dtype=dtype); t.write(fout75_bpz24_3,overwrite=True)
-        t = table.Table(outlist50bpz24_4.T, names=names, dtype=dtype); t.write(fout50_bpz24_4,overwrite=True)
-        t = table.Table(outlist75bpz24_4.T, names=names, dtype=dtype); t.write(fout75_bpz24_4,overwrite=True)
-        t = table.Table(outlist50bpz24_5.T, names=names, dtype=dtype); t.write(fout50_bpz24_5,overwrite=True)
-        t = table.Table(outlist75bpz24_5.T, names=names, dtype=dtype); t.write(fout75_bpz24_5,overwrite=True)
-        t = table.Table(outlist50bpz24_6.T, names=names, dtype=dtype); t.write(fout50_bpz24_6,overwrite=True)
-        t = table.Table(outlist75bpz24_6.T, names=names, dtype=dtype); t.write(fout75_bpz24_6,overwrite=True)
-        t = table.Table(outlist50bpz24_7.T, names=names, dtype=dtype); t.write(fout50_bpz24_7,overwrite=True)
-        t = table.Table(outlist75bpz24_7.T, names=names, dtype=dtype); t.write(fout75_bpz24_7,overwrite=True)
-        t = table.Table(outlist50bpz24_8.T, names=names, dtype=dtype); t.write(fout50_bpz24_8,overwrite=True)
-        t = table.Table(outlist75bpz24_8.T, names=names, dtype=dtype); t.write(fout75_bpz24_8,overwrite=True)
-        t = table.Table(outlist50bpz24_9.T, names=names, dtype=dtype); t.write(fout50_bpz24_9,overwrite=True)
-        t = table.Table(outlist75bpz24_9.T, names=names, dtype=dtype); t.write(fout75_bpz24_9,overwrite=True)
-if limmag == 24 and photoz == 'bpzeazy':
-        t = table.Table(outlist50eazy24_0.T, names=names, dtype=dtype); t.write(fout50_eazy24_0,overwrite=True)
-        t = table.Table(outlist75eazy24_0.T, names=names, dtype=dtype); t.write(fout75_eazy24_0,overwrite=True)
-        t = table.Table(outlist50eazy24_1.T, names=names, dtype=dtype); t.write(fout50_eazy24_1,overwrite=True)
-        t = table.Table(outlist75eazy24_1.T, names=names, dtype=dtype); t.write(fout75_eazy24_1,overwrite=True)
-        t = table.Table(outlist50eazy24_2.T, names=names, dtype=dtype); t.write(fout50_eazy24_2,overwrite=True)
-        t = table.Table(outlist75eazy24_2.T, names=names, dtype=dtype); t.write(fout75_eazy24_2,overwrite=True)
-        t = table.Table(outlist50eazy24_3.T, names=names, dtype=dtype); t.write(fout50_eazy24_3,overwrite=True)
-        t = table.Table(outlist75eazy24_3.T, names=names, dtype=dtype); t.write(fout75_eazy24_3,overwrite=True)
-        t = table.Table(outlist50eazy24_4.T, names=names, dtype=dtype); t.write(fout50_eazy24_4,overwrite=True)
-        t = table.Table(outlist75eazy24_4.T, names=names, dtype=dtype); t.write(fout75_eazy24_4,overwrite=True)
-        t = table.Table(outlist50eazy24_5.T, names=names, dtype=dtype); t.write(fout50_eazy24_5,overwrite=True)
-        t = table.Table(outlist75eazy24_5.T, names=names, dtype=dtype); t.write(fout75_eazy24_5,overwrite=True)
-        t = table.Table(outlist50eazy24_6.T, names=names, dtype=dtype); t.write(fout50_eazy24_6,overwrite=True)
-        t = table.Table(outlist75eazy24_6.T, names=names, dtype=dtype); t.write(fout75_eazy24_6,overwrite=True)
-        t = table.Table(outlist50eazy24_7.T, names=names, dtype=dtype); t.write(fout50_eazy24_7,overwrite=True)
-        t = table.Table(outlist75eazy24_7.T, names=names, dtype=dtype); t.write(fout75_eazy24_7,overwrite=True)
-        t = table.Table(outlist50eazy24_8.T, names=names, dtype=dtype); t.write(fout50_eazy24_8,overwrite=True)
-        t = table.Table(outlist75eazy24_8.T, names=names, dtype=dtype); t.write(fout75_eazy24_8,overwrite=True)
-        t = table.Table(outlist50eazy24_9.T, names=names, dtype=dtype); t.write(fout50_eazy24_9,overwrite=True)
-        t = table.Table(outlist75eazy24_9.T, names=names, dtype=dtype); t.write(fout75_eazy24_9,overwrite=True)
+if limmag == limbright and photoz == 'bpzeazy':
+        outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimbright_5,outlist50bpzlimbright_6,outlist50bpzlimbright_7,outlist50bpzlimbright_8,outlist50bpzlimbright_9,outlist50eazylimbright_0,outlist50eazylimbright_1,outlist50eazylimbright_2,outlist50eazylimbright_3,outlist50eazylimbright_4,outlist50eazylimbright_5,outlist50eazylimbright_6,outlist50eazylimbright_7,outlist50eazylimbright_8,outlist50eazylimbright_9 = outputfunc(0.50,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limbrighteazy,lens_zweight_limbrighteazy,lens_mass_limbrighteazy,lens_mass2_limbrighteazy,lens_mass3_limbrighteazy,lens_oneoverr_limbrighteazy,lens_zoverr_limbrighteazy,lens_massoverr_limbrighteazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limbrighteazy,lens_flexion_limbrighteazy,lens_tidal_limbrighteazy,lens_convergence_limbrighteazy,lens_convergencehalo_limbrighteazy)
+        outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimbright_5,outlist75bpzlimbright_6,outlist75bpzlimbright_7,outlist75bpzlimbright_8,outlist75bpzlimbright_9,outlist75eazylimbright_0,outlist75eazylimbright_1,outlist75eazylimbright_2,outlist75eazylimbright_3,outlist75eazylimbright_4,outlist75eazylimbright_5,outlist75eazylimbright_6,outlist75eazylimbright_7,outlist75eazylimbright_8,outlist75eazylimbright_9 = outputfunc(0.75,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright,lens_gal_limbrighteazy,lens_zweight_limbrighteazy,lens_mass_limbrighteazy,lens_mass2_limbrighteazy,lens_mass3_limbrighteazy,lens_oneoverr_limbrighteazy,lens_zoverr_limbrighteazy,lens_massoverr_limbrighteazy,lens_mass2overr_limbrighteazy,lens_mass3overr_limbrighteazy,lens_mass2rms_limbrighteazy,lens_mass3rms_limbrighteazy,lens_mass2overrms_limbrighteazy,lens_mass3overrms_limbrighteazy,lens_flexion_limbrighteazy,lens_tidal_limbrighteazy,lens_convergence_limbrighteazy,lens_convergencehalo_limbrighteazy)
+
+if limmag == limbright and photoz == 'bpz':
+        outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimbright_5,outlist50bpzlimbright_6,outlist50bpzlimbright_7,outlist50bpzlimbright_8,outlist50bpzlimbright_9 = outputfunc(0.50,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
+        outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimbright_5,outlist75bpzlimbright_6,outlist75bpzlimbright_7,outlist75bpzlimbright_8,outlist75bpzlimbright_9 = outputfunc(0.75,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
+
+if photoz == 'bpzeazy' or photoz == 'bpz':
+        t = table.Table(outlist50bpzlimbright_0.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_0,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_0.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_0,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_1.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_1,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_1.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_1,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_2.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_2,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_2.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_2,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_3.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_3,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_3.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_3,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_4.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_4,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_4.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_4,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_5.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_5,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_5.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_5,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_6.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_6,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_6.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_6,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_7.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_7,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_7.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_7,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_8.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_8,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_8.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_8,overwrite=True)
+        t = table.Table(outlist50bpzlimbright_9.T, names=names, dtype=dtype); t.write(fout50_bpzlimbright_9,overwrite=True)
+        t = table.Table(outlist75bpzlimbright_9.T, names=names, dtype=dtype); t.write(fout75_bpzlimbright_9,overwrite=True)
+if photoz == 'bpzeazy':
+        t = table.Table(outlist50eazylimbright_0.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_0,overwrite=True)
+        t = table.Table(outlist75eazylimbright_0.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_0,overwrite=True)
+        t = table.Table(outlist50eazylimbright_1.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_1,overwrite=True)
+        t = table.Table(outlist75eazylimbright_1.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_1,overwrite=True)
+        t = table.Table(outlist50eazylimbright_2.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_2,overwrite=True)
+        t = table.Table(outlist75eazylimbright_2.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_2,overwrite=True)
+        t = table.Table(outlist50eazylimbright_3.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_3,overwrite=True)
+        t = table.Table(outlist75eazylimbright_3.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_3,overwrite=True)
+        t = table.Table(outlist50eazylimbright_4.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_4,overwrite=True)
+        t = table.Table(outlist75eazylimbright_4.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_4,overwrite=True)
+        t = table.Table(outlist50eazylimbright_5.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_5,overwrite=True)
+        t = table.Table(outlist75eazylimbright_5.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_5,overwrite=True)
+        t = table.Table(outlist50eazylimbright_6.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_6,overwrite=True)
+        t = table.Table(outlist75eazylimbright_6.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_6,overwrite=True)
+        t = table.Table(outlist50eazylimbright_7.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_7,overwrite=True)
+        t = table.Table(outlist75eazylimbright_7.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_7,overwrite=True)
+        t = table.Table(outlist50eazylimbright_8.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_8,overwrite=True)
+        t = table.Table(outlist75eazylimbright_8.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_8,overwrite=True)
+        t = table.Table(outlist50eazylimbright_9.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_9,overwrite=True)
+        t = table.Table(outlist75eazylimbright_9.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_9,overwrite=True)
+if (limmag =! limbright and photoz == 'bpz') or (limmag =! limbright and photoz == 'bpzeazy'):
+        t = table.Table(outlist50bpzlimmag_0.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_0,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_0.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_0,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_1.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_1,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_1.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_1,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_2.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_2,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_2.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_2,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_3.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_3,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_3.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_3,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_4.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_4,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_4.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_4,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_5.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_5,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_5.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_5,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_6.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_6,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_6.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_6,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_7.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_7,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_7.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_7,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_8.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_8,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_8.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_8,overwrite=True)
+        t = table.Table(outlist50bpzlimmag_9.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_9,overwrite=True)
+        t = table.Table(outlist75bpzlimmag_9.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_9,overwrite=True)
+if limmag =! limbright and photoz == 'bpzeazy':
+        t = table.Table(outlist50eazylimmag_0.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_0,overwrite=True)
+        t = table.Table(outlist75eazylimmag_0.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_0,overwrite=True)
+        t = table.Table(outlist50eazylimmag_1.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_1,overwrite=True)
+        t = table.Table(outlist75eazylimmag_1.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_1,overwrite=True)
+        t = table.Table(outlist50eazylimmag_2.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_2,overwrite=True)
+        t = table.Table(outlist75eazylimmag_2.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_2,overwrite=True)
+        t = table.Table(outlist50eazylimmag_3.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_3,overwrite=True)
+        t = table.Table(outlist75eazylimmag_3.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_3,overwrite=True)
+        t = table.Table(outlist50eazylimmag_4.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_4,overwrite=True)
+        t = table.Table(outlist75eazylimmag_4.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_4,overwrite=True)
+        t = table.Table(outlist50eazylimmag_5.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_5,overwrite=True)
+        t = table.Table(outlist75eazylimmag_5.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_5,overwrite=True)
+        t = table.Table(outlist50eazylimmag_6.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_6,overwrite=True)
+        t = table.Table(outlist75eazylimmag_6.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_6,overwrite=True)
+        t = table.Table(outlist50eazylimmag_7.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_7,overwrite=True)
+        t = table.Table(outlist75eazylimmag_7.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_7,overwrite=True)
+        t = table.Table(outlist50eazylimmag_8.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_8,overwrite=True)
+        t = table.Table(outlist75eazylimmag_8.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_8,overwrite=True)
+        t = table.Table(outlist50eazylimmag_9.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_9,overwrite=True)
+        t = table.Table(outlist75eazylimmag_9.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_9,overwrite=True)
 
 print("Writing output completed in %0.1f seconds" % ((time.time() - start_write)))
-print("Total time for %s: --- %0.2f seconds ---" % ('%s_wghtratios_75_%s_%s_24_eazy_%s_%s_%s_zgap%s_%s%s' % (fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix), (time.time() - start_time)))
+print("Total time for %s: --- %0.2f seconds ---" % ('%s_wghtratios_75_%s_%s_limmag_eazy_%s_%s_%s_zgap%s_%s%s' % (fieldID[-26:-20],mskname,lensID,det,irac,type,zinf,zsup,suffix), (time.time() - start_time)))
 
 print 'Done!'
