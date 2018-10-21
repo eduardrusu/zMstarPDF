@@ -485,7 +485,7 @@ if limmag != limbright: field_mass2_limmag = np.zeros((overlap,overlap,cells_on_
 field_mass2_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 if limmag != limbright: field_mass3_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 field_mass3_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
-if limmag != limbright field_oneoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
+if limmag != limbright: field_oneoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 field_oneoverr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 if limmag != limbright: field_zoverr_limmag = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
 field_zoverr_limbright = np.zeros((overlap,overlap,cells_on_a_side,cells_on_a_side))
