@@ -33,7 +33,7 @@ H_corr += 1.35
 Ks_corr += 1.83
 
 # use the modified version of converttolephare_WFI2033.py:
-def lephare_noobs(data,fileout):
+def lephare_noobs(data,fileout,irac):
 
     # a small number of objects in BPZ have good mags, but error on the mag 99; those objects should be good, and Ideally I would fix the errors one by one through closer examination. Here I just replace their errors with 1 mag
     data[u_err][np.abs(data[u_err]) == 99.00] = 1.00
@@ -46,15 +46,16 @@ def lephare_noobs(data,fileout):
     data[H_err][np.abs(data[H_err]) == 99.00] = 1.00
     data[Ks_err][np.abs(data[Ks_err]) == 99.00] = 1.00
 
+    if irac == False:
     # If not observed in a specific band, negative values (-99,-99) can be used for (mag,error)
-    data[irac1] = -99
-    data[irac1_err] = -99
-    data[irac2] = -99
-    data[irac2_err] = -99
-    data[irac3] = -99
-    data[irac3_err] = -99
-    data[irac4] = -99
-    data[irac4_err] = -99
+        data[irac1] = -99
+        data[irac1_err] = -99
+        data[irac2] = -99
+        data[irac2_err] = -99
+        data[irac3] = -99
+        data[irac3_err] = -99
+        data[irac4] = -99
+        data[irac4_err] = -99
 
     data[u_err][np.abs(data[u]) == 99.0] = -99.0
     data[g_err][np.abs(data[g]) == 99.0] = -99.0
@@ -102,17 +103,17 @@ def lephare_noobs(data,fileout):
     np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t 8191 \t %.4f ')
 
 # use the modified version of converttolephare_noobs_WFI2033.py:
-def lephare(data,fileout):
-
+def lephare(data,fileout,irac):
+    if irac == False:
     # If not observed in a specific band, negative values (-99,-99) can be used for (mag,error)
-    data[irac1] = -99
-    data[irac1_err] = -99
-    data[irac2] = -99
-    data[irac2_err] = -99
-    data[irac3] = -99
-    data[irac3_err] = -99
-    data[irac4] = -99
-    data[irac4_err] = -99
+        data[irac1] = -99
+        data[irac1_err] = -99
+        data[irac2] = -99
+        data[irac2_err] = -99
+        data[irac3] = -99
+        data[irac3_err] = -99
+        data[irac4] = -99
+        data[irac4_err] = -99
 
     # a small number of objects in BPZ have good mags, but error on the mag 99; those objects should be good, and Ideally I would fix the errors one by one through closer examination. Here I just replace their errors with 1 mag
     data[u_err][np.abs(data[u_err]) == 99.00] = 1.00
@@ -188,7 +189,7 @@ def lephare(data,fileout):
 
 pdz = np.loadtxt(filebpz, unpack=False)
 samplez = np.zeros((pdz.shape[0],9)) # sample 9 times, the 10th will be the original best-fit
-zgridint = np.arange(351) # integers corresponding to z=arange(0.0000,3.5100,0.0100)
+zgridint = np.arange(350) # integers corresponding to z=arange(0.0000,3.5100,0.0100)
 
 id = 8
 spec = 40 # -1: no spec data; -2: spec star; >0: available spec
@@ -274,11 +275,11 @@ samplez = samplez.reshape(samplez.size)
 lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
 
 data = np.copy(lephdata)
-#lephare(data,file[:-4] + "_bpzsample.cat")
-lephare(data,file[:-4] + "_noIRACbpzsample.cat")
+lephare(data,file[:-4] + "_bpzsample.cat",True)
+lephare(data,file[:-4] + "_noIRACbpzsample.cat",False)
 data = np.copy(lephdata)
-#lephare_noobs(data,file[:-4] + "_bpzsample_noobs.cat")
-lephare_noobs(data,file[:-4] + "_noIRACbpzsample_noobs.cat")
+lephare_noobs(data,file[:-4] + "_bpzsample_noobs.cat",True)
+lephare_noobs(data,file[:-4] + "_noIRACbpzsample_noobs.cat",False)
 
 
 ###################
@@ -314,8 +315,8 @@ if useeazy == 1:
             lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
 
             data = np.copy(lephdata)
-            #lephare(data,file[:-4] + "_eazysample.cat")
-            lephare(data,file[:-4] + "_noIRACeazysample.cat")
+            lephare(data,file[:-4] + "_eazysample.cat",True)
+            lephare(data,file[:-4] + "_noIRACeazysample.cat",False)
             data = np.copy(lephdata)
-            #lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat")
-            lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat")
+            lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat",True)
+            lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat",False)
