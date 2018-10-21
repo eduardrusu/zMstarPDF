@@ -1069,7 +1069,7 @@ if photoz == 'bpzeazy':
         t = table.Table(outlist75eazylimbright_8.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_8,overwrite=True)
         t = table.Table(outlist50eazylimbright_9.T, names=names, dtype=dtype); t.write(fout50_eazylimbright_9,overwrite=True)
         t = table.Table(outlist75eazylimbright_9.T, names=names, dtype=dtype); t.write(fout75_eazylimbright_9,overwrite=True)
-if (limmag =! limbright and photoz == 'bpz') or (limmag =! limbright and photoz == 'bpzeazy'):
+if (limmag != limbright and photoz == 'bpz') or (limmag != limbright and photoz == 'bpzeazy'):
         t = table.Table(outlist50bpzlimmag_0.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_0,overwrite=True)
         t = table.Table(outlist75bpzlimmag_0.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_0,overwrite=True)
         t = table.Table(outlist50bpzlimmag_1.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_1,overwrite=True)
@@ -1090,7 +1090,7 @@ if (limmag =! limbright and photoz == 'bpz') or (limmag =! limbright and photoz 
         t = table.Table(outlist75bpzlimmag_8.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_8,overwrite=True)
         t = table.Table(outlist50bpzlimmag_9.T, names=names, dtype=dtype); t.write(fout50_bpzlimmag_9,overwrite=True)
         t = table.Table(outlist75bpzlimmag_9.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_9,overwrite=True)
-if limmag =! limbright and photoz == 'bpzeazy':
+if limmag != limbright and photoz == 'bpzeazy':
         t = table.Table(outlist50eazylimmag_0.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_0,overwrite=True)
         t = table.Table(outlist75eazylimmag_0.T, names=names, dtype=dtype); t.write(fout75_eazylimmag_0,overwrite=True)
         t = table.Table(outlist50eazylimmag_1.T, names=names, dtype=dtype); t.write(fout50_eazylimmag_1,overwrite=True)
