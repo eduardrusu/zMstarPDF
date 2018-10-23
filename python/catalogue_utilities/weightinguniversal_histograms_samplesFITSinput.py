@@ -54,14 +54,14 @@ medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
     print '%s/%s' %(nr,samples-1)
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
 
     print "W1..."
     for i in range(len(lstW1_50)):
@@ -130,15 +130,6 @@ for nr in range(samples):
             q_W4_75read = dataread
         else: q_W4_75read = np.r_['1',q_W4_75read,dataread]
         hdu.close()
-
-
-
-
-
-
-
-
-
 
     for j in range(18):
         q_W1_50 = q_W1_50read[j][q_W1_50read[j] < limit]
