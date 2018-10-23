@@ -1,4 +1,4 @@
-# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians (meaning from the distribution of the 10 samples). For small widths of the averages/medians distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
+# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians (meaning from the distribution of the 10 samples). For small widths of the distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
 # run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_asymmetric.py standard WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100
 # type is either 'standard' or 'extra'. In case of 'standard' only the original 10 samples are used
 
@@ -81,7 +81,7 @@ for nr in range(samples):
     if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
     if mag == "23" and photz == "bpz": cols=[5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39]
     if mag == "23" and photz == "eazy": cols=[41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75]
-                
+
     print "W1..."
     for i in range(len(lstW1_50)):
         if i == 0:
@@ -93,7 +93,7 @@ for nr in range(samples):
             q_W1_75read = np.loadtxt(root+lstW1_75[i], usecols=cols, unpack=True)
         else:
             q_W1_75read = np.r_['1',q_W1_75read,np.loadtxt(root+ lstW1_75[i], usecols=cols, unpack=True)]
-    
+
     print "W2..."
     for i in range(len(lstW2_50)):
         if i == 0:
@@ -117,7 +117,7 @@ for nr in range(samples):
             q_W3_75read = np.loadtxt(root+lstW3_75[i], usecols=cols, unpack=True)
         else:
             q_W3_75read = np.r_['1',q_W3_75read,np.loadtxt(root+ lstW3_75[i], usecols=cols, unpack=True)]
-    
+
     print "W4..."
     for i in range(len(lstW4_50)):
         if i == 0:
@@ -225,7 +225,7 @@ for i in range(18):
     if i == 15: ax=plt.subplot(5,4,17)
     if i == 16: ax=plt.subplot(5,4,18)
     if i == 17: ax=plt.subplot(5,4,19)
-    
+
     q_W1_50 = q_W1_50read[i][q_W1_50read[i] < limit]
     if mode == "sum": q_W1_50 = abs(q_W1_50) # fix the negative halo convergence
     q_W1_75 = q_W1_75read[i][q_W1_75read[i] < limit]
@@ -242,7 +242,7 @@ for i in range(18):
     if mode == "sum": q_W4_50 = abs(q_W4_50)
     q_W4_75 = q_W4_75read[i][q_W4_75read[i] < limit]
     if mode == "sum": q_W4_75 = abs(q_W4_75)
-    
+
     plt.hist(q_W1_50, histtype='step', color='b', label='W1_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
     plt.hist(q_W2_50, histtype='step', color='g', label='W2_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
     plt.hist(q_W3_50, histtype='step', color='r', label='W3_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
@@ -360,7 +360,7 @@ plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hsp
 plt.subplot(5,4,5)
 plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=10)
 plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_asymmetric.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup), dpi=500)
-                
+
 print(" --- %s seconds ---" % (time.time() - start_time))
 
 print 'Done!'

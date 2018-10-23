@@ -1,6 +1,6 @@
 # CE Rusu, Feb 13 2018
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles, using the 10 samples
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100 removegrouphandpicked testduplicatesamples/testothersamples
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 22.5 meds bpz deti IRAC 0.61 0.71 100 removegrouphandpicked testduplicatesamples/testothersamples
 # After running this code, you need to combine the results into a final text file with the final distributions and widths, using weightinguniversal_histograms_finalcombine.py
 # If desired, run weightinguniversal_histograms_samples_publicationqualitynotext.py to produce a publication quality plot
 
@@ -9,6 +9,7 @@ import sys
 import os
 import time
 import matplotlib.pyplot as plt
+from astropy.io import fits
 
 lens = str(sys.argv[1])
 radius = str(sys.argv[2])
@@ -53,68 +54,91 @@ medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
     print '%s/%s' %(nr,samples-1)
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_24galphotmstar_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-
-    if mag == "24" and photz == "bpz": cols=[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38]
-    if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
-    if mag == "23" and photz == "bpz": cols=[5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39]
-    if mag == "23" and photz == "eazy": cols=[41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75]
+    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.lst' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
 
     print "W1..."
     for i in range(len(lstW1_50)):
+        hdu = fits.open(root+lstW1_50[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W1_50read = np.loadtxt(root+lstW1_50[i], usecols=cols, unpack=True)
-        else:
-            q_W1_50read = np.r_['1',q_W1_50read,np.loadtxt(root+ lstW1_50[i], usecols=cols, unpack=True)]
+            q_W1_50read = dataread
+        else: q_W1_50read = np.r_['1',q_W1_50read,dataread]
+        hdu.close()
         #print np.shape(q_W1_50read)
     for i in range(len(lstW1_75)):
+        hdu = fits.open(root+lstW1_75[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W1_75read = np.loadtxt(root+lstW1_75[i], usecols=cols, unpack=True)
-        else:
-            q_W1_75read = np.r_['1',q_W1_75read,np.loadtxt(root+ lstW1_75[i], usecols=cols, unpack=True)]
+            q_W1_75read = dataread
+        else: q_W1_75read = np.r_['1',q_W1_75read,dataread]
+        hdu.close()
 
     print "W2..."
     for i in range(len(lstW2_50)):
+        hdu = fits.open(root+lstW2_50[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W2_50read = np.loadtxt(root+lstW2_50[i], usecols=cols, unpack=True)
-        else:
-            q_W2_50read = np.r_['1',q_W2_50read,np.loadtxt(root+ lstW2_50[i], usecols=cols, unpack=True)]
+            q_W2_50read = dataread
+        else: q_W2_50read = np.r_['1',q_W2_50read,dataread]
+        hdu.close()
+        #print np.shape(q_W2_50read)
     for i in range(len(lstW2_75)):
+        hdu = fits.open(root+lstW2_75[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W2_75read = np.loadtxt(root+lstW2_75[i], usecols=cols, unpack=True)
-        else:
-            q_W2_75read = np.r_['1',q_W2_75read,np.loadtxt(root+ lstW2_75[i], usecols=cols, unpack=True)]
+            q_W2_75read = dataread
+        else: q_W2_75read = np.r_['1',q_W2_75read,dataread]
+        hdu.close()
 
     print "W3..."
     for i in range(len(lstW3_50)):
+        hdu = fits.open(root+lstW3_50[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W3_50read = np.loadtxt(root+lstW3_50[i], usecols=cols, unpack=True)
-        else:
-            q_W3_50read = np.r_['1',q_W3_50read,np.loadtxt(root+ lstW3_50[i], usecols=cols, unpack=True)]
+            q_W3_50read = dataread
+        else: q_W3_50read = np.r_['1',q_W3_50read,dataread]
+        hdu.close()
+        #print np.shape(q_W3_50read)
     for i in range(len(lstW3_75)):
+        hdu = fits.open(root+lstW3_75[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W3_75read = np.loadtxt(root+lstW3_75[i], usecols=cols, unpack=True)
-        else:
-            q_W3_75read = np.r_['1',q_W3_75read,np.loadtxt(root+ lstW3_75[i], usecols=cols, unpack=True)]
+            q_W3_75read = dataread
+        else: q_W3_75read = np.r_['1',q_W3_75read,dataread]
+        hdu.close()
 
     print "W4..."
     for i in range(len(lstW4_50)):
+        hdu = fits.open(root+lstW4_50[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W4_50read = np.loadtxt(root+lstW4_50[i], usecols=cols, unpack=True)
-        else:
-            q_W4_50read = np.r_['1',q_W4_50read,np.loadtxt(root+ lstW4_50[i], usecols=cols, unpack=True)]
+            q_W4_50read = dataread
+        else: q_W4_50read = np.r_['1',q_W4_50read,dataread]
+        hdu.close()
+        #print np.shape(q_W4_50read)
     for i in range(len(lstW4_75)):
+        hdu = fits.open(root+lstW4_75[i]); data = hdu[1].data
+        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
         if i == 0:
-            q_W4_75read = np.loadtxt(root+lstW4_75[i], usecols=cols, unpack=True)
-        else:
-            q_W4_75read = np.r_['1',q_W4_75read,np.loadtxt(root+ lstW4_75[i], usecols=cols, unpack=True)]
+            q_W4_75read = dataread
+        else: q_W4_75read = np.r_['1',q_W4_75read,dataread]
+        hdu.close()
+
+
+
+
+
+
+
+
+
 
     for j in range(18):
         q_W1_50 = q_W1_50read[j][q_W1_50read[j] < limit]
@@ -310,7 +334,7 @@ total50 = 0
 total75 = 0
 good50 = 0
 good75 = 0
-lst = [x for x in os.listdir(root) if ('_24galphotmstar_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_count%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,specialtest) in x)]
+lst = [x for x in os.listdir(root) if ('_wghtratios_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_count%s.lst' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,specialtest) in x)]
 for i in range(len(lst)):
     str = open('%s/%s' %(root,lst[i]),'r').read()
     str = [x.strip() for x in str.split(" ")]
