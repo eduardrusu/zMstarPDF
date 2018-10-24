@@ -5,14 +5,14 @@
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-#mode = "poisson"
-mode = "mcmc"
-redshift = "lens"
-photoztolerance = 2 # number of sigmas
+mode = "poisson"
+#mode = "mcmc"
+samples = 20
+photoztolerance = 1.5 # number of sigmas
 #zgroup = 0.6592
 zgroup = 0.4956
-#veldisp0.66 = 522+/-80 -> 870+/-130 after correction for Dominique's error -> Fig 4 Becker 90 [60-150?] galaxies inside R_200
-#veldisp0.49 = 557+/-125 -> 835+/-190 after correction for Dominique's error
+#veldisp0.66 = 522+/-80 -> Fig 5 Andreon 2010 [13-40 at 68%] galaxies inside R_200
+#veldisp0.49 = 557+/-125 -> Fig 5 Andreon 2010 [8-50 at 68%] galaxies inside R_200
 limmag = 22.5
 faintmagspec = 22.5
 center_lens = SkyCoord('20:33:42.080 -47:23:43.00', frame='fk5', unit=(u.hourangle, u.deg))
@@ -24,7 +24,6 @@ virrad = 240 # arcsec # using R_200, which is robust agains Dominique's and is u
 if zgroup == 0.6592: observed_members = 19
 if zgroup == 0.4956: observed_members = 10
 file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-filephotozpool = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/grouppool.cat"
 data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
 ra = 0
 dec = 1
@@ -37,16 +36,16 @@ spec = 7
 cls = 8
 coord = SkyCoord(ra=data[:,ra]*u.degree, dec=data[:,dec]*u.degree, frame='fk5')
 sep = coord.separation(center_lens).arcsec
-all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag)])
-print all
+all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)])
+print "gals: ",all
 specs = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
-print specs
+print "specs: ",specs
 #print data[:,i][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
 #print data[:,spec][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
 #print data[:,id][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
-observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag)]
+observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
 print 'members',len(observed120_membersID)
-pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
+pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,cls] >= 0) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
 print 'pool',len(pool)
 
 if mode == "mcmc":
@@ -61,8 +60,8 @@ if mode == "mcmc":
     # fraction of volume out of the virial sphere which contains the 120"-radius cylinder centered on the lens
     def expected_members():
         while True:
-            x = np.abs(np.random.normal(90, 30, 1)).astype(int)[0]
-            #  fig 16 Berlind et al. 2006 based on velocity dispersion
+            if zgroup == 0.6592: x = np.abs(np.random.normal(27, 13, 1)).astype(int)[0]
+            if zgroup == 0.4956: x = np.abs(np.random.normal(30, 21, 1)).astype(int)[0]
             if (x > observed_members) and (frac * x > len(observed120_membersID)): break
         return x
 if mode == "poisson":
@@ -76,15 +75,14 @@ pdz = np.array([])
 for i in range(10000):
     if mode == "mcmc": pdz = np.append(pdz,frac * expected_members())
     if mode == "poisson": pdz = np.append(pdz,expected_members())
-import pylab as plt
-plt.clf()
-plt.hist(pdz)
-plt.show()
-for i in range(10):
+
+pdzselect = np.array([])
+for i in range(samples):
     if mode == "mcmc": missing120_membersID = np.random.choice(a=pool, size=int(frac * expected_members() - len(observed120_membersID)), replace=False)
     if mode == "poisson": missing120_membersID = np.random.choice(a=pool, size=int(expected_members() - len(observed120_membersID)), replace=False)
     missing120_membersra = np.array([])
     missing120_membersdec = np.array([])
+    pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID))
     for j in range(len(missing120_membersID)):
         missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==missing120_membersID[j]][0])
         missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==missing120_membersID[j]][0])
@@ -94,3 +92,9 @@ for i in range(10):
         missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==observed120_membersID[k]][0])
     if zgroup == 0.6592: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
     if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+import pylab as plt
+plt.clf()
+plt.hist(pdz,normed=True)
+plt.hist(pdzselect,normed=True,alpha = 0.5)
+plt.show()
+print np.percentile(pdz,[16,50,84]) # I ran the code several times untill the two distributions match fairly well

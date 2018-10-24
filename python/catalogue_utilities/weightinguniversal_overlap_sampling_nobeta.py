@@ -286,7 +286,9 @@ def lensprep(lenscat):
     lenscat = np.c_['0',lenscat,sep_lens.reshape((1, sep_lens.shape[0]))] # inserting as the last column of the catalogue
     lenscat = np.delete(lenscat,np.where(msk_lens[0].data[lenscat[y_lens].astype(int),lenscat[x_lens].astype(int)] != 0),axis=1) # remove the masked objects; I tested that this is the correct order of x and y. x and y in lenscat are the actual coordinates in the natural reading of the .fits file (not the reading of python, which inverts axes)
     #print msk_lens[0].data[400,485] # testing
+    print np.shape(lenscat)
     lenscat = np.delete(lenscat,np.where(lenscat[classify] < 0),axis=1) # removes all stars from the catalogue
+    print np.shape(lenscat)
     #print lenscat[RA_lens],lenscat[DEC_lens],SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5').separation(center_lens).arcsec,lenscat[classify]
     if remove != 'no':
         removecat = np.loadtxt('%s/%s.cat' % (rootlenscat,remove))
@@ -294,7 +296,8 @@ def lensprep(lenscat):
             coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5') # redefine this whenever I remove rows
             coordremove = SkyCoord('%s %s' %(removecat[i][0],removecat[i][1]), frame='fk5', unit=(u.deg, u.deg))
             #print coordremove
-            #print np.where(coord_lensinit.separation(coordremove).arcsec < 0.5)
+            #print np.shape(lenscat)
+            print np.where(coord_lensinit.separation(coordremove).arcsec < 0.5)
             lenscat = np.delete(lenscat,np.where(coord_lensinit.separation(coordremove).arcsec < 0.5),axis=1) # removes selected objects from the catalogue, within a selection radius of 0.5 arcsec
             #print np.shape(lenscat)
         global suffix

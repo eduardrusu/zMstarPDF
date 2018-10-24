@@ -1,8 +1,6 @@
-# CE Rusu, Feb 13 2018
-# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles, using the 10 samples
-# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 22.5 meds bpz deti IRAC 0.61 0.71 100 removegrouphandpicked testduplicatesamples/testothersamples
-# After running this code, you need to combine the results into a final text file with the final distributions and widths, using weightinguniversal_histograms_finalcombine.py
-# If desired, run weightinguniversal_histograms_samples_publicationqualitynotext.py to produce a publication quality plot
+# The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles. It does this by creating an output file where it samples 1000 times from the distributions of the averages/medians (meaning from the distribution of the 10 samples). For small widths of the distributions, where they are approximately gaussian, use weightinguniversal_histograms_samples_WFI2033.py instead
+# run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples_asymmetric.py standard WFI2033 45 5 23 meds bpz deti IRAC 0.61 0.71 100
+# type is either 'standard' or 'extra'. In case of 'standard' only the original 10 samples are used
 
 import numpy as np
 import sys
@@ -11,21 +9,20 @@ import time
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
-lens = str(sys.argv[1])
-radius = str(sys.argv[2])
-inner = str(sys.argv[3])
-mag = str(sys.argv[4])
-mode = str(sys.argv[5])
-photz = str(sys.argv[6])
-detect = str(sys.argv[7])
-irac = str(sys.argv[8])
-zinf = str(sys.argv[9])
-zsup = str(sys.argv[10])
-bin = int(str(sys.argv[11]))
-try: handpicked = '_'+str(sys.argv[12])
+type = str(sys.argv[1])
+lens = str(sys.argv[2])
+radius = str(sys.argv[3])
+inner = str(sys.argv[4])
+mag = str(sys.argv[5])
+mode = str(sys.argv[6])
+photz = str(sys.argv[7])
+detect = str(sys.argv[8])
+irac = str(sys.argv[9])
+zinf = str(sys.argv[10])
+zsup = str(sys.argv[11])
+bin = int(str(sys.argv[12]))
+try: handpicked = '_'+str(sys.argv[13])
 except: handpicked = ''
-try: specialtest = '_'+str(sys.argv[13])
-except: specialtest = ''
 
 plt.clf()
 
@@ -40,6 +37,13 @@ samples = 10
 limit = np.infty
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
 
+def sample(median,stdlow,stdhigh): # samples from different standard deviation gaussians on each side of the mean
+    rand = np.random.uniform(0,1,250)
+    result = np.zeros(250)
+    result[rand < 0.5] = median - np.abs(np.random.normal(0, np.abs(stdlow), len(rand[rand < 0.5])))
+    result[rand > 0.5] = median + np.abs(np.random.normal(0, stdhigh, len(rand[rand > 0.5])))
+    return result
+
 start_time = time.time()
 
 print "Working on samples:"
@@ -53,16 +57,32 @@ medsum75W3 = np.zeros((18,samples))
 medsum50W4 = np.zeros((18,samples))
 medsum75W4 = np.zeros((18,samples))
 
+sampling50W1 = np.zeros((18,250))
+sampling50W2 = np.zeros((18,250))
+sampling50W3 = np.zeros((18,250))
+sampling50W4 = np.zeros((18,250))
+sampling50 = np.zeros((18,1000))
+sampling75W1 = np.zeros((18,250))
+sampling75W2 = np.zeros((18,250))
+sampling75W3 = np.zeros((18,250))
+sampling75W4 = np.zeros((18,250))
+sampling75 = np.zeros((18,1000))
+
 for nr in range(samples):
     print '%s/%s' %(nr,samples-1)
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)] # select from the files in the root directory
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr)) in x)]
+
+    if mag == "24" and photz == "bpz": cols=[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38]
+    if mag == "24" and photz == "eazy": cols=[40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74]
+    if mag == "23" and photz == "bpz": cols=[5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39]
+    if mag == "23" and photz == "eazy": cols=[41,43,45,47,49,51,53,55,57,59,61,63,65,67,69,71,73,75]
 
     print "W1..."
     for i in range(len(lstW1_50)):
@@ -185,8 +205,6 @@ std75W3_inf = np.zeros(18)
 std75W3_sup = np.zeros(18)
 std75W4_inf = np.zeros(18)
 std75W4_sup = np.zeros(18)
-std_inf = np.zeros(18)
-std_sup = np.zeros(18)
 
 for i in range(18):
     std50W1_inf[i] = np.percentile(medsum50W1[i], 16)
@@ -205,8 +223,6 @@ for i in range(18):
     std75W3_sup[i] = np.percentile(medsum75W3[i], 84)
     std75W4_inf[i] = np.percentile(medsum75W4[i], 16)
     std75W4_sup[i] = np.percentile(medsum75W4[i], 84)
-    std_inf[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 16)
-    std_sup[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 84)
 
 print "Plotting..."
 
@@ -267,8 +283,34 @@ for i in range(18):
         ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
         s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.average(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.average(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
         ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
-        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.average([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.average([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i]]),np.median([std50W1_inf[i],std50W2_inf[i],std50W3_inf[i],std50W4_inf[i],std75W1_inf[i],std75W2_inf[i],std75W3_inf[i],std75W4_inf[i]]),np.median([std50W1_sup[i],std50W2_sup[i],std50W3_sup[i],std50W4_sup[i],std75W1_sup[i],std75W2_sup[i],std75W3_sup[i],std75W4_sup[i]]))
         ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
+        if np.average(medsum50W1[i]) == std50W1_inf[i]: std50W1_inf[i] = np.average(medsum50W1[i]) - 0.01
+        if np.average(medsum50W2[i]) == std50W2_inf[i]: std50W2_inf[i] = np.average(medsum50W2[i]) - 0.01
+        if np.average(medsum50W3[i]) == std50W3_inf[i]: std50W3_inf[i] = np.average(medsum50W3[i]) - 0.01
+        if np.average(medsum50W4[i]) == std50W4_inf[i]: std50W4_inf[i] = np.average(medsum50W4[i]) - 0.01
+        if np.average(medsum50W1[i]) == std50W1_sup[i]: std50W1_sup[i] = np.average(medsum50W1[i]) + 0.01
+        if np.average(medsum50W2[i]) == std50W2_sup[i]: std50W2_sup[i] = np.average(medsum50W2[i]) + 0.01
+        if np.average(medsum50W3[i]) == std50W3_sup[i]: std50W3_sup[i] = np.average(medsum50W3[i]) + 0.01
+        if np.average(medsum50W4[i]) == std50W4_sup[i]: std50W4_sup[i] = np.average(medsum50W4[i]) + 0.01
+        if np.average(medsum75W1[i]) == std75W1_inf[i]: std75W1_inf[i] = np.average(medsum75W1[i]) - 0.01
+        if np.average(medsum75W2[i]) == std75W2_inf[i]: std75W2_inf[i] = np.average(medsum75W2[i]) - 0.01
+        if np.average(medsum75W3[i]) == std75W3_inf[i]: std75W3_inf[i] = np.average(medsum75W3[i]) - 0.01
+        if np.average(medsum75W4[i]) == std75W4_inf[i]: std75W4_inf[i] = np.average(medsum75W4[i]) - 0.01
+        if np.average(medsum75W1[i]) == std75W1_sup[i]: std75W1_sup[i] = np.average(medsum75W1[i]) + 0.01
+        if np.average(medsum75W2[i]) == std75W2_sup[i]: std75W2_sup[i] = np.average(medsum75W2[i]) + 0.01
+        if np.average(medsum75W3[i]) == std75W3_sup[i]: std75W3_sup[i] = np.average(medsum75W3[i]) + 0.01
+        if np.average(medsum75W4[i]) == std75W4_sup[i]: std75W4_sup[i] = np.average(medsum75W4[i]) + 0.01
+        sampling50W1[i] = sample(np.average(medsum50W1[i]), np.average(medsum50W1[i]) - std50W1_inf[i], std50W1_sup[i] - np.average(medsum50W1[i]))
+        sampling50W2[i] = sample(np.average(medsum50W2[i]), np.average(medsum50W2[i]) - std50W2_inf[i], std50W2_sup[i] - np.average(medsum50W2[i]))
+        sampling50W3[i] = sample(np.average(medsum50W3[i]), np.average(medsum50W3[i]) - std50W3_inf[i], std50W3_sup[i] - np.average(medsum50W3[i]))
+        sampling50W4[i] = sample(np.average(medsum50W4[i]), np.average(medsum50W4[i]) - std50W4_inf[i], std50W4_sup[i] - np.average(medsum50W4[i]))
+        sampling50[i] = np.r_[sampling50W1[i],sampling50W2[i],sampling50W3[i],sampling50W4[i]] # takes 250 samples of the sum/median from W1-4 and combines them
+        sampling75W1[i] = sample(np.average(medsum75W1[i]), np.average(medsum75W1[i]) - std75W1_inf[i], std75W1_sup[i] - np.average(medsum75W1[i]))
+        sampling75W2[i] = sample(np.average(medsum75W2[i]), np.average(medsum75W2[i]) - std75W2_inf[i], std75W2_sup[i] - np.average(medsum75W2[i]))
+        sampling75W3[i] = sample(np.average(medsum75W3[i]), np.average(medsum75W3[i]) - std75W3_inf[i], std75W3_sup[i] - np.average(medsum75W3[i]))
+        sampling75W4[i] = sample(np.average(medsum75W4[i]), np.average(medsum75W4[i]) - std75W4_inf[i], std75W4_sup[i] - np.average(medsum75W4[i]))
+        sampling75[i] = np.r_[sampling75W1[i],sampling75W2[i],sampling75W3[i],sampling75W4[i]]
     if mode == "meds":
         s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W1[i][0],np.median(medsum50W1[i]),std50W1_inf[i],std50W1_sup[i],medsum75W1[i][0],np.median(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
         ax.text(0.02, 0.9, s, fontsize=fontlabel, color='b',transform=ax.transAxes)
@@ -278,9 +320,36 @@ for i in range(18):
         ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
         s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.median(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.median(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
         ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
-        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.median([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.median([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.median([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),np.median([std50W1_inf[i],std50W2_inf[i],std50W3_inf[i],std50W4_inf[i],std75W1_inf[i],std75W2_inf[i],std75W3_inf[i],std75W4_inf[i]]),np.median([std50W1_sup[i],std50W2_sup[i],std50W3_sup[i],std50W4_sup[i],std75W1_sup[i],std75W2_sup[i],std75W3_sup[i],std75W4_sup[i]]))
         ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
+        if np.median(medsum50W1[i]) == std50W1_inf[i]: std50W1_inf[i] = np.median(medsum50W1[i]) - 0.01
+        if np.median(medsum50W2[i]) == std50W2_inf[i]: std50W2_inf[i] = np.median(medsum50W2[i]) - 0.01
+        if np.median(medsum50W3[i]) == std50W3_inf[i]: std50W3_inf[i] = np.median(medsum50W3[i]) - 0.01
+        if np.median(medsum50W4[i]) == std50W4_inf[i]: std50W4_inf[i] = np.median(medsum50W4[i]) - 0.01
+        if np.median(medsum50W1[i]) == std50W1_sup[i]: std50W1_sup[i] = np.median(medsum50W1[i]) + 0.01
+        if np.median(medsum50W2[i]) == std50W2_sup[i]: std50W2_sup[i] = np.median(medsum50W2[i]) + 0.01
+        if np.median(medsum50W3[i]) == std50W3_sup[i]: std50W3_sup[i] = np.median(medsum50W3[i]) + 0.01
+        if np.median(medsum50W4[i]) == std50W4_sup[i]: std50W4_sup[i] = np.median(medsum50W4[i]) + 0.01
+        if np.median(medsum75W1[i]) == std75W1_inf[i]: std75W1_inf[i] = np.median(medsum75W1[i]) - 0.01
+        if np.median(medsum75W2[i]) == std75W2_inf[i]: std75W2_inf[i] = np.median(medsum75W2[i]) - 0.01
+        if np.median(medsum75W3[i]) == std75W3_inf[i]: std75W3_inf[i] = np.median(medsum75W3[i]) - 0.01
+        if np.median(medsum75W4[i]) == std75W4_inf[i]: std75W4_inf[i] = np.median(medsum75W4[i]) - 0.01
+        if np.median(medsum75W1[i]) == std75W1_sup[i]: std75W1_sup[i] = np.median(medsum75W1[i]) + 0.01
+        if np.median(medsum75W2[i]) == std75W2_sup[i]: std75W2_sup[i] = np.median(medsum75W2[i]) + 0.01
+        if np.median(medsum75W3[i]) == std75W3_sup[i]: std75W3_sup[i] = np.median(medsum75W3[i]) + 0.01
+        if np.median(medsum75W4[i]) == std75W4_sup[i]: std75W4_sup[i] = np.median(medsum75W4[i]) + 0.01
+        sampling50W1[i] = sample(np.median(medsum50W1[i]), np.median(medsum50W1[i]) - std50W1_inf[i], std50W1_sup[i] - np.median(medsum50W1[i]))
+        sampling50W2[i] = sample(np.median(medsum50W2[i]), np.median(medsum50W2[i]) - std50W2_inf[i], std50W2_sup[i] - np.median(medsum50W2[i]))
+        sampling50W3[i] = sample(np.median(medsum50W3[i]), np.median(medsum50W3[i]) - std50W3_inf[i], std50W3_sup[i] - np.median(medsum50W3[i]))
+        sampling50W4[i] = sample(np.median(medsum50W4[i]), np.median(medsum50W4[i]) - std50W4_inf[i], std50W4_sup[i] - np.median(medsum50W4[i]))
+        sampling50[i] = np.r_[sampling50W1[i],sampling50W2[i],sampling50W3[i],sampling50W4[i]]
+        sampling75W1[i] = sample(np.median(medsum75W1[i]), np.median(medsum75W1[i]) - std75W1_inf[i], std75W1_sup[i] - np.median(medsum75W1[i]))
+        sampling75W2[i] = sample(np.median(medsum75W2[i]), np.median(medsum75W2[i]) - std75W2_inf[i], std75W2_sup[i] - np.median(medsum75W2[i]))
+        sampling75W3[i] = sample(np.median(medsum75W3[i]), np.median(medsum75W3[i]) - std75W3_inf[i], std75W3_sup[i] - np.median(medsum75W3[i]))
+        sampling75W4[i] = sample(np.median(medsum75W4[i]), np.median(medsum75W4[i]) - std75W4_inf[i], std75W4_sup[i] - np.median(medsum75W4[i]))
+        sampling75[i] = np.r_[sampling75W1[i],sampling75W2[i],sampling75W3[i],sampling75W4[i]]
     print i,s
+
     if i == 0: plt.xlabel(r'$\zeta_{gal}$', fontsize=fontabsciss)
     if i == 1: plt.xlabel(r'$\zeta_{z}$', fontsize=fontabsciss)
     if i == 2: plt.xlabel(r'$\zeta_{M_\star}$', fontsize=fontabsciss)
@@ -307,45 +376,37 @@ for i in range(18):
     subplot = i+1
     #print "finished subplot %d/18; fraction of points inside the < %s cut: \n W1_50 %.3f\n W2_50 %.3f\n W3_50 %.3f\n W4_50 %.3f" % (subplot, limit, float(q_W1_50.size)/q_W1_50read[0].size, float(q_W2_50.size)/q_W2_50read[0].size, float(q_W3_50.size)/q_W3_50read[0].size, float(q_W4_50.size)/q_W4_50read[0].size)
 
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_frac50_asymmetric%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup,type), sampling50.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_frac75_asymmetric%s.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup,type), sampling75.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
 plt.subplot(5,4,5)
 plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=10)
-plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamples%s.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), dpi=500)
+plt.savefig('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_asymmetric%s.png' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup,type), dpi=500)
 
-# compute the number of fields used
-total50 = 0
-total75 = 0
-good50 = 0
-good75 = 0
-lst = [x for x in os.listdir(root) if ('_wghtratios_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_zgap%s_%s%s_count%s.cat' %(radius,inner,lens,detect,irac,mode,zinf,zsup,handpicked,specialtest) in x)]
-for i in range(len(lst)):
-    str = open('%s/%s' %(root,lst[i]),'r').read()
-    str = [x.strip() for x in str.split(" ")]
-    str_total50 = int(str[9])
-    str_total75 = int(str[7][:-1])
-    str_good50 = int(str[8])
-    str_good75 = int(str[6])
-    if i == 0:
-        total50 = str_total50
-        total75 = str_total75
-        good50 = str_good50
-        good75 = str_good75
-    else:
-        total50 += str_total50
-        total75 += str_total75
-        good50 += str_good50
-        good75 += str_good75
-
-print '50%: ', good50, '/', total50, ';', '75%: ', good75, '/', total75
 print(" --- %s seconds ---" % (time.time() - start_time))
 
 print 'Done!'
+
+'''
+Once all 8 runs have finished for a given radius, do the following:
+! cat WFI2033_weightedcountshist_45_5_23_meds_bpz_deti_IRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_deti_noIRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_detir_IRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_detir_noIRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_deti_IRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_deti_noIRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_detir_IRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_detir_noIRAC_handpicked_zgap0.61_0.71_frac50_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_deti_IRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_deti_noIRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_detir_IRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_bpz_detir_noIRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_deti_IRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_deti_noIRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_detir_IRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst WFI2033_weightedcountshist_45_5_23_meds_eazy_detir_noIRAC_handpicked_zgap0.61_0.71_frac75_asymmetric.lst > WFI2033_weightedcountshist_45_5_23_meds_handpicked_zgap0.61_0.71_asymmetric.lst
+x = np.loadtxt("WFI2033_weightedcountshist_45_5_23_meds_handpicked_zgap0.61_0.71_asymmetric.lst", unpack=True)
+print np.median(x[0]), np.percentile(x[0], 16), np.percentile(x[0], 84)
+print np.median(x[1]), np.percentile(x[1], 16), np.percentile(x[1], 84)
+print np.median(x[2]), np.percentile(x[2], 16), np.percentile(x[2], 84)
+print np.median(x[3]), np.percentile(x[3], 16), np.percentile(x[3], 84)
+print np.median(x[4]), np.percentile(x[4], 16), np.percentile(x[4], 84)
+print np.median(x[5]), np.percentile(x[5], 16), np.percentile(x[5], 84)
+print np.median(x[6]), np.percentile(x[6], 16), np.percentile(x[6], 84)
+print np.median(x[7]), np.percentile(x[7], 16), np.percentile(x[7], 84)
+print np.median(x[8]), np.percentile(x[8], 16), np.percentile(x[8], 84)
+print np.median(x[9]), np.percentile(x[9], 16), np.percentile(x[9], 84)
+print np.median(x[10]), np.percentile(x[10], 16), np.percentile(x[10], 84)
+print np.median(x[11]), np.percentile(x[11], 16), np.percentile(x[11], 84)
+print np.median(x[12]), np.percentile(x[12], 16), np.percentile(x[12], 84)
+print np.median(x[13]), np.percentile(x[13], 16), np.percentile(x[13], 84)
+print np.median(x[14]), np.percentile(x[14], 16), np.percentile(x[14], 84)
+print np.median(x[15]), np.percentile(x[15], 16), np.percentile(x[15], 84)
+print np.median(x[16]), np.percentile(x[16], 16), np.percentile(x[16], 84)
+print np.median(x[17]), np.percentile(x[17], 16), np.percentile(x[17], 84)
+'''
