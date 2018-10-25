@@ -263,7 +263,7 @@ if lensID == "J1206":
     center_lens = SkyCoord('12:06:29.650 +43:32:19.90', frame='fk5', unit=(u.hourangle, u.deg))
 
 lensbpz = np.loadtxt('%s/%s%sbpz_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
-if np.shape(lensbpz)[1] != 8 + 3 * samples:
+if np.shape(lensbpz)[0] != 8 + 3 * samples:
     print("Number of declared samples and the ones inside the input file do not match!!!")
     sys.exit()
 if photoz == 'bpzeazy': lenseazy = np.loadtxt('%s/%s%seazy_nobeta_%s.cat' % (rootlenscat,lensID,irac,det), unpack=True)
