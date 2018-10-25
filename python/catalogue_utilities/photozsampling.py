@@ -1,4 +1,4 @@
-# Run this code in order to sample from P(z) 9 times for the lens catalogue, with or without spectroscopic information. Requires that a necessary .probs file exists in the BPZ folfer, containing P(z) computed with BPZ on a grid z=arange(0.0000,3.5100,0.0100). Also requires that the .pz files exist for each object from a previous EAzY run on a grid z=arange(0.0100,4.00,0.0100). The code then uses a modified version of converttolephare_WFI2033.py and converttolephare_noobs_WFI2033.py in order to produce the input expected by Lephare.
+# Run this code in order to sample from P(z) for the lens catalogue, with or without spectroscopic information. Requires that a necessary .probs file exists in the BPZ folfer, containing P(z) computed with BPZ on a grid z=arange(0.0000,3.5100,0.0100). Also requires that the .pz files exist for each object with z=arange(0.0100,4.0000,0.0100) from a previous EAzY run on a grid z=arange(0.0100,4.00,0.0100). The code then uses a modified version of converttolephare_WFI2033.py and converttolephare_noobs_WFI2033.py in order to produce the input expected by Lephare.
 
 import numpy as np
 import scipy
@@ -8,13 +8,14 @@ import os
 from os import system
 import time
 
-useeazy = 0
-file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-filebpz = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
-if useeazy == 1: fileeazy = "/Users/eduardrusu/software/eazy-1.00/inputs/OUTPUT/sample_i/"
-#file = "rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-#filebpz = "/Users/eduardrusu/software/bpz-1.99.3/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
-#fileeazy = "/Users/eduardrusu/software/eazy-1.00/inputs/OUTPUT/sample_r/"
+useeazy = 1
+samples = 20
+#file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+#filebpz = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
+#if useeazy == 1: fileeazy = "/Users/cerusu/GITHUB/eazy-photoz/inputs/OUTPUT/sample_ir/"
+file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+filebpz = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_forbpz.probs"
+if useeazy == 1: fileeazy = "/Users/cerusu/GITHUB/eazy-photoz/inputs/OUTPUT/sample_i/"
 
 # zeropoint corrections suggested by lephare:
 u_corr = +1.40
@@ -188,7 +189,7 @@ def lephare(data,fileout,irac):
 # sampling from BPZ:
 
 pdz = np.loadtxt(filebpz, unpack=False)
-samplez = np.zeros((pdz.shape[0],9)) # sample 9 times, the 10th will be the original best-fit
+samplez = np.zeros((pdz.shape[0],samples)) # sample 9 times, the 10th will be the original best-fit
 zgridint = np.arange(350) # integers corresponding to z=arange(0.0000,3.5100,0.0100)
 
 id = 8
@@ -259,35 +260,40 @@ for k in range(pdz.shape[0]): # for each galaxy
         while pdz[k][l] != 0: l += 1
         pdz[k][l] = 1 - np.sum(pdz[k][1:]) # the first instance where the probability is zero, add the require offset to have a perfect normalization
     custm = stats.rv_discrete(name='custm', values=(zgridint, pdz[k][1:])) # ignore the first column, which is the ID
-    sample = custm.rvs(size = 9)
+    sample = custm.rvs(size = samples)
     if phot[k][spec] < 0: # if no spectrum is available or if the object is a spectroscopic star
-        samplez[k] = np.array([np.max([0.01 * sample[0],0.01]),np.max([0.01 * sample[1],0.01]),np.max([0.01 * sample[2],0.01]),np.max([0.01 * sample[3],0.01]),np.max([0.01 * sample[4],0.01]),np.max([0.01 * sample[5],0.01]),np.max([0.01 * sample[6],0.01]),np.max([0.01 * sample[7],0.01]),np.max([0.01 * sample[8],0.01])])
+        samplez[k] = np.array([np.max([0.01 * sample[0],0.01]),np.max([0.01 * sample[1],0.01]),np.max([0.01 * sample[2],0.01]),np.max([0.01 * sample[3],0.01]),np.max([0.01 * sample[4],0.01]),np.max([0.01 * sample[5],0.01]),np.max([0.01 * sample[6],0.01]),np.max([0.01 * sample[7],0.01]),np.max([0.01 * sample[8],0.01]),np.max([0.01 * sample[9],0.01]),np.max([0.01 * sample[10],0.01]),np.max([0.01 * sample[11],0.01]),np.max([0.01 * sample[12],0.01]),np.max([0.01 * sample[13],0.01]),np.max([0.01 * sample[14],0.01]),np.max([0.01 * sample[15],0.01]),np.max([0.01 * sample[16],0.01]),np.max([0.01 * sample[17],0.01]),np.max([0.01 * sample[18],0.01]),np.max([0.01 * sample[19],0.01])])
         # because 0.01 is the redshift step; the minimum redshift accepted by LePhare is 0.01
     else:
-        samplez[k] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
+        samplez[k] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
     for j in range(phot.shape[0]): # match the two files by ID
         if pdz[k][0] == phot[j][0]:
             if k != 0:
-                lephdata = np.c_[lephdata,phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j]]
+                lephdata = np.c_[lephdata,phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j]]
             else:
-                lephdata = np.c_[phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j]]
+                lephdata = np.c_[phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j],phot[j]]
 
 samplez = samplez.reshape(samplez.size)
+#print np.shape(lephdata)
 lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
+#print np.shape(lephdata)
 
 data = np.copy(lephdata)
 lephare(data,file[:-4] + "_bpzsample.cat",True)
+data = np.copy(lephdata)
 lephare(data,file[:-4] + "_noIRACbpzsample.cat",False)
 data = np.copy(lephdata)
 lephare_noobs(data,file[:-4] + "_bpzsample_noobs.cat",True)
+data = np.copy(lephdata)
 lephare_noobs(data,file[:-4] + "_noIRACbpzsample_noobs.cat",False)
 
 
 ###################
 # sampling from EAzY:
 if useeazy == 1:
+    del lephdata
     lst = [x for x in os.listdir('%s' %fileeazy) if ('.pz' in x)]
-    samplez = np.zeros((len(lst),9)) # sample 9 times
+    samplez = np.zeros((len(lst),samples)) # sample 9 times
 
     gal = np.zeros(len(lst)) # array of all the ID of galaxies
     for k in range(len(lst)):
@@ -301,23 +307,26 @@ if useeazy == 1:
             pdz = np.loadtxt('%s%s.pz' % (fileeazy,int(phot[k][0])), usecols = [3], unpack=True)
             pdz = pdz/np.sum(pdz) # it needs to be normalized
             custm = stats.rv_discrete(name='custm', values=(zgridint, pdz)) # ignore the first column, which is the ID
-            sample = custm.rvs(size = 9)
+            sample = custm.rvs(size = samples)
             if phot[k][spec] < 0: # if no spectrum is available or if the object is a spectroscopic star
-                samplez[nr] = np.array([0.01 + 0.01 * sample[0],0.01 + 0.01 * sample[1],0.01 + 0.01 * sample[2],0.01 + 0.01 * sample[3],0.01 + 0.01 * sample[4],0.01 + 0.01 * sample[5],0.01 + 0.01 * sample[6],0.01 + 0.01 * sample[7],0.01 + 0.01 * sample[8]]) # because 0.01 is the redshift step
+                samplez[nr] = np.array([0.01 + 0.01 * sample[0],0.01 + 0.01 * sample[1],0.01 + 0.01 * sample[2],0.01 + 0.01 * sample[3],0.01 + 0.01 * sample[4],0.01 + 0.01 * sample[5],0.01 + 0.01 * sample[6],0.01 + 0.01 * sample[7],0.01 + 0.01 * sample[8],0.01 + 0.01 * sample[9],0.01 + 0.01 * sample[10],0.01 + 0.01 * sample[11],0.01 + 0.01 * sample[12],0.01 + 0.01 * sample[13],0.01 + 0.01 * sample[14],0.01 + 0.01 * sample[15],0.01 + 0.01 * sample[16],0.01 + 0.01 * sample[17],0.01 + 0.01 * sample[18],0.01 + 0.01 * sample[19]]) # because 0.01 is the redshift step
             else:
-                samplez[nr] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
+                samplez[nr] = np.array([phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec],phot[k][spec]])
             if nr != 0:
-                lephdata = np.c_[lephdata,phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
+                lephdata = np.c_[lephdata,phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
             else:
-                lephdata = np.c_[phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
+                lephdata = np.c_[phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k],phot[k]]
             nr = nr + 1
 
-            samplez = samplez.reshape(samplez.size)
-            lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
+    samplez = samplez.reshape(samplez.size)
+    print np.shape(lephdata)
+    lephdata = np.r_[lephdata,samplez.reshape(1,samplez.size)]
 
-            data = np.copy(lephdata)
-            lephare(data,file[:-4] + "_eazysample.cat",True)
-            lephare(data,file[:-4] + "_noIRACeazysample.cat",False)
-            data = np.copy(lephdata)
-            lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat",True)
-            lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat",False)
+    data = np.copy(lephdata)
+    lephare(data,file[:-4] + "_eazysample.cat",True)
+    data = np.copy(lephdata)
+    lephare(data,file[:-4] + "_noIRACeazysample.cat",False)
+    data = np.copy(lephdata)
+    lephare_noobs(data,file[:-4] + "_eazysample_noobs.cat",True)
+    data = np.copy(lephdata)
+    lephare_noobs(data,file[:-4] + "_noIRACeazysample_noobs.cat",False)

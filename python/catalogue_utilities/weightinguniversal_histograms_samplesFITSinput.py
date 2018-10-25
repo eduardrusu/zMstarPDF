@@ -71,6 +71,7 @@ for nr in range(samples):
         if i == 0:
             q_W1_50read = dataread
         else: q_W1_50read = np.r_['1',q_W1_50read,dataread]
+        #print np.shape(q_W1_50read)
         hdu.close()
         #print np.shape(q_W1_50read)
     for i in range(len(lstW1_75)):
