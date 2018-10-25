@@ -1,4 +1,4 @@
-# run this in order to sample from P(Mstar,z) for the lens catalogue. It requires the output files produced by photozsampling.py, which whould be first used as input for LePhare, and then combined with combinelephare_withredshift.py
+# run this in order to sample from P(Mstar,z) for the lens catalogue. It requires that the output files produced by photozsampling.py first be used as input for LePhare, and then combined with combinelephare_withredshift.py
 
 import numpy as np
 import scipy
@@ -37,16 +37,18 @@ def sample(median,stdlow,stdhigh): # samples from different standard deviation g
     else:
         return median + np.abs(np.random.normal(0, stdhigh, 1)[0])
 
-#masterfile = "/Users/eduardrusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-#massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACbpzsample_combined.cat.MAG_BC03_I09.lephareout"
-#massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
-#massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
-#massfile = "/Users/eduardrusu/lephare_dev/test/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
-masterfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-#massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACbpzsample_combined.cat.MAG_BC03_I09.lephareout"
-massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
-#massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
-#massfile = "/Users/eduardrusu/lephare_dev/test/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
+samples = 20
+masterfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
+massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACbpzsample_combined.cat.MAG_BC03_I09.lephareout"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/i_detect_i_and_ir_rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
+#masterfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_bpzsample_combined.cat.MAG_BC03_I09.lephareout"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_eazysample_combined.cat.MAG_BC03_I09.lephareout"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACbpzsample_combined.cat.MAG_BC03_I09.lephareout"
+#massfile = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W_noIRACeazysample_combined.cat.MAG_BC03_I09.lephareout"
+
 
 x = 0
 y = 1
@@ -127,9 +129,9 @@ errbar22 = np.median(master[:,mMED_ind][(master[:,i_auto]>21) & (master[:,i_auto
 errbar23 = np.median(master[:,mMED_ind][(master[:,i_auto]>21) & (master[:,mMED_ind]!=-99)] - master[:,mINF_ind][(master[:,i_auto]>21) & (master[:,mMED_ind]!=-99)])
 
 for i in range(master.shape[0]):
-        line = np.zeros(8 + 10 * 3) # x,y,ra,dec,i_auto,i_auto_err,id,classify + 10 * (z,Mstar,Mhalo)
+        line = np.zeros(8 + (samples + 1) * 3) # x,y,ra,dec,i_auto,i_auto_err,id,classify + 10 * (z,Mstar,Mhalo)
         line[0:8] = master[i][0:8] # x,y,ra,dec,i_auto,i_auto_err,id,classify are the first 8 columns from master
-        z = np.zeros(10)
+        z = np.zeros(samples + 1)
         if master[i][spec] > 0: z[0] = master[i][spec] # if there is a galaxy spectrum
         else: z[0] = master[i][z_ind]
 
@@ -149,8 +151,8 @@ for i in range(master.shape[0]):
             if master[i][i_auto] > 22: errbar = errbar23
             mINF = mBEST - errbar
             mSUP = mBEST + errbar
-        m = np.zeros(10)
-        mhalo = np.zeros(10)
+        m = np.zeros(samples + 1)
+        mhalo = np.zeros(samples + 1)
         m[0] = mMED
         a = 1 / (1 + z[0])
         if z[0] <= 1:
@@ -205,7 +207,7 @@ for i in range(master.shape[0]):
                         g = sample(g0[0],g0[1],g0_[2]) + sample(ga[0],ga[1],ga[2]) * (a - 1)
                     mhalo[ind] = logM1a + b * (m[ind] - logMs0a) + ((10 ** m[ind]/notlogMs0a)**d)/(1+(10 ** m[ind]/notlogMs0a)**(-g)) - 1/2
 
-        for j in range(9):
+        for j in range(samples):
             line[8+(j+1)*3:8+(j+2)*3] = np.array([z[j+1],m[j+1],mhalo[j+1]])
         if i == 0:
             data = line
@@ -213,7 +215,7 @@ for i in range(master.shape[0]):
         else:
             data = np.c_[data,line]
 
-#np.savetxt(masterfile[:-4] + "_WFI2033noIRACbpz_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
-#np.savetxt(masterfile[:-4] + "_WFI2033noIRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
-np.savetxt(masterfile[:-4] + "_WFI2033IRACbpz_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
-#np.savetxt(masterfile[:-4] + "_WFI2033IRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
+#np.savetxt(masterfile[:-4] + "_WFI2033noIRACbpz_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
+#np.savetxt(masterfile[:-4] + "_WFI2033noIRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
+#np.savetxt(masterfile[:-4] + "_WFI2033IRACbpz_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
+np.savetxt(masterfile[:-4] + "_WFI2033IRACeazy_nobeta.cat",data.T,fmt='%s %s %s %s %.2f %.2f %d %d %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f %.2f %.4f %.4f')
