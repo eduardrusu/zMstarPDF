@@ -1,6 +1,6 @@
 # CE Rusu, Feb 12 2018
 # This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights.
-# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 23 45 measured 15 0.61 0.71
+# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 22.5 45 measured 15 0.61 0.71
 # the code can oly be used for limmag 23 or 24 currently
 
 import numpy as np
