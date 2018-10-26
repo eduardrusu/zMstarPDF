@@ -215,7 +215,7 @@ def plot(mag,radius):
     plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
     plt.subplot(5,4,5)
     plt.legend(bbox_to_anchor=(5, -5), loc='lower right', borderaxespad=0., fontsize=fontlegend)
-    plt.savefig('%s/weightedcountshist_%sarcsec_%sinner_%s_%s%s_zgap%s_%s_10samples.png' % (rootout, radius, inner, mag, mode, handpicked, zinf, zsup), dpi=500)
+    plt.savefig('%s/weightedcountshist_%sarcsec_%sinner_%s_%s%s_zgap%s_%s_10samples_%s.png' % (rootout, radius, inner, mag, mode, handpicked, zinf, zsup,local), dpi=500)
 
 bpz_deti_irac = bpz_deti_irac45
 #bpz_deti_noirac = bpz_deti_noirac45
