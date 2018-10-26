@@ -1,5 +1,6 @@
 # CE Rusu, Feb 13 2018
 # The code uses the weighted count ratios derived by weightinguniversal_overlap_sampling_nobeta_WFI2033rethought.py to produce histograms and compute the 16th, 50th and 84th percentiles, using the 10 samples
+# What is actually plotted is the distribution for the final sample (of the various samples), but the plotted statistics refer to all samples. If I want to plot the first (fiducial) sample, I need to run the code with samples=1
 # run as python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_histograms_samples.py WFI2033 45 5 22.5 meds bpz deti IRAC 0.61 0.71 100 removegrouphandpicked testduplicatesamples/testothersamples
 # After running this code, you need to combine the results into a final text file with the final distributions and widths, using weightinguniversal_histograms_finalcombine.py
 # If desired, run weightinguniversal_histograms_samples_publicationqualitynotext.py to produce a publication quality plot
@@ -35,7 +36,7 @@ fontordonate = 4
 fontabsciss = 8
 fontlabel = 2
 pltrange = 3
-samples = 10
+samples = 20
 #limit = 10**30
 limit = np.infty
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
@@ -54,26 +55,27 @@ medsum50W4 = np.zeros((18,samples))
 medsum75W4 = np.zeros((18,samples))
 
 for nr in range(samples):
-    print '%s/%s' %(nr,samples-1)
-    lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
+    print '%s/%s' %(nr+1,samples)
+    #lstW1_50 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
     lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    #print lstW1_75
+    #lstW2_50 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
     lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    #lstW3_50 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
     lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
+    #lstW4_50 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_50_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
     lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
 
     print "W1..."
-    for i in range(len(lstW1_50)):
-        hdu = fits.open(root+lstW1_50[i]); data = hdu[1].data
-        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
-        if i == 0:
-            q_W1_50read = dataread
-        else: q_W1_50read = np.r_['1',q_W1_50read,dataread]
-        #print np.shape(q_W1_50read)
-        hdu.close()
-        #print np.shape(q_W1_50read)
+#    for i in range(len(lstW1_50)):
+#        hdu = fits.open(root+lstW1_50[i]); data = hdu[1].data
+#        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
+#        if i == 0:
+#            q_W1_50read = dataread
+#        else: q_W1_50read = np.r_['1',q_W1_50read,dataread]
+#        #print np.shape(q_W1_50read)
+#        hdu.close()
+#        #print np.shape(q_W1_50read)
     for i in range(len(lstW1_75)):
         hdu = fits.open(root+lstW1_75[i]); data = hdu[1].data
         dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
@@ -83,14 +85,14 @@ for nr in range(samples):
         hdu.close()
 
     print "W2..."
-    for i in range(len(lstW2_50)):
-        hdu = fits.open(root+lstW2_50[i]); data = hdu[1].data
-        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
-        if i == 0:
-            q_W2_50read = dataread
-        else: q_W2_50read = np.r_['1',q_W2_50read,dataread]
-        hdu.close()
-        #print np.shape(q_W2_50read)
+#    for i in range(len(lstW2_50)):
+#        hdu = fits.open(root+lstW2_50[i]); data = hdu[1].data
+#        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
+#        if i == 0:
+#            q_W2_50read = dataread
+#        else: q_W2_50read = np.r_['1',q_W2_50read,dataread]
+#        hdu.close()
+#        #print np.shape(q_W2_50read)
     for i in range(len(lstW2_75)):
         hdu = fits.open(root+lstW2_75[i]); data = hdu[1].data
         dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
@@ -100,14 +102,14 @@ for nr in range(samples):
         hdu.close()
 
     print "W3..."
-    for i in range(len(lstW3_50)):
-        hdu = fits.open(root+lstW3_50[i]); data = hdu[1].data
-        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
-        if i == 0:
-            q_W3_50read = dataread
-        else: q_W3_50read = np.r_['1',q_W3_50read,dataread]
-        hdu.close()
-        #print np.shape(q_W3_50read)
+#    for i in range(len(lstW3_50)):
+#        hdu = fits.open(root+lstW3_50[i]); data = hdu[1].data
+#        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
+#        if i == 0:
+#            q_W3_50read = dataread
+#        else: q_W3_50read = np.r_['1',q_W3_50read,dataread]
+#        hdu.close()
+#        #print np.shape(q_W3_50read)
     for i in range(len(lstW3_75)):
         hdu = fits.open(root+lstW3_75[i]); data = hdu[1].data
         dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
@@ -117,14 +119,14 @@ for nr in range(samples):
         hdu.close()
 
     print "W4..."
-    for i in range(len(lstW4_50)):
-        hdu = fits.open(root+lstW4_50[i]); data = hdu[1].data
-        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
-        if i == 0:
-            q_W4_50read = dataread
-        else: q_W4_50read = np.r_['1',q_W4_50read,dataread]
-        hdu.close()
-        #print np.shape(q_W4_50read)
+#    for i in range(len(lstW4_50)):
+#        hdu = fits.open(root+lstW4_50[i]); data = hdu[1].data
+#        dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
+#        if i == 0:
+#            q_W4_50read = dataread
+#        else: q_W4_50read = np.r_['1',q_W4_50read,dataread]
+#        hdu.close()
+#        #print np.shape(q_W4_50read)
     for i in range(len(lstW4_75)):
         hdu = fits.open(root+lstW4_75[i]); data = hdu[1].data
         dataread = np.c_[data.field('5_lens_gal'),data.field('6_lens_zweight'),data.field('7_lens_mass'),data.field('8_lens_mass2'),data.field('9_lens_mass3'),data.field('10_lens_oneoverr'),data.field('11_lens_zoverr'),data.field('12_lens_massoverr'),data.field('13_lens_mass2overr'),data.field('14_lens_mass3overr'),data.field('15_lens_mass2rms'),data.field('16_lens_mass3rms'),data.field('17_lens_mass2overrms'),data.field('18_lens_mass3overrms'),data.field('19_lens_flexion'),data.field('20_lens_tidal'),data.field('21_lens_convergence'),data.field('22_lens_convergencehalo')].T
@@ -134,50 +136,50 @@ for nr in range(samples):
         hdu.close()
 
     for j in range(18):
-        q_W1_50 = q_W1_50read[j][q_W1_50read[j] < limit]
-        if mode == "sum": q_W1_50 = abs(q_W1_50)
+        #q_W1_50 = q_W1_50read[j][q_W1_50read[j] < limit]
+        #if mode == "sum": q_W1_50 = abs(q_W1_50)
         q_W1_75 = q_W1_75read[j][q_W1_75read[j] < limit]
         if mode == "sum": q_W1_75 = abs(q_W1_75)
-        q_W2_50 = q_W2_50read[j][q_W2_50read[j] < limit]
-        if mode == "sum": q_W2_50 = abs(q_W2_50)
+        #q_W2_50 = q_W2_50read[j][q_W2_50read[j] < limit]
+        #if mode == "sum": q_W2_50 = abs(q_W2_50)
         q_W2_75 = q_W2_75read[j][q_W2_75read[j] < limit]
         if mode == "sum": q_W2_75 = abs(q_W2_75)
-        q_W3_50 = q_W3_50read[j][q_W3_50read[j] < limit]
-        if mode == "sum": q_W3_50 = abs(q_W3_50)
+        #q_W3_50 = q_W3_50read[j][q_W3_50read[j] < limit]
+        #if mode == "sum": q_W3_50 = abs(q_W3_50)
         q_W3_75 = q_W3_75read[j][q_W3_75read[j] < limit]
         if mode == "sum": q_W3_75 = abs(q_W3_75)
-        q_W4_50 = q_W4_50read[j][q_W4_50read[j] < limit]
-        if mode == "sum": q_W4_50 = abs(q_W4_50)
+        #q_W4_50 = q_W4_50read[j][q_W4_50read[j] < limit]
+        #if mode == "sum": q_W4_50 = abs(q_W4_50)
         q_W4_75 = q_W4_75read[j][q_W4_75read[j] < limit]
         if mode == "sum": q_W4_75 = abs(q_W4_75)
 
         if mode == "sum":
-            medsum50W1[j][nr] = np.average(q_W1_50)
+            #medsum50W1[j][nr] = np.average(q_W1_50)
             medsum75W1[j][nr] = np.average(q_W1_75)
-            medsum50W2[j][nr] = np.average(q_W2_50)
+            #medsum50W2[j][nr] = np.average(q_W2_50)
             medsum75W2[j][nr] = np.average(q_W2_75)
-            medsum50W3[j][nr] = np.average(q_W3_50)
+            #medsum50W3[j][nr] = np.average(q_W3_50)
             medsum75W3[j][nr] = np.average(q_W3_75)
-            medsum50W4[j][nr] = np.average(q_W4_50)
+            #medsum50W4[j][nr] = np.average(q_W4_50)
             medsum75W4[j][nr] = np.average(q_W4_75)
         if mode == "meds":
-            medsum50W1[j][nr] = np.median(q_W1_50)
+            #medsum50W1[j][nr] = np.median(q_W1_50)
             medsum75W1[j][nr] = np.median(q_W1_75)
-            medsum50W2[j][nr] = np.median(q_W2_50)
+            #medsum50W2[j][nr] = np.median(q_W2_50)
             medsum75W2[j][nr] = np.median(q_W2_75)
-            medsum50W3[j][nr] = np.median(q_W3_50)
+            #medsum50W3[j][nr] = np.median(q_W3_50)
             medsum75W3[j][nr] = np.median(q_W3_75)
-            medsum50W4[j][nr] = np.median(q_W4_50)
+            #medsum50W4[j][nr] = np.median(q_W4_50)
             medsum75W4[j][nr] = np.median(q_W4_75)
 
-std50W1_inf = np.zeros(18)
-std50W1_sup = np.zeros(18)
-std50W2_inf = np.zeros(18)
-std50W2_sup = np.zeros(18)
-std50W3_inf = np.zeros(18)
-std50W3_sup = np.zeros(18)
-std50W4_inf = np.zeros(18)
-std50W4_sup = np.zeros(18)
+#std50W1_inf = np.zeros(18)
+#std50W1_sup = np.zeros(18)
+#std50W2_inf = np.zeros(18)
+#std50W2_sup = np.zeros(18)
+#std50W3_inf = np.zeros(18)
+#std50W3_sup = np.zeros(18)
+#std50W4_inf = np.zeros(18)
+#std50W4_sup = np.zeros(18)
 std75W1_inf = np.zeros(18)
 std75W1_sup = np.zeros(18)
 std75W2_inf = np.zeros(18)
@@ -190,14 +192,14 @@ std_inf = np.zeros(18)
 std_sup = np.zeros(18)
 
 for i in range(18):
-    std50W1_inf[i] = np.percentile(medsum50W1[i], 16)
-    std50W1_sup[i] = np.percentile(medsum50W1[i], 84)
-    std50W2_inf[i] = np.percentile(medsum50W2[i], 16)
-    std50W2_sup[i] = np.percentile(medsum50W2[i], 84)
-    std50W3_inf[i] = np.percentile(medsum50W3[i], 16)
-    std50W3_sup[i] = np.percentile(medsum50W3[i], 84)
-    std50W4_inf[i] = np.percentile(medsum50W4[i], 16)
-    std50W4_sup[i] = np.percentile(medsum50W4[i], 84)
+    #std50W1_inf[i] = np.percentile(medsum50W1[i], 16)
+    #std50W1_sup[i] = np.percentile(medsum50W1[i], 84)
+    #std50W2_inf[i] = np.percentile(medsum50W2[i], 16)
+    #std50W2_sup[i] = np.percentile(medsum50W2[i], 84)
+    #std50W3_inf[i] = np.percentile(medsum50W3[i], 16)
+    #std50W3_sup[i] = np.percentile(medsum50W3[i], 84)
+    #std50W4_inf[i] = np.percentile(medsum50W4[i], 16)
+    #std50W4_sup[i] = np.percentile(medsum50W4[i], 84)
     std75W1_inf[i] = np.percentile(medsum75W1[i], 16)
     std75W1_sup[i] = np.percentile(medsum75W1[i], 84)
     std75W2_inf[i] = np.percentile(medsum75W2[i], 16)
@@ -206,8 +208,10 @@ for i in range(18):
     std75W3_sup[i] = np.percentile(medsum75W3[i], 84)
     std75W4_inf[i] = np.percentile(medsum75W4[i], 16)
     std75W4_sup[i] = np.percentile(medsum75W4[i], 84)
-    std_inf[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 16)
-    std_sup[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 84)
+    #std_inf[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 16)
+    #std_sup[i] = np.percentile([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 84)
+    std_inf[i] = np.percentile([medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 16)
+    std_sup[i] = np.percentile([medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]], 84)
 
 print "Plotting..."
 
@@ -233,53 +237,76 @@ for i in range(18):
     if i == 16: ax=plt.subplot(5,4,18)
     if i == 17: ax=plt.subplot(5,4,19)
 
-    q_W1_50 = q_W1_50read[i][q_W1_50read[i] < limit]
-    if mode == "sum": q_W1_50 = abs(q_W1_50) # fix the negative halo convergence
+    #q_W1_50 = q_W1_50read[i][q_W1_50read[i] < limit]
+    #if mode == "sum": q_W1_50 = abs(q_W1_50) # fix the negative halo convergence
     q_W1_75 = q_W1_75read[i][q_W1_75read[i] < limit]
     if mode == "sum": q_W1_75 = abs(q_W1_75)
-    q_W2_50 = q_W2_50read[i][q_W2_50read[i] < limit]
-    if mode == "sum": q_W2_50 = abs(q_W2_50)
+    #q_W2_50 = q_W2_50read[i][q_W2_50read[i] < limit]
+    #if mode == "sum": q_W2_50 = abs(q_W2_50)
     q_W2_75 = q_W2_75read[i][q_W2_75read[i] < limit]
     if mode == "sum": q_W2_75 = abs(q_W2_75)
-    q_W3_50 = q_W3_50read[i][q_W3_50read[i] < limit]
-    if mode == "sum": q_W3_50 = abs(q_W3_50)
+    #q_W3_50 = q_W3_50read[i][q_W3_50read[i] < limit]
+    #if mode == "sum": q_W3_50 = abs(q_W3_50)
     q_W3_75 = q_W3_75read[i][q_W3_75read[i] < limit]
     if mode == "sum": q_W3_75 = abs(q_W3_75)
-    q_W4_50 = q_W4_50read[i][q_W4_50read[i] < limit]
-    if mode == "sum": q_W4_50 = abs(q_W4_50)
+    #q_W4_50 = q_W4_50read[i][q_W4_50read[i] < limit]
+    #if mode == "sum": q_W4_50 = abs(q_W4_50)
     q_W4_75 = q_W4_75read[i][q_W4_75read[i] < limit]
     if mode == "sum": q_W4_75 = abs(q_W4_75)
 
-    plt.hist(q_W1_50, histtype='step', color='b', label='W1_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
-    plt.hist(q_W2_50, histtype='step', color='g', label='W2_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
-    plt.hist(q_W3_50, histtype='step', color='r', label='W3_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
-    plt.hist(q_W4_50, histtype='step', color='k', label='W4_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
-    plt.hist(q_W1_75, histtype='step', color='b', label='W1_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
-    plt.hist(q_W2_75, histtype='step', color='g', label='W2_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
-    plt.hist(q_W3_75, histtype='step', color='r', label='W3_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
-    plt.hist(q_W4_75, histtype='step', color='k', label='W4_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
+    #plt.hist(q_W1_50, histtype='step', color='b', label='W1_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
+    #plt.hist(q_W2_50, histtype='step', color='g', label='W2_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
+    #plt.hist(q_W3_50, histtype='step', color='r', label='W3_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
+    #plt.hist(q_W4_50, histtype='step', color='k', label='W4_50', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange], linestyle='dotted')
+    plt.hist(q_W1_75, histtype='step', color='b', label='W1_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
+    plt.hist(q_W2_75, histtype='step', color='g', label='W2_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
+    plt.hist(q_W3_75, histtype='step', color='r', label='W3_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
+    plt.hist(q_W4_75, histtype='step', color='k', label='W4_75', linewidth=0.5, normed=1, bins=bin, range=[0, pltrange])
+
+#    if mode == "sum":
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W1[i][0],np.average(medsum50W1[i]),std50W1_inf[i],std50W1_sup[i],medsum75W1[i][0],np.average(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
+#        ax.text(0.02, 0.9, s, fontsize=fontlabel, color='b',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W2[i][0],np.average(medsum50W2[i]),std50W2_inf[i],std50W2_sup[i],medsum75W2[i][0],np.average(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
+#        ax.text(0.02, 0.7, s, fontsize=fontlabel, color='g',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W3[i][0],np.average(medsum50W3[i]),std50W3_inf[i],std50W3_sup[i],medsum75W3[i][0],np.average(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
+#        ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.average(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.average(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
+#        ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
+#        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.average([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+#        ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
+#    if mode == "meds":
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W1[i][0],np.median(medsum50W1[i]),std50W1_inf[i],std50W1_sup[i],medsum75W1[i][0],np.median(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
+#        ax.text(0.02, 0.9, s, fontsize=fontlabel, color='b',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W2[i][0],np.median(medsum50W2[i]),std50W2_inf[i],std50W2_sup[i],medsum75W2[i][0],np.median(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
+#        ax.text(0.02, 0.7, s, fontsize=fontlabel, color='g',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W3[i][0],np.median(medsum50W3[i]),std50W3_inf[i],std50W3_sup[i],medsum75W3[i][0],np.median(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
+#        ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
+#        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.median(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.median(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
+#        ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
+#        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.median([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.median([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+#        ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
 
     if mode == "sum":
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W1[i][0],np.average(medsum50W1[i]),std50W1_inf[i],std50W1_sup[i],medsum75W1[i][0],np.average(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W1[i][0],np.average(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
         ax.text(0.02, 0.9, s, fontsize=fontlabel, color='b',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W2[i][0],np.average(medsum50W2[i]),std50W2_inf[i],std50W2_sup[i],medsum75W2[i][0],np.average(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W2[i][0],np.average(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
         ax.text(0.02, 0.7, s, fontsize=fontlabel, color='g',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W3[i][0],np.average(medsum50W3[i]),std50W3_inf[i],std50W3_sup[i],medsum75W3[i][0],np.average(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W3[i][0],np.average(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
         ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.average(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.average(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W4[i][0],np.average(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
         ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
-        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.average([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.average([medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.average([medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
         ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
     if mode == "meds":
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W1[i][0],np.median(medsum50W1[i]),std50W1_inf[i],std50W1_sup[i],medsum75W1[i][0],np.median(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W1[i][0],np.median(medsum75W1[i]),std75W1_inf[i],std75W1_sup[i]) # init refers to the zeroth sample, all to all samples combined
         ax.text(0.02, 0.9, s, fontsize=fontlabel, color='b',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W2[i][0],np.median(medsum50W2[i]),std50W2_inf[i],std50W2_sup[i],medsum75W2[i][0],np.median(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W2[i][0],np.median(medsum75W2[i]),std75W2_inf[i],std75W2_sup[i])
         ax.text(0.02, 0.7, s, fontsize=fontlabel, color='g',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W3[i][0],np.median(medsum50W3[i]),std50W3_inf[i],std50W3_sup[i],medsum75W3[i][0],np.median(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W3[i][0],np.median(medsum75W3[i]),std75W3_inf[i],std75W3_sup[i])
         ax.text(0.02, 0.5, s, fontsize=fontlabel, color='r',transform=ax.transAxes)
-        s = "50: init %.3f all %.3f (%.3f %.3f); 75: %.3f %.3f (%.3f %.3f)" % (medsum50W4[i][0],np.median(medsum50W4[i]),std50W4_inf[i],std50W4_sup[i],medsum75W4[i][0],np.median(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
+        s = "75: %.3f %.3f (%.3f %.3f)" % (medsum75W4[i][0],np.median(medsum75W4[i]),std75W4_inf[i],std75W4_sup[i])
         ax.text(0.02, 0.3, s, fontsize=fontlabel, color='k',transform=ax.transAxes)
-        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.median([medsum50W1[i][0],medsum50W2[i][0],medsum50W3[i][0],medsum50W4[i][0],medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.median([medsum50W1[i],medsum50W2[i],medsum50W3[i],medsum50W4[i],medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
+        s = "W1-4 init %.3f all %.3f (%.3f %.3f)" % (np.median([medsum75W1[i][0],medsum75W2[i][0],medsum75W3[i][0],medsum75W4[i][0]]),np.median([medsum75W1[i],medsum75W2[i],medsum75W3[i],medsum75W4[i]]),std_inf[i],std_sup[i])
         ax.text(0.02, 0.1, s, fontsize=fontlabel+1, color='k',transform=ax.transAxes)
     print i,s
     if i == 0: plt.xlabel(r'$\zeta_{gal}$', fontsize=fontabsciss)
@@ -308,13 +335,13 @@ for i in range(18):
     subplot = i+1
     #print "finished subplot %d/18; fraction of points inside the < %s cut: \n W1_50 %.3f\n W2_50 %.3f\n W3_50 %.3f\n W4_50 %.3f" % (subplot, limit, float(q_W1_50.size)/q_W1_50read[0].size, float(q_W2_50.size)/q_W2_50read[0].size, float(q_W3_50.size)/q_W3_50read[0].size, float(q_W4_50.size)/q_W4_50read[0].size)
 
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+#np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW1_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W1.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+#np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW2_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W2.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+#np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW3_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W3.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
-np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
+#np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_50%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum50W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 np.savetxt('%s%s_weightedcountshist_%sarcsec_%sinner_%s_%s_%s_%s_%s%s_zgap%s_%s_%ssamplesW4_75%snolim.lst' % (root, lens, radius, inner, mag, mode, photz, detect, irac, handpicked, zinf, zsup, samples, specialtest), medsum75W4.T, fmt='%1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f %1.3f')
 
 plt.subplots_adjust(left=None, bottom=0.1, right=None, top=0.95, wspace=0.4, hspace=0.6)
