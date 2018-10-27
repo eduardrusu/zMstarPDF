@@ -844,7 +844,7 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
         else:
             if type(weight1_index) == int:
-                id_,kappa_, weight1_,galinner_ = readfile(file, usecols=(0,1,weight1_index,len(f[1].get_colnames()) - 1))
+                id_,kappa_, weight1_,galinner_ = readfile(file, usecols=(0,1,weight1_index,len(f[1].get_colnames()) - 1), unpack=True)
                 weight1_ = weight1_ / med_weight1
             else:
                 id_,kappa_, gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,2,3,len(f[1].get_colnames()) - 1))

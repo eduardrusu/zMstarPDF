@@ -3,7 +3,7 @@
 # Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshearFITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial 5 45 23 measured med gal gamma oneoverr mass
 # It does not accept mixed radii or selecting empty inner radii. When a single radius is used (not mixing different radii constraints) this code is faster than inferkappa_unbiasedwithshear45and120_23or24_allowsemptymskandJ1206 because it doesn't read the id column
 # The input weight files have to be FITS files. In case of multiple data extensions, data is combined from every extension
-# J1206 is considered separately because their the input weight files do not include columns which use mass
+# J1206 is considered separately because there the input weight files do not include columns which use mass
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
 # weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
 # the code is written such that, if shear is used as overdensity, it should be the second weight used (unless only one weight is used);
@@ -18,6 +18,7 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
+only8 = True # in this case run only 8/64 MS fields
 
 lens = str(sys.argv[1])
 zinf = str(sys.argv[2])
@@ -50,15 +51,15 @@ if conjoined == 4:
     weightin4 = str(sys.argv[14])
 
 print "conjoined:", conjoined
-#root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 #root = "/Volumes/LaCieSubaru/MSweights/"
-rootcode = "/mnt/scratch/rusucs/code/"
-#rootcode = "/lfs08/rusucs/code/"
+#rootcode = "/mnt/scratch/rusucs/code/"
+rootcode = "/lfs08/rusucs/code/"
 #rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
-#rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
+rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
-rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
+#rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt('/Users/cerusu/Dropbox/Davis_work/code/%s/weightedcounts_%s_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
@@ -68,17 +69,17 @@ min_kappa = -0.10
 max_kappa = 1
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 10
+increment2 = 8
 increment3 = 4
-increment4 = 2
+increment4 = 4
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.100
         constrwidth_gamma_inf = 0.090
         constrwidth_gamma_sup = 0.110
-    if other == 'chameleon' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.128
         constrwidth_gamma_inf = 0.118
         constrwidth_gamma_sup = 0.138
@@ -86,11 +87,12 @@ if lens == "WFI2033":
         constr_gamma = 0.095
         constrwidth_gamma_inf = 0.085
         constrwidth_gamma_sup = 0.105
-    if other == 'composite' and handpicked == 'handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'composite' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.148
         constrwidth_gamma_inf = 0.138
         constrwidth_gamma_sup = 0.158
     filters = "ugrizJHK"
+    plane = 35
     print 'shear: ',constr_gamma
 if lens == "J1206":
     filters = "griK"
@@ -112,23 +114,23 @@ if radius == "120":
 if lens != "J1206":
     def declareweight(weightin):
         if weightin == "gal": weight_index = 4
-        if weightin == "z": weight_index = 6
-        if weightin == "mass": weight_index = 8
-        if weightin == "mass2": weight_index = 10
-        if weightin == "mass3": weight_index = 12
-        if weightin == "oneoverr": weight_index = 14
-        if weightin == "zoverr": weight_index = 16
-        if weightin == "massoverr": weight_index = 18
-        if weightin == "mass2overr": weight_index = 20
-        if weightin == "mass3overr": weight_index = 22
-        if weightin == "mass2rms": weight_index = 24
-        if weightin == "mass3rms": weight_index = 26
-        if weightin == "mass2overrrms": weight_index = 28
-        if weightin == "mass3overrrms": weight_index = 30
-        if weightin == "flexion": weight_index = 32
-        if weightin == "tidal": weight_index = 34
-        if weightin == "SIS": weight_index = 36
-        if weightin == "SIShalo": weight_index = 38
+        if weightin == "z": weight_index = 5
+        if weightin == "mass": weight_index = 6
+        if weightin == "mass2": weight_index = 7
+        if weightin == "mass3": weight_index = 8
+        if weightin == "oneoverr": weight_index = 9
+        if weightin == "zoverr": weight_index = 10
+        if weightin == "massoverr": weight_index = 11
+        if weightin == "mass2overr": weight_index = 12
+        if weightin == "mass3overr": weight_index = 13
+        if weightin == "mass2rms": weight_index = 14
+        if weightin == "mass3rms": weight_index = 15
+        if weightin == "mass2overrrms": weight_index = 16
+        if weightin == "mass3overrrms": weight_index = 17
+        if weightin == "flexion": weight_index = 18
+        if weightin == "tidal": weight_index = 19
+        if weightin == "SIS": weight_index = 20
+        if weightin == "SIShalo": weight_index = 21
         if weightin == "gamma": weight_index = None
         return weight_index
 if lens == "J1206":
@@ -285,9 +287,11 @@ def readfile(file,usecols):
 
 if conjoined == 1:
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
-    med1 = np.zeros(8)
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
     filters1 = "ugriz"
-    for j in range(8):
+    for j in range(field):
       for i in range(8):
         if weightin1 != "gamma":
             weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
@@ -322,10 +326,12 @@ if conjoined == 1:
         del weight1_
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))]) # absolute number, e.g. of galaxies within the lower width
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
-    
+
     ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
     filters1 = filters
-    for j in range(8):
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
       for i in range(8):
         if weightin1 != "gamma":
             kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index))
@@ -361,10 +367,12 @@ if conjoined == 1:
         del weight1_
 
 if conjoined == 2:
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
     filters1 = "ugriz"
-    for j in range(8):
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index))
@@ -415,7 +423,9 @@ if conjoined == 2:
         del weight2_
 
     filters1 = filters
-    for j in range(8):
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             kappa_, weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index))
@@ -465,11 +475,13 @@ if conjoined == 2:
 
 
 if conjoined == 3:
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
-    med3 = np.zeros(8)
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
+    med3 = np.zeros(field)
     filters1 = "ugriz"
-    for j in range(8):
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index))
@@ -533,7 +545,9 @@ if conjoined == 3:
         del weight3_
 
     filters1 = filters
-    for j in range(8):
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             kappa_, weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index))
@@ -597,12 +611,14 @@ if conjoined == 3:
         del weight3_
 
 if conjoined == 4:
-    med1 = np.zeros(8)
-    med2 = np.zeros(8)
-    med3 = np.zeros(8)
-    med4 = np.zeros(8)
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
+    med3 = np.zeros(field)
+    med4 = np.zeros(field)
     filters1 = "ugriz"
-    for j in range(8):
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index))
@@ -679,7 +695,9 @@ if conjoined == 4:
         del weight4_
 
     filters1 = filters
-    for j in range(8):
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
       for i in range(8):
         if weightin2 != "gamma":
             kappa_, weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index))

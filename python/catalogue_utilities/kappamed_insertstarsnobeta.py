@@ -181,7 +181,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             if initialized != 0:
             	cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],int(limmag),radius,innermsk,gap)
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
                 os.system('rm -f %s' % f)
                 cellkappagammafinal = cellkappagammastyle
                 initialized = 1
@@ -247,7 +247,7 @@ if lens == "WFI2033":
     z_s = 1.66
     z_l = 0.66
     brightmag = 16.90
-    limmag = 23
+    #limmag = 22.5
     pln = 35
     if (radiusstr == "45"):
         hstcoverage = 1

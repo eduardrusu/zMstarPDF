@@ -5,7 +5,7 @@
 #PBS -o Logb5.out
 #PBS -e Logb5.err
 #PBS -N 5
-#PBS -l mem=10gb
+#PBS -l mem=11gb
 #PBS -M eduardrusu@yahoo.com
 
 # Go to this job's working directory

@@ -5,7 +5,7 @@
 #PBS -o Logb3.out
 #PBS -e Logb3.err
 #PBS -N 3
-#PBS -l mem=10gb
+#PBS -l mem=15gb
 #PBS -M eduardrusu@yahoo.com
 
 # Go to this job's working directory

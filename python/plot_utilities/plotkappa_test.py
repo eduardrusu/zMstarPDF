@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import scipy as sp
 from scipy.stats import norm
 import numpy as np
+import sys
 
 min_kappa = -0.10
 max_kappa = 1
@@ -14,6 +15,7 @@ max_kappa_plot = 1
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
+file = str(sys.argv[1])
 #root = "/Users/cerusu/Dropbox/"
 root = "/Volumes/LaCieSubaru/kapparesults/"
 
@@ -24,7 +26,7 @@ def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
     #meanX = np.sum(kappa_counts * (kappa_values[:-1] + halfwidth)) / sum
     #meanX2 = np.sum(kappa_counts * (kappa_values[:-1] + halfwidth) ** 2) / sum
     #std = np.sqrt(meanX2 - meanX**2)
-    
+
     med = 0
     i = 0
     ok = False
@@ -37,7 +39,7 @@ def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
             median = kappa_values[i] + 2 * halfwidth
             ok = True
         i = i + 1
-    
+
     std = 0
     ok = False
     i = 0
@@ -50,7 +52,7 @@ def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
             std1_ = kappa_values[i] + 2 * halfwidth
             ok = True
         i = i + 1
-    
+
     std = 0
     ok = False
     i = 0
@@ -63,9 +65,9 @@ def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
             std1 = kappa_values[i] + 2 * halfwidth
             ok = True
         i = i + 1
-    
+
     stddev = (std1 - std1_) / 2
-    
+
     return median,stddev,kappa_values
 
 def smooth(x,window_len=11,window='hanning'):
@@ -75,24 +77,24 @@ def smooth(x,window_len=11,window='hanning'):
         The signal is prepared by introducing reflected copies of the signal
         (with the window size) in both ends so that transient parts are minimized
         in the begining and end part of the output signal.
-        
+
         input:
         x: the input signal
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
         flat window will produce a moving average smoothing.
-        
+
         output: the smoothed signal
 
         see also:
-        
+
         numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
         scipy.signal.lfilter
-        
+
         TODO: the window parameter could be the window itself if an array instead of a string
         NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
         """
-    
+
     if x.ndim != 1:
         raise ValueError, "smooth only accepts 1 dimension arrays."
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
@@ -112,7 +114,7 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
-kappa_0  = np.loadtxt("%skappahist_WFI2033_5innermask_nobeta_zgap-1.0_-1.0_fiducial_120_gal_120_gamma_120_oneoverr_45_gal_45_oneoverr_23_meds_increments2_2_2_2_2.cat" % root, usecols=[0], unpack=True)
+kappa_0  = np.loadtxt(file, usecols=[0], unpack=True)
 median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
 kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 
@@ -141,7 +143,7 @@ kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
 #kappa_6 = kappa_6 / np.sum(kappa_6 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #s = "med=%.3f std=%.3f LOS=%d" % (median,std1,LOS)
-#s0 = "med=%.3f std=%.3f" % (median0,stddev0)
+s0 = "med=%.3f std=%.3f" % (median0,stddev0)
 #s1 = "med=%.3f std=%.3f" % (median1,stddev1)
 #s2 = "med=%.3f std=%.3f" % (median2,stddev2)
 #s3 = "med=%.3f std=%.3f" % (median3,stddev3)
@@ -154,8 +156,8 @@ ax.tick_params(labelsize=15)
 plt.xlim(min_kappa_plot, max_kappa_plot)
 plt.ylim(0, 0.25)
 
-plt.plot(kappa_values[:-1][::1],kappa_0[::1],linewidth=2, label ='$45: 1 + 1/r + \gamma$', linestyle=':') # every 1th point
-#ax.text(0.6, 0.90, s0, fontsize=10, transform=ax.transAxes)
+plt.plot(kappa_values[:-1][::1],kappa_0[::1],linewidth=2, label ='', linestyle=':') # every 1th point
+ax.text(0.6, 0.90, s0, fontsize=10, transform=ax.transAxes)
 #plt.plot(kappa_values[:-1][::1],kappa_1[::1], linewidth=2, label ='$120: 1 + 1/r + \gamma$', linestyle='-.') # every 1th point
 #ax.text(0.6, 0.85, s1, fontsize=10, transform=ax.transAxes)
 #plt.plot(kappa_values[:-1][::1],kappa_2[::1], linewidth=2, label ='$120: 1 + \gamma$; 45: 1', linestyle='--') # every 1th point
@@ -180,4 +182,4 @@ plt.plot(kappa_values[:-1],smooth(kappa_0,winlen,'flat')[(winlen/2-1):-(winlen/2
 plt.xlabel(r'$\kappa$', fontsize=20)
 plt.ylabel(r'normalized counts', fontsize=20)
 plt.legend(loc="lower right")
-plt.savefig('%skappahist_test.png' % root, dpi=250, bbox_inches='tight')
+plt.savefig('%s.png' % file[:-4], dpi=250, bbox_inches='tight')
