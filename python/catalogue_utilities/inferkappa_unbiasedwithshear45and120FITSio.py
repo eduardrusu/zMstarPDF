@@ -1,7 +1,7 @@
 # CE Rusu July 21 2018
 # NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
 # Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
-# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty 5 23 measured med 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty notremovegroups 5 23 measured med 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
@@ -26,35 +26,36 @@ zsup = str(sys.argv[3])
 handpicked = str(sys.argv[4])
 other = str(sys.argv[5]) # refers to an optional suffix for the shear constraint
 empty = str(sys.argv[6])
-innermask = str(sys.argv[7])
-mag = str(sys.argv[8])
-compmeas = str(sys.argv[9])
-mode = str(sys.argv[10])
-conjoined = len(sys.argv) - 11 # total number of arguments including code name, minus the number of ones that are not weights
+removegroups = str(sys.argv[7])
+innermask = str(sys.argv[8])
+mag = str(sys.argv[9])
+compmeas = str(sys.argv[10])
+mode = str(sys.argv[11])
+conjoined = len(sys.argv) - 12 # total number of arguments including code name, minus the number of ones that are not weights
 
 if handpicked == 'nohandpicked': handpickedstr = ''
 else: handpickedstr = '_'+str(sys.argv[4])
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[11])
+    weightin1 = str(sys.argv[12])
 if conjoined == 2:
-    weightin1 = str(sys.argv[11])
-    weightin2 = str(sys.argv[12])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
 if conjoined == 3:
-    weightin1 = str(sys.argv[11])
-    weightin2 = str(sys.argv[12])
-    weightin3 = str(sys.argv[13])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
 if conjoined == 4:
-    weightin1 = str(sys.argv[11])
-    weightin2 = str(sys.argv[12])
-    weightin3 = str(sys.argv[13])
-    weightin4 = str(sys.argv[14])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
+    weightin4 = str(sys.argv[15])
 if conjoined == 5:
-    weightin1 = str(sys.argv[11])
-    weightin2 = str(sys.argv[12])
-    weightin3 = str(sys.argv[13])
-    weightin4 = str(sys.argv[14])
-    weightin5 = str(sys.argv[15])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
+    weightin4 = str(sys.argv[15])
+    weightin5 = str(sys.argv[16])
 
 print "conjoined:", conjoined
 root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
@@ -69,16 +70,24 @@ rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 #weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 20
+increment2 = 10
 increment3 = 4
 increment4 = 4
 increment5 = 4
+
+# these quantities are only for dealing with galaxy groups
+degree = np.pi / 180
+L_field = 4.0 * degree
+N_pix_per_dim = 4096
+L_pix = L_field / N_pix_per_dim
+rad = degree / 3600
 
 # define the shear constraints
 if lens == "WFI2033":
@@ -356,16 +365,18 @@ print "Reading..."
 
 if empty == 'empty': emptystr = '_emptymsk'
 else: emptystr = ''
+if removegroups == 'removegroups': groupsstr = '_removegroups'
+else: groupsstr = ''
 if conjoined == 5:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr)
 if conjoined == 4:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr)
 if conjoined == 3:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr)
 if conjoined == 2:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr)
 if conjoined == 1:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr)
 
 def readfile(file,usecols):
     f = fitsio.FITS(file)
@@ -634,6 +645,24 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
         #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1
 
 
@@ -685,6 +714,31 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
         #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          #global x
+          #global y
+          x = np.array([])
+          y = np.array([])
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              #x=np.append(x,k+1)
+              #y=np.append(y,len(id))
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
