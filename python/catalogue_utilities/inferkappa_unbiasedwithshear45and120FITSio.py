@@ -18,7 +18,7 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
-only8 = True # in this case run only 8/64 MS fields
+only8 = False # in this case run only 8/64 MS fields
 
 lens = str(sys.argv[1])
 zinf = str(sys.argv[2])
