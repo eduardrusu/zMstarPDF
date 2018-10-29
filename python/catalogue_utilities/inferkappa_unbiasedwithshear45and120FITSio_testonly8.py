@@ -58,15 +58,15 @@ if conjoined == 5:
     weightin5 = str(sys.argv[16])
 
 print "conjoined:", conjoined
-#root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
-root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 #root = "/Volumes/LaCieSubaru/MSweights/"
-#rootcode = "/lfs08/rusucs/code/"
+rootcode = "/lfs08/rusucs/code/"
 #rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
-rootcode = "/mnt/scratch/rusucs/code/"
-#rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
+#rootcode = "/mnt/scratch/rusucs/code/"
+rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
-rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
+#rootout = "/mnt/scratch/rusucs/%s/MSkapparesults/" % lens
 weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
@@ -417,13 +417,13 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
     for j in range(field):
       for i in range(8):
         if type(weight1_index) == int:
-            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s_cellxy.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
+            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s_cellxy.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3])
+            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3])
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
@@ -618,10 +618,10 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
     for j in range(field):
       for i in range(8):
         if type(weight1_index) == int:
-            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s_cellxy.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index))
+            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index))
             weight1_ = weight1_ / med_weight1
         else:
-            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s_cellxy.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3))
+            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -894,7 +894,7 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
     else: field = 8
     for j in range(field):
       for i in range(8):
-        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_6_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(i),mag,radius,innermask,zinf,zsup)
         f = fitsio.FITS(file)
         if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
