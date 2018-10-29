@@ -75,22 +75,26 @@ increment4 = 4
 
 # define the shear constraints
 if lens == "WFI2033":
-    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.100
-        constrwidth_gamma_inf = 0.090
-        constrwidth_gamma_sup = 0.110
-    if other == 'chameleon' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.118
-        constrwidth_gamma_sup = 0.138
-    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or innermask == '15' or float(zsup) > 0):
-        constr_gamma = 0.095
-        constrwidth_gamma_inf = 0.085
-        constrwidth_gamma_sup = 0.105
-    if other == 'composite' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.148
-        constrwidth_gamma_inf = 0.138
-        constrwidth_gamma_sup = 0.158
+    if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.119
+        constrwidth_gamma_inf = 0.109 # 0.116
+        constrwidth_gamma_sup = 0.129 # 0.121
+    if other == 'fiducial' and handpicked == 'removegrouplenshandpicked' and innermask == '5' and float(zsup) < 0:
+        constr_gamma = 0.107
+        constrwidth_gamma_inf = 0.097 # 0.102
+        constrwidth_gamma_sup = 0.117 # 0.112
+    if other == 'fiducial' and handpicked == 'removegrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
+        constr_gamma = 0.111
+        constrwidth_gamma_inf = 0.101 # 0.105
+        constrwidth_gamma_sup = 0.121 # 0.115
+    if other == 'chameleon' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.130
+        constrwidth_gamma_inf = 0.120 # 0.128
+        constrwidth_gamma_sup = 0.140 # 0.132
+    if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.152
+        constrwidth_gamma_inf = 0.142 # 0.148
+        constrwidth_gamma_sup = 0.162 # 0.156
     filters = "ugrizJHK"
     plane = 35
     print 'shear: ',constr_gamma

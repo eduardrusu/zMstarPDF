@@ -98,7 +98,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             cellx = grid_x.flatten()
             celly = grid_y.flatten()
             cellxy = np.array([cellx,celly])
-            posxy = np.array([-0.5 * L_field  + (1 + cellxy[0] + 0.5) * L_pix, -0.5 * L_field  + (1 + cellxy[1] + 0.5) * L_pix])
+            posxy = np.array([-0.5 * L_field  + (cellxy[0] + 0.5) * L_pix, -0.5 * L_field  + (cellxy[1] + 0.5) * L_pix])
             cellkappagamma = np.c_[cells,kappagamma[:,][(cellxy[0] * 4096 + cellxy[1]).astype(int)]]
             index = griddata(posxy.T, cells, (cat[:,index_posx], cat[:,index_posy]), method='nearest')
             sep = np.sqrt((posxy[0][index.astype(int)]-cat[:,index_posx])**2 + (posxy[1][index.astype(int)]-cat[:,index_posy])**2)*1/degree*3600
@@ -132,7 +132,6 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
                 w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] needs all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
             except:
-                #print len(w_gal_2X[w_gal_2X==0])
                 missing = np.array([])
                 cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
                 for k in range(int(np.max(index_all))):
@@ -182,7 +181,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             if initialized != 0:
             	cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s_cellxy.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
                 os.system('rm -f %s' % f)
                 cellkappagammafinal = cellkappagammastyle
                 initialized = 1
@@ -310,22 +309,22 @@ if lens == "J1206":
         fracspec23 = 0.19
         fracspec24 = 0.04
 
-rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#rootwghtratios = "/lfs08/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/u/flashscratch/c/cerusu/MSwghtratios/"
-#rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+rootwghtratios = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
 #rootwghtratios = "/Volumes/LaCieSubaru/MSweights/"
-rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
+#rootgals = "/lfs08/rusucs/%s/MSgals/" % lens
 #rootgals = "/u/flashscratch/c/cerusu/MSgals/"
-#rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
+rootgals = "/mnt/scratch/rusucs/%s/MSgals/" % lens
 #rootgals = "/Volumes/LaCieSubaru/MSgals/"
-rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
+#rootkappaplanes = "/lfs08/rusucs/kappaplanes/"
 #rootkappaplanes = "/u/flashscratch/c/cerusu/kappaplanes/"
-#rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
+rootkappaplanes = "/mnt/scratch/rusucs/kappaplanes/"
 #rootkappaplanes = "/Volumes/LaCieSubaru/kappaplanes/"
-rootstars = "/lfs08/rusucs/insertstars/"
+#rootstars = "/lfs08/rusucs/insertstars/"
 #rootstars = "/u/flashscratch/c/cerusu/insertstars/"
 #rootstars = "/Volumes/LaCieSubaru/insertstars/"
-#rootstars = "/mnt/scratch/rusucs/insertstars/"
+rootstars = "/mnt/scratch/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
