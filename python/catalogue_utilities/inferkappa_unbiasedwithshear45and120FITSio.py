@@ -2,6 +2,7 @@
 # NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
 # Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
 # Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty notremovegroups 5 23 measured med 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# if shear is being used, it should be the second weight used in either radius
 # do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
 # the code currently works for maglim 23 (WFI2033)
 # Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
