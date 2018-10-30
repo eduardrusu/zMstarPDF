@@ -25,13 +25,13 @@ def pause():
 
 def readbinary(replacestr):
     replace = plane + replacestr
-    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (replace,lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("sed \"35s/.*/  fpt = fopen (\\\"kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat\\\", \\\"w\\\");/\"  readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_ > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,int(limmag),radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("gcc readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c -o compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,int(limmag),radius,innermsk,gap,lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("./compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,int(limmag),radius,innermsk,gap))
-    os.system("rm -f compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("sed \"11s/.*/  const char kappa_file_name[]   = \\\"\%s\\\";/\" readKappaBinary.c > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (replace,lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("sed \"35s/.*/  fpt = fopen (\\\"kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat\\\", \\\"w\\\");/\"  readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_ > readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,float(limmag),radius,innermsk,gap,lens,type,plane,float(limmag),radius,innermsk,gap,lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c_" % (lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("gcc readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c -o compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,float(limmag),radius,innermsk,gap,lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("./compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,float(limmag),radius,innermsk,gap))
+    os.system("rm -f compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,float(limmag),radius,innermsk,gap))
 
 def contaminants(count,cont_ugr,posxmin,posxmax,posymin,posymax,star_imag,star_z,star_mstar):
     cont = np.random.random_integers(0,499,int(count * cont_ugr)) # randomly select from the star catalogues which contain 500 stars each
@@ -452,13 +452,13 @@ start_readkappa = time.time()
 if str(pln) in plane:
     os.chdir(rootkappaplanes)
     readbinary(".kappa")
-    pos1D,kappa = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), unpack=True)
+    pos1D,kappa = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), unpack=True)
     readbinary(".gamma_1")
-    gamma1 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
+    gamma1 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
     readbinary(".gamma_2")
-    gamma2 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
+    gamma2 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
     kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
-    os.system("rm -f kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,int(limmag),radius,innermsk,gap))
+    os.system("rm -f kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap))
 else: sys.exit('Wrong MS plane for this lens!!!')
 
 ############################
@@ -757,6 +757,7 @@ start_radius = time.time()
 
 cat = cat_ugrizJHK
 bands = "ugrizJHK"
+if lens == "J1206": bands = "griK"
 weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 cat = cat_ugriz
