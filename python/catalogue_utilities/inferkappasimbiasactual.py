@@ -352,7 +352,7 @@ if conjoined == 3:
 if conjoined == 2:
     output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
 if conjoined == 1:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1,constr_weight1)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1)
 
 def readfile(file,usecols):
     f = fitsio.FITS(file)
