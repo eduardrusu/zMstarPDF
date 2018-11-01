@@ -1,8 +1,13 @@
-# This code takes 10000 samples of overdensities from the permited range around the measured overdensities, and computes the distribution of kappa for all fields within a very narrow range of overdensities of those 10000. It outputs the statistics for the 10000 distributions, as well as the true kappa for each of those.
-# The difference from inferkappasimbias.py is that this code reads the actual observed overdensities from file. On the other hand, inferkappasimbias.py is more easy to script
-# Run as python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal
-# weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
-# the code is written such that, if shear is used as overdensity, it should be the second weight used (unless only one weight is used);
+# CE Rusu July 21 2018
+# NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
+# Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
+# Run as python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 nohandpicked fiducial notempty notremovegroups 5 23 measured med 120_gal 120_gamma 120_oneoverr 45_gal 45_oneoverr
+# if shear is being used, it should be the second weight used in either radius
+# do not use more than 5 constraints in total, of which maximum 4 can refer to the same radius; do not mix order of 45_ and 120_; e.g.: 45_gal 45_oneoverr 120_gamma correct, but 45_gal 120_gamma 45_oneoverr incorrect
+# the code currently works for maglim 23 (WFI2033)
+# Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
+# for each redius, weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
+# the code is written such that, if shear is used as overdensity, it should be the second weight used in either radius
 
 import sys
 import os
@@ -19,34 +24,39 @@ only8 = True # in this case run only 8/64 MS fields
 lens = str(sys.argv[1])
 zinf = str(sys.argv[2])
 zsup = str(sys.argv[3])
-empty = str(sys.argv[4])
-removegroups = str(sys.argv[5])
-innermask = str(sys.argv[6])
-mag = str(sys.argv[7])
-compmeas = str(sys.argv[8])
-mode = str(sys.argv[9])
-conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
+handpicked = str(sys.argv[4])
+other = str(sys.argv[5]) # refers to an optional suffix for the shear constraint
+empty = str(sys.argv[6])
+removegroups = str(sys.argv[7])
+innermask = str(sys.argv[8])
+mag = str(sys.argv[9])
+compmeas = str(sys.argv[10])
+mode = str(sys.argv[11])
+conjoined = len(sys.argv) - 12 # total number of arguments including code name, minus the number of ones that are not weights
+
+if handpicked == 'nohandpicked': handpickedstr = ''
+else: handpickedstr = '_'+str(sys.argv[4])
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[10])
+    weightin1 = str(sys.argv[12])
 if conjoined == 2:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
 if conjoined == 3:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
 if conjoined == 4:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
+    weightin4 = str(sys.argv[15])
 if conjoined == 5:
-    weightin1 = str(sys.argv[10])
-    weightin2 = str(sys.argv[11])
-    weightin3 = str(sys.argv[12])
-    weightin4 = str(sys.argv[13])
-    weightin5 = str(sys.argv[14])
+    weightin1 = str(sys.argv[12])
+    weightin2 = str(sys.argv[13])
+    weightin3 = str(sys.argv[14])
+    weightin4 = str(sys.argv[15])
+    weightin5 = str(sys.argv[16])
 
 print "conjoined:", conjoined
 root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
@@ -58,16 +68,18 @@ rootcode = "/lfs08/rusucs/code/"
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
-weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner_removehandpicked_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+#weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
-limsigma = 1 # sigma limits on either side of the assumed gaussians
+limsigma = 2 # sigma limits on either side of the assumed gaussians
+bin_stat = 2000
+min_kappa = -0.10
+max_kappa = 1
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
 increment2 = 4
 increment3 = 4
 increment4 = 4
 increment5 = 4
-samples = 1000
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -75,6 +87,39 @@ L_field = 4.0 * degree
 N_pix_per_dim = 4096
 L_pix = L_field / N_pix_per_dim
 rad = degree / 3600
+
+# define the shear constraints
+if lens == "WFI2033":
+    if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.119
+        constrwidth_gamma_inf = 0.116# 0.109 #
+        constrwidth_gamma_sup = 0.121# 0.129 #
+    if other == 'fiducial' and handpicked == 'removegrouplenshandpicked' and innermask == '5' and float(zsup) < 0:
+        constr_gamma = 0.107
+        constrwidth_gamma_inf = 0.102# 0.097 #
+        constrwidth_gamma_sup = 0.112# 0.117 #
+    if other == 'fiducial' and handpicked == 'removegrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
+        constr_gamma = 0.111
+        constrwidth_gamma_inf = 0.105# .101 #
+        constrwidth_gamma_sup = 0.115# 0.121 #
+    if other == 'chameleon' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.130
+        constrwidth_gamma_inf = 0.128# 0.120 #
+        constrwidth_gamma_sup = 0.132# 0.140 #
+    if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.152
+        constrwidth_gamma_inf = 0.148# 0.142 #
+        constrwidth_gamma_sup = 0.156# 0.162 #
+    filters = "ugrizJHK"
+    plane = 35
+    print 'shear: ',constr_gamma
+if lens == "J1206":
+    filters = "griK"
+    plane = 34
+    if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or handpicked == 'nohandpicked'):
+        constr_gamma = 0.04
+        constrwidth_gamma_inf = 0.03
+        constrwidth_gamma_sup = 0.05
 
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile
@@ -125,169 +170,155 @@ if conjoined >= 2:
             if conjoined == 5:
                 weight5_index = declareweight(weightin5)
 
-if lens == "WFI2033":
-    constr_gamma = 0.119
-    constrwidth_gamma_inf = 0.109# 0.109 #
-    constrwidth_gamma_sup = 0.129# 0.129 #
-    filters = "ugrizJHK"
-    plane = 35
-    print 'shear: ',constr_gamma
-if lens == "J1206":
-    filters = "griK"
-    plane = 34
-    constr_gamma = 0.04
-    constrwidth_gamma_inf = 0.03
-    constrwidth_gamma_sup = 0.05
-
 # read weight constraints
-constr_gamma = 0.119
-constrwidth_gamma_inf = 0.116# 0.109 #
-constrwidth_gamma_sup = 0.121# 0.129 #
+constr_gal_meds45 = 3.0
+constrwidth_gal_meds_inf45 = constr_gal_meds45 - 0.05
+constrwidth_gal_meds_sup45 = constr_gal_meds45 + 0.05
 
-constr_gal_meds45 = weightsfile[measured_index45][0]
-constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
-constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
+constr_gal_meds120 = 2.0
+constrwidth_gal_meds_inf120 = constr_gal_meds120 - 0.05
+constrwidth_gal_meds_sup120 = constr_gal_meds120 + 0.05
 
-constr_z_meds45 = weightsfile[measured_index45][1]
-constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
-constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
+#constr_z_meds45 = weightsfile[measured_index45][1]
+#constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
+#constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
 
-constr_mass_meds45 = weightsfile[measured_index45][2]
-constrwidth_mass_meds_inf45 = weightsfile[measured_index_inf45][2]
-constrwidth_mass_meds_sup45 = weightsfile[measured_index_sup45][2]
+#constr_mass_meds45 = weightsfile[measured_index45][2]
+#constrwidth_mass_meds_inf45 = weightsfile[measured_index_inf45][2]
+#constrwidth_mass_meds_sup45 = weightsfile[measured_index_sup45][2]
 
-constr_mass2_meds45 = weightsfile[measured_index45][3]
-constrwidth_mass2_meds_inf45 = weightsfile[measured_index_inf45][3]
-constrwidth_mass2_meds_sup45 = weightsfile[measured_index_sup45][3]
+#constr_mass2_meds45 = weightsfile[measured_index45][3]
+#constrwidth_mass2_meds_inf45 = weightsfile[measured_index_inf45][3]
+#constrwidth_mass2_meds_sup45 = weightsfile[measured_index_sup45][3]
 
-constr_mass3_meds45 = weightsfile[measured_index45][4]
-constrwidth_mass3_meds_inf45 = weightsfile[measured_index_inf45][4]
-constrwidth_mass3_meds_sup45 = weightsfile[measured_index_sup45][4]
+#constr_mass3_meds45 = weightsfile[measured_index45][4]
+#constrwidth_mass3_meds_inf45 = weightsfile[measured_index_inf45][4]
+#constrwidth_mass3_meds_sup45 = weightsfile[measured_index_sup45][4]
 
-constr_oneoverr_meds45 = weightsfile[measured_index45][5]
-constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][5]
-constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][5]
+#constr_oneoverr_meds45 = weightsfile[measured_index45][5]
+#constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][5]
+#constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][5]
 
-constr_zoverr_meds45 = weightsfile[measured_index45][6]
-constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][6]
-constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][6]
+#constr_zoverr_meds45 = weightsfile[measured_index45][6]
+#constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][6]
+#constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][6]
 
-constr_massoverr_meds45 = weightsfile[measured_index45][7]
-constrwidth_massoverr_meds_inf45 = weightsfile[measured_index_inf45][7]
-constrwidth_massoverr_meds_sup45 = weightsfile[measured_index_sup45][7]
+#constr_massoverr_meds45 = weightsfile[measured_index45][7]
+#constrwidth_massoverr_meds_inf45 = weightsfile[measured_index_inf45][7]
+#constrwidth_massoverr_meds_sup45 = weightsfile[measured_index_sup45][7]
 
-constr_mass2overr_meds45 = weightsfile[measured_index45][8]
-constrwidth_mass2overr_meds_inf45 = weightsfile[measured_index_inf45][8]
-constrwidth_mass2overr_meds_sup45 = weightsfile[measured_index_sup45][8]
+#constr_mass2overr_meds45 = weightsfile[measured_index45][8]
+#constrwidth_mass2overr_meds_inf45 = weightsfile[measured_index_inf45][8]
+#constrwidth_mass2overr_meds_sup45 = weightsfile[measured_index_sup45][8]
 
-constr_mass3overr_meds45 = weightsfile[measured_index45][9]
-constrwidth_mass3overr_meds_inf45 = weightsfile[measured_index_inf45][9]
-constrwidth_mass3overr_meds_sup45 = weightsfile[measured_index_sup45][9]
+#constr_mass3overr_meds45 = weightsfile[measured_index45][9]
+#constrwidth_mass3overr_meds_inf45 = weightsfile[measured_index_inf45][9]
+#constrwidth_mass3overr_meds_sup45 = weightsfile[measured_index_sup45][9]
 
-constr_mass2rms_meds45 = weightsfile[measured_index45][10]
-constrwidth_mass2rms_meds_inf45 = weightsfile[measured_index_inf45][10]
-constrwidth_mass2rms_meds_sup45 = weightsfile[measured_index_sup45][10]
+#constr_mass2rms_meds45 = weightsfile[measured_index45][10]
+#constrwidth_mass2rms_meds_inf45 = weightsfile[measured_index_inf45][10]
+#constrwidth_mass2rms_meds_sup45 = weightsfile[measured_index_sup45][10]
 
-constr_mass3rms_meds45 = weightsfile[measured_index45][11]
-constrwidth_mass3rms_meds_inf45 = weightsfile[measured_index_inf45][11]
-constrwidth_mass3rms_meds_sup45 = weightsfile[measured_index_sup45][11]
+#constr_mass3rms_meds45 = weightsfile[measured_index45][11]
+#constrwidth_mass3rms_meds_inf45 = weightsfile[measured_index_inf45][11]
+#constrwidth_mass3rms_meds_sup45 = weightsfile[measured_index_sup45][11]
 
-constr_mass2overrrms_meds45 = weightsfile[measured_index45][12]
-constrwidth_mass2overrrms_meds_inf45 = weightsfile[measured_index_inf45][12]
-constrwidth_mass2overrrms_meds_sup45 = weightsfile[measured_index_sup45][12]
+#constr_mass2overrrms_meds45 = weightsfile[measured_index45][12]
+#constrwidth_mass2overrrms_meds_inf45 = weightsfile[measured_index_inf45][12]
+#constrwidth_mass2overrrms_meds_sup45 = weightsfile[measured_index_sup45][12]
 
-constr_mass3overrrms_meds45 = weightsfile[measured_index45][13]
-constrwidth_mass3overrrms_meds_inf45 = weightsfile[measured_index_inf45][13]
-constrwidth_mass3overrrms_meds_sup45 = weightsfile[measured_index_sup45][13]
+#constr_mass3overrrms_meds45 = weightsfile[measured_index45][13]
+#constrwidth_mass3overrrms_meds_inf45 = weightsfile[measured_index_inf45][13]
+#constrwidth_mass3overrrms_meds_sup45 = weightsfile[measured_index_sup45][13]
 
-constr_flexion_meds45 = weightsfile[measured_index45][14]
-constrwidth_flexion_meds_inf45 = weightsfile[measured_index_inf45][14]
-constrwidth_flexion_meds_sup45 = weightsfile[measured_index_sup45][14]
+#constr_flexion_meds45 = weightsfile[measured_index45][14]
+#constrwidth_flexion_meds_inf45 = weightsfile[measured_index_inf45][14]
+#constrwidth_flexion_meds_sup45 = weightsfile[measured_index_sup45][14]
 
-constr_tidal_meds45 = weightsfile[measured_index45][15]
-constrwidth_tidal_meds_inf45 = weightsfile[measured_index_inf45][15]
-constrwidth_tidal_meds_sup45 = weightsfile[measured_index_sup45][15]
+#constr_tidal_meds45 = weightsfile[measured_index45][15]
+#constrwidth_tidal_meds_inf45 = weightsfile[measured_index_inf45][15]
+#constrwidth_tidal_meds_sup45 = weightsfile[measured_index_sup45][15]
 
-constr_SIS_meds45 = weightsfile[measured_index45][16]
-constrwidth_SIS_meds_inf45 = weightsfile[measured_index_inf45][16]
-constrwidth_SIS_meds_sup45 = weightsfile[measured_index_sup45][16]
+#constr_SIS_meds45 = weightsfile[measured_index45][16]
+#constrwidth_SIS_meds_inf45 = weightsfile[measured_index_inf45][16]
+#constrwidth_SIS_meds_sup45 = weightsfile[measured_index_sup45][16]
 
-constr_SIShalo_meds45 = weightsfile[measured_index45][17]
-constrwidth_SIShalo_meds_inf45 = weightsfile[measured_index_inf45][17]
-constrwidth_SIShalo_meds_sup45 = weightsfile[measured_index_sup45][17]
+#constr_SIShalo_meds45 = weightsfile[measured_index45][17]
+#constrwidth_SIShalo_meds_inf45 = weightsfile[measured_index_inf45][17]
+#constrwidth_SIShalo_meds_sup45 = weightsfile[measured_index_sup45][17]
 
 
-constr_gal_meds120 = weightsfile[measured_index120][0]
-constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
-constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
+#constr_gal_meds120 = weightsfile[measured_index120][0]
+#constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
+#constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
 
-constr_z_meds120 = weightsfile[measured_index120][1]
-constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
-constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
+#constr_z_meds120 = weightsfile[measured_index120][1]
+#constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
+#constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
 
-constr_mass_meds120 = weightsfile[measured_index120][2]
-constrwidth_mass_meds_inf120 = weightsfile[measured_index_inf120][2]
-constrwidth_mass_meds_sup120 = weightsfile[measured_index_sup120][2]
+#constr_mass_meds120 = weightsfile[measured_index120][2]
+#constrwidth_mass_meds_inf120 = weightsfile[measured_index_inf120][2]
+#constrwidth_mass_meds_sup120 = weightsfile[measured_index_sup120][2]
 
-constr_mass2_meds120 = weightsfile[measured_index120][3]
-constrwidth_mass2_meds_inf120 = weightsfile[measured_index_inf120][3]
-constrwidth_mass2_meds_sup120 = weightsfile[measured_index_sup120][3]
+#constr_mass2_meds120 = weightsfile[measured_index120][3]
+#constrwidth_mass2_meds_inf120 = weightsfile[measured_index_inf120][3]
+#constrwidth_mass2_meds_sup120 = weightsfile[measured_index_sup120][3]
 
-constr_mass3_meds120 = weightsfile[measured_index120][4]
-constrwidth_mass3_meds_inf120 = weightsfile[measured_index_inf120][4]
-constrwidth_mass3_meds_sup120 = weightsfile[measured_index_sup120][4]
+#constr_mass3_meds120 = weightsfile[measured_index120][4]
+#constrwidth_mass3_meds_inf120 = weightsfile[measured_index_inf120][4]
+#constrwidth_mass3_meds_sup120 = weightsfile[measured_index_sup120][4]
 
-constr_oneoverr_meds120 = weightsfile[measured_index120][5]
-constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][5]
-constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][5]
+#constr_oneoverr_meds120 = weightsfile[measured_index120][5]
+#constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][5]
+#constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][5]
 
-constr_zoverr_meds120 = weightsfile[measured_index120][6]
-constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][6]
-constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][6]
+#constr_zoverr_meds120 = weightsfile[measured_index120][6]
+#constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][6]
+#constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][6]
 
-constr_massoverr_meds120 = weightsfile[measured_index120][7]
-constrwidth_massoverr_meds_inf120 = weightsfile[measured_index_inf120][7]
-constrwidth_massoverr_meds_sup120 = weightsfile[measured_index_sup120][7]
+#constr_massoverr_meds120 = weightsfile[measured_index120][7]
+#constrwidth_massoverr_meds_inf120 = weightsfile[measured_index_inf120][7]
+#constrwidth_massoverr_meds_sup120 = weightsfile[measured_index_sup120][7]
 
-constr_mass2overr_meds120 = weightsfile[measured_index120][8]
-constrwidth_mass2overr_meds_inf120 = weightsfile[measured_index_inf120][8]
-constrwidth_mass2overr_meds_sup120 = weightsfile[measured_index_sup120][8]
+#constr_mass2overr_meds120 = weightsfile[measured_index120][8]
+#constrwidth_mass2overr_meds_inf120 = weightsfile[measured_index_inf120][8]
+#constrwidth_mass2overr_meds_sup120 = weightsfile[measured_index_sup120][8]
 
-constr_mass3overr_meds120 = weightsfile[measured_index120][9]
-constrwidth_mass3overr_meds_inf120 = weightsfile[measured_index_inf120][9]
-constrwidth_mass3overr_meds_sup120 = weightsfile[measured_index_sup120][9]
+#constr_mass3overr_meds120 = weightsfile[measured_index120][9]
+#constrwidth_mass3overr_meds_inf120 = weightsfile[measured_index_inf120][9]
+#constrwidth_mass3overr_meds_sup120 = weightsfile[measured_index_sup120][9]
 
-constr_mass2rms_meds120 = weightsfile[measured_index120][10]
-constrwidth_mass2rms_meds_inf120 = weightsfile[measured_index_inf120][10]
-constrwidth_mass2rms_meds_sup120 = weightsfile[measured_index_sup120][10]
+#constr_mass2rms_meds120 = weightsfile[measured_index120][10]
+#constrwidth_mass2rms_meds_inf120 = weightsfile[measured_index_inf120][10]
+#constrwidth_mass2rms_meds_sup120 = weightsfile[measured_index_sup120][10]
 
-constr_mass3rms_meds120 = weightsfile[measured_index120][11]
-constrwidth_mass3rms_meds_inf120 = weightsfile[measured_index_inf120][11]
-constrwidth_mass3rms_meds_sup120 = weightsfile[measured_index_sup120][11]
+#constr_mass3rms_meds120 = weightsfile[measured_index120][11]
+#constrwidth_mass3rms_meds_inf120 = weightsfile[measured_index_inf120][11]
+#constrwidth_mass3rms_meds_sup120 = weightsfile[measured_index_sup120][11]
 
-constr_mass2overrrms_meds120 = weightsfile[measured_index120][12]
-constrwidth_mass2overrrms_meds_inf120 = weightsfile[measured_index_inf120][12]
-constrwidth_mass2overrrms_meds_sup120 = weightsfile[measured_index_sup120][12]
+#constr_mass2overrrms_meds120 = weightsfile[measured_index120][12]
+#constrwidth_mass2overrrms_meds_inf120 = weightsfile[measured_index_inf120][12]
+#constrwidth_mass2overrrms_meds_sup120 = weightsfile[measured_index_sup120][12]
 
-constr_mass3overrrms_meds120 = weightsfile[measured_index120][13]
-constrwidth_mass3overrrms_meds_inf120 = weightsfile[measured_index_inf120][13]
-constrwidth_mass3overrrms_meds_sup120 = weightsfile[measured_index_sup120][13]
+#constr_mass3overrrms_meds120 = weightsfile[measured_index120][13]
+#constrwidth_mass3overrrms_meds_inf120 = weightsfile[measured_index_inf120][13]
+#constrwidth_mass3overrrms_meds_sup120 = weightsfile[measured_index_sup120][13]
 
-constr_flexion_meds120 = weightsfile[measured_index120][14]
-constrwidth_flexion_meds_inf120 = weightsfile[measured_index_inf120][14]
-constrwidth_flexion_meds_sup120 = weightsfile[measured_index_sup120][14]
+#constr_flexion_meds120 = weightsfile[measured_index120][14]
+#constrwidth_flexion_meds_inf120 = weightsfile[measured_index_inf120][14]
+#constrwidth_flexion_meds_sup120 = weightsfile[measured_index_sup120][14]
 
-constr_tidal_meds120 = weightsfile[measured_index120][15]
-constrwidth_tidal_meds_inf120 = weightsfile[measured_index_inf120][15]
-constrwidth_tidal_meds_sup120 = weightsfile[measured_index_sup120][15]
+#constr_tidal_meds120 = weightsfile[measured_index120][15]
+#constrwidth_tidal_meds_inf120 = weightsfile[measured_index_inf120][15]
+#constrwidth_tidal_meds_sup120 = weightsfile[measured_index_sup120][15]
 
-constr_SIS_meds120 = weightsfile[measured_index120][16]
-constrwidth_SIS_meds_inf120 = weightsfile[measured_index_inf120][16]
-constrwidth_SIS_meds_sup120 = weightsfile[measured_index_sup120][16]
+#constr_SIS_meds120 = weightsfile[measured_index120][16]
+#constrwidth_SIS_meds_inf120 = weightsfile[measured_index_inf120][16]
+#constrwidth_SIS_meds_sup120 = weightsfile[measured_index_sup120][16]
 
-constr_SIShalo_meds120 = weightsfile[measured_index120][17]
-constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
-constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
+#constr_SIShalo_meds120 = weightsfile[measured_index120][17]
+#constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
+#constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
 
 def declareweight(weightin):
     if weightin.split('_')[0] == "45":
@@ -344,15 +375,15 @@ else: emptystr = ''
 if removegroups == 'removegroups': groupsstr = '_removegroups'
 else: groupsstr = ''
 if conjoined == 5:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,constr_weight1,constr_weight2,constr_weight3,constr_weight4,constr_weight5)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s_%s_%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,constr_weight1,constr_weight2,constr_weight3,constr_weight4,constr_weight5)
 if conjoined == 4:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,weightin4,mag,mode,constr_weight1,constr_weight2,constr_weight3,constr_weight4)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s_%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,constr_weight1,constr_weight2,constr_weight3,constr_weight4)
 if conjoined == 3:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,mag,mode,constr_weight1,constr_weight2,constr_weight3)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,constr_weight1,constr_weight2,constr_weight3)
 if conjoined == 2:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,constr_weight1,constr_weight3)
 if conjoined == 1:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1,constr_weight1)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s_%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr,constr_weight1)
 
 def readfile(file,usecols):
     f = fitsio.FITS(file)
@@ -581,7 +612,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
-    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
 
 
 def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
@@ -832,7 +863,6 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
         print np.shape(kappa_)
         del weight
         weight = np.copy(weight4_)
-        id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
@@ -1106,7 +1136,6 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
             print np.shape(kappa_)
             del weight
             weight = np.copy(weight4_)
-            id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
@@ -1562,101 +1591,150 @@ if conjoined == 5:
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
+gauss = sp.stats.norm(0, 1)
 start1 = time.time()
+LOS = 0
+print np.shape(kappa)
 
 if conjoined == 5:
-    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
-    true = np.zeros(sizing)
-    med = np.zeros(sizing)
-    std16 = np.zeros(sizing)
-    std84 = np.zeros(sizing)
-    los = np.zeros(sizing)
-    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
-    for i in range(sizing):
-        print i, "/",sizing
-        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0) & (weight2 * med_weight1 >= round(weight2[rand[i]] * med_weight1) - increment2/2.0) & (weight2 * med_weight1 < round(weight2[rand[i]] * med_weight1) + increment2/2.0) & (weight3 * med_weight1 >= round(weight3[rand[i]] * med_weight1) - increment3/2.0) & (weight3 * med_weight1 < round(weight3[rand[i]] * med_weight1) + increment3/2.0) & (weight4 * med_weight1 >= round(weight4[rand[i]] * med_weight1) - increment4/2.0) & (weight4 * med_weight1 < round(weight4[rand[i]] * med_weight1) + increment4/2.0) & (weight5 * med_weight1 >= round(weight5[rand[i]] * med_weight1) - increment5/2.0) & (weight5 * med_weight1 < round(weight5[rand[i]] * med_weight1) + increment5/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
-        if data.size > 0:
-            true[i] = kappa[rand[i]]
-            med[i] = np.median(data)
-            std16[i] = np.percentile(data,16)
-            std84[i] = np.percentile(data,84)
-            los[i] = data.size
+    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                    for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                        if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                        if data.size > 0:
+                            if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                            else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                            if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                            else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                            if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                            else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                            if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                            else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                            if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                            else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
+                            if LOS == 0:
+                                unbiased_kappa_constrained = kappa_constrained
+                            else:
+                                unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                        LOS = LOS + data.size
 
 if conjoined == 4:
-    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
-    true = np.zeros(sizing)
-    med = np.zeros(sizing)
-    std16 = np.zeros(sizing)
-    std84 = np.zeros(sizing)
-    los = np.zeros(sizing)
-    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
-    for i in range(sizing):
-        print i, "/",sizing
-        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0) & (weight2 * med_weight1 >= round(weight2[rand[i]] * med_weight1) - increment2/2.0) & (weight2 * med_weight1 < round(weight2[rand[i]] * med_weight1) + increment2/2.0) & (weight3 * med_weight1 >= round(weight3[rand[i]] * med_weight1) - increment3/2.0) & (weight3 * med_weight1 < round(weight3[rand[i]] * med_weight1) + increment3/2.0) & (weight4 * med_weight1 >= round(weight4[rand[i]] * med_weight1) - increment4/2.0) & (weight4 * med_weight1 < round(weight4[rand[i]] * med_weight1) + increment4/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
-        if data.size > 0:
-            true[i] = kappa[rand[i]]
-            med[i] = np.median(data)
-            std16[i] = np.percentile(data,16)
-            std84[i] = np.percentile(data,84)
-            los[i] = data.size
+    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                        if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                        else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / data.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
 
 if conjoined == 3:
-    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
-    true = np.zeros(sizing)
-    med = np.zeros(sizing)
-    std16 = np.zeros(sizing)
-    std84 = np.zeros(sizing)
-    los = np.zeros(sizing)
-    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
-    for i in range(sizing):
-        print i, "/",sizing
-        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0) & (weight2 * med_weight1 >= round(weight2[rand[i]] * med_weight1) - increment2/2.0) & (weight2 * med_weight1 < round(weight2[rand[i]] * med_weight1) + increment2/2.0) & (weight3 * med_weight1 >= round(weight3[rand[i]] * med_weight1) - increment3/2.0) & (weight3 * med_weight1 < round(weight3[rand[i]] * med_weight1) + increment3/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
-        if data.size > 0:
-            true[i] = kappa[rand[i]]
-            med[i] = np.median(data)
-            std16[i] = np.percentile(data,16)
-            std84[i] = np.percentile(data,84)
-            los[i] = data.size
+    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") "#, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                        if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / data.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
 
 if conjoined == 2:
-    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
-    true = np.zeros(sizing)
-    med = np.zeros(sizing)
-    std16 = np.zeros(sizing)
-    std84 = np.zeros(sizing)
-    los = np.zeros(sizing)
-    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
-    for i in range(sizing):
-        print i, "/",sizing
-        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0) & (weight2 * med_weight1 >= round(weight2[rand[i]] * med_weight1) - increment2/2.0) & (weight2 * med_weight1 < round(weight2[rand[i]] * med_weight1) + increment2/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
-        if data.size > 0:
-            true[i] = kappa[rand[i]]
-            med[i] = np.median(data)
-            std16[i] = np.percentile(data,16)
-            std84[i] = np.percentile(data,84)
-            los[i] = data.size
+    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0)]
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
 
 if conjoined == 1:
-    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
-    true = np.zeros(sizing)
-    med = np.zeros(sizing)
-    std16 = np.zeros(sizing)
-    std84 = np.zeros(sizing)
-    los = np.zeros(sizing)
-    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
-    for i in range(sizing):
-        print i, "/",sizing
-        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
-        if data.size > 0:
-            true[i] = kappa[rand[i]]
-            med[i] = np.median(data)
-            std16[i] = np.percentile(data,16)
-            std84[i] = np.percentile(data,84)
-            los[i] = data.size
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0)] # this is equation 3 in Greene et al.
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf) # for asymmetric limits, implement a gaussian on each side
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 / data.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
+                    LOS = LOS + data.size
 
-head = "kappa_true kappa_median 16th 84th kappa_LOS"
-np.savetxt(output,np.c_[true,med,std16,std84,los],fmt='%s',delimiter='\t',newline='\n',header=head)
+head = 'LOS: %d' % np.array([LOS])
+np.savetxt(output,unbiased_kappa_constrained,header=head,fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
+
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
+    print "increment1 = ", increment1
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
+    print "increment2 = ", increment2
+if (conjoined == 3) | (conjoined == 4) | (conjoined == 5):
+    print "increment3 = ", increment3
+if (conjoined == 4) | (conjoined == 5):
+    print "increment4 = ", increment4
+if conjoined == 5:
+    print "increment5 = ", increment5
+
 print(" Total time --- %s seconds ---" % (time.time() - start_time))
 
 print 'Done!'
