@@ -70,7 +70,7 @@ col2 = (kappastat_120[0])
 rects2 = ax.bar(ind + 2*width, col2, width, color='b')
 
 #ax.set_ylim([0.00,0.05])
-ax.set_ylim([-0.02,0.10])
+ax.set_ylim([0.00,0.09])
 ax.set_ylabel('median$_\kappa$')
 #ax.set_ylabel('$\mathrm{median}_{\kappa_\mathrm{med} - \kappa_\mathrm{true}}$')
 ax.set_xticks(ind + 2*width)

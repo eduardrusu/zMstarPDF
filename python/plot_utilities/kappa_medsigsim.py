@@ -28,33 +28,22 @@ popt120, pcov120 = curve_fit(func, medpdf_120, stdpdf_120)
 #plt.plot(medpdf_120, func(medpdf_120, *popt120), 'r-',label='fit: a=%5.3f, b=%5.3f' % tuple(popt120))
 #plt.legend()
 #plt.show()
-popt = np.mean(popt45,popt120,axis=0)
+popt = np.mean([popt45,popt120],axis=0)
 
 # But the way inferkappa_unbiasedwithshear45and120FITSio_customzeta.py computes std is not a simple np.std, which is output by inferkappasimbias.py
 # Normalizing std(truekappa-medkappa):
 root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/"
-x = np.loadtxt(root+'calibs/kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_1.8_overdensities1.8.cat',unpack=True)
-
-func(0.01, *popt)
-
-
-
-
-
-
+x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
 
 list = glob.glob(root+'kappasim_WFI2033*.cat')
-
-#fout = root + 'medstd.dat'
-#os.system('rm -f %s' % fout)
+fout = root + 'medstdbias.dat'
+os.system('rm -f %s' % fout)
 
 for i in range(len(list)):
     file = list[i]
-    kappa  = np.loadtxt(file, usecols=[0], unpack=True, comments = '#')
-    #median,stddev,kappa_values = statistics(kappa,bin_stat,min_kappa,max_kappa)
-    winlen = 12
-    #median_smooth,stddev_smooth,kappa_values_smooth = statistics(smooth(kappa,winlen,'flat')[(winlen/2-1):-(winlen/2)],bin_stat,min_kappa,max_kappa)
-    #str = "%s %.3f %.3f %.3f %.3f \n" % (list[i],median,stddev,median_smooth,stddev_smooth)
-    #file =open(fout,'a')
-    #file.write(str)
-#file.close()
+    data  = np.loadtxt(file,unpack=True)
+    scaledstd = np.std(data[1]-data[0]) * (func(np.median(x[1]), *popt)/func(np.median(data[1]), *popt)) / np.std(x[1]-x[0])
+    str = "%s %.3f %.3f %.3f %.3f \n" % (list[i],np.median(data[0]-data[1]),np.std(data[0]-data[1]),np.median(data[4]),scaledstd)
+    file =open(fout,'a')
+    file.write(str)
+file.close()

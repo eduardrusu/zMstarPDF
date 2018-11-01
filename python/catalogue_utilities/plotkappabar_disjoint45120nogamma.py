@@ -44,7 +44,7 @@ kappastat_45 = np.c_[kappastat[:,44-1], # 1-1/r
                         kappastat[:,112-1], # mass
                         kappastat[:,104-1], # mass2
                         kappastat[:,108-1], # mass3
-                        kappastat[:,100-1], # 1/r
+                        kappastat[:,99-1], # 1/r
                         kappastat[:,116-1], # z/r
                         kappastat[:,113-1], # massoverr
                         kappastat[:,105-1], # mass2overr
