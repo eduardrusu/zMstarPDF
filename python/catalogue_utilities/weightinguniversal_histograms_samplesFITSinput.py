@@ -36,7 +36,7 @@ fontordonate = 4
 fontabsciss = 8
 fontlabel = 2
 pltrange = 3
-samples = 20
+samples = 4
 #limit = 10**30
 limit = np.infty
 root = "/Volumes/LaCieSubaru/weightedcounts/%s/" % lens
@@ -57,14 +57,14 @@ medsum75W4 = np.zeros((18,samples))
 for nr in range(samples):
     print '%s/%s' %(nr+1,samples)
     #lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)] # select from the files in the root directory
-    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % str(nr) in x)]
-    #print lstW1_75
+    lstW1_75 = [x for x in os.listdir(root) if ('W1' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % nr in x)]
+    print lstW1_75
     #lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % str(nr) in x)]
+    lstW2_75 = [x for x in os.listdir(root) if ('W2' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % nr in x)]
     #lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % str(nr) in x)]
+    lstW3_75 = [x for x in os.listdir(root) if ('W3' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % nr in x)]
     #lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s_%s%s.fits' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked,str(nr),specialtest) in x)]
-    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % str(nr) in x)]
+    lstW4_75 = [x for x in os.listdir(root) if ('W4' in x) and ('_wghtratios_75_msk%sarcsecrad%sarcsecgap_%s_%s_%s_%s_%s_%s_zgap%s_%s%s' %(radius,inner,lens,mag,photz,detect,irac,mode,zinf,zsup,handpicked) in x) and ('_%s.fits' % nr in x)]
     print lstW1_75
 
     print "W1..."

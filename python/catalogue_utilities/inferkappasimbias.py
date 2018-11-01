@@ -1,7 +1,5 @@
 # This code takes 10000 samples of overdensities from the permited range around the measured overdensities, and computes the distribution of kappa for all fields within a very narrow range of overdensities of those 10000. It outputs the statistics for the 10000 distributions, as well as the true kappa for each of those.
-# Run as python inferkappasimbias.py WFI2033 5 45 23 meds gal gamma oneoverr mass
-# The current code uses 1/8 simulation fields
-# Description of arguments: inferkappa_unbiasedwithshear.py lens radius maglim innermask sum/meds gal list_of_weight_constraints
+# Run as python inferkappasimbias.py WFI2033 -1.0 -1.0 fiducial empty notremovegroups 5 22.5 measured med 45_gal
 # weight1 should always be "gal", in order to use the galaxy counts when correcting the bias due to different LOS
 # the code is written such that, if shear is used as overdensity, it should be the second weight used (unless only one weight is used);
 
@@ -12,369 +10,427 @@ import scipy as sp
 from scipy.stats import norm
 import numpy as np
 import time
+import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
+only8 = True # in this case run only 8/64 MS fields
 
 lens = str(sys.argv[1])
-innermask = str(sys.argv[2])
-radius = str(sys.argv[3])
-mag = str(sys.argv[4])
-mode = str(sys.argv[5])
-conjoined = len(sys.argv) - 6 # total number of arguments including code name, minus the number of ones that are not weights
+zinf = str(sys.argv[2])
+zsup = str(sys.argv[3])
+empty = str(sys.argv[4])
+removegroups = str(sys.argv[5])
+innermask = str(sys.argv[6])
+mag = str(sys.argv[7])
+compmeas = str(sys.argv[8])
+mode = str(sys.argv[9])
+conjoined = len(sys.argv) - 10 # total number of arguments including code name, minus the number of ones that are not weights
 
 if conjoined == 1:
-    weightin1 = str(sys.argv[6])
+    weightin1 = str(sys.argv[10])
 if conjoined == 2:
-    weightin1 = str(sys.argv[6])
-    weightin2 = str(sys.argv[7])
+    weightin1 = str(sys.argv[10])
+    weightin2 = str(sys.argv[11])
 if conjoined == 3:
-    weightin1 = str(sys.argv[6])
-    weightin2 = str(sys.argv[7])
-    weightin3 = str(sys.argv[8])
+    weightin1 = str(sys.argv[10])
+    weightin2 = str(sys.argv[11])
+    weightin3 = str(sys.argv[12])
 if conjoined == 4:
-    weightin1 = str(sys.argv[6])
-    weightin2 = str(sys.argv[7])
-    weightin3 = str(sys.argv[8])
-    weightin4 = str(sys.argv[9])
+    weightin1 = str(sys.argv[10])
+    weightin2 = str(sys.argv[11])
+    weightin3 = str(sys.argv[12])
+    weightin4 = str(sys.argv[13])
+if conjoined == 5:
+    weightin1 = str(sys.argv[10])
+    weightin2 = str(sys.argv[11])
+    weightin3 = str(sys.argv[12])
+    weightin4 = str(sys.argv[13])
+    weightin5 = str(sys.argv[14])
 
 print "conjoined:", conjoined
-root = "/mfst01a/rusucs/WFI2033/MSwghtratios/"
-rootout = "/mfst01a/rusucs/WFI2033/MSkapparesults/"
-weightsfile = np.loadtxt(root+'weightedcounts_%s_%s_%sarcsec.lst' % (lens,mode,str(innermask)),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
-limsigma = 2 # sigma limits on either side of the assumed gaussians
+root = "/lfs08/rusucs/%s/MSwghtratios/" % lens
+#root = "/mnt/scratch/rusucs/%s/MSwghtratios/" % lens
+#root = "/Volumes/LaCieSubaru/MSweights/"
+rootcode = "/lfs08/rusucs/code/"
+#rootcode = "/Users/cerusu/Dropbox/Davis_work/code/J1206/"
+#rootcode = "/mnt/scratch/rusucs/code/"
+rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
+#rootout = "/Volumes/LaCieSubaru/kapparesults/"
+#rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
+if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
+limsigma = 1 # sigma limits on either side of the assumed gaussians
 
 increment1 = 4 # refers to the E interval from Greene et al. 2014
 increment2 = 4
 increment3 = 4
 increment4 = 4
+increment5 = 4
+samples = 5000
 
+# these quantities are only for dealing with galaxy groups
+degree = np.pi / 180
+L_field = 4.0 * degree
+N_pix_per_dim = 4096
+L_pix = L_field / N_pix_per_dim
+rad = degree / 3600
+
+# declare which weights to read
+measured_index45 = 0 # specifies the column index in weightsfile
+measured_index_inf45 = 1
+measured_index_sup45 = 2
+measured_index120 = 3
+measured_index_inf120 = 4
+measured_index_sup120 = 5
+
+if lens != "J1206":
+    def declareweight(weightin):
+        if weightin.split('_')[1] == "gal": weight_index = 4
+        if weightin.split('_')[1] == "z": weight_index = 5
+        if weightin.split('_')[1] == "mass": weight_index = 6
+        if weightin.split('_')[1] == "mass2": weight_index = 7
+        if weightin.split('_')[1] == "mass3": weight_index = 8
+        if weightin.split('_')[1] == "oneoverr": weight_index = 9
+        if weightin.split('_')[1] == "zoverr": weight_index = 10
+        if weightin.split('_')[1] == "massoverr": weight_index = 11
+        if weightin.split('_')[1] == "mass2overr": weight_index = 12
+        if weightin.split('_')[1] == "mass3overr": weight_index = 13
+        if weightin.split('_')[1] == "mass2rms": weight_index = 14
+        if weightin.split('_')[1] == "mass3rms": weight_index = 15
+        if weightin.split('_')[1] == "mass2overrrms": weight_index = 16
+        if weightin.split('_')[1] == "mass3overrrms": weight_index = 17
+        if weightin.split('_')[1] == "flexion": weight_index = 18
+        if weightin.split('_')[1] == "tidal": weight_index = 19
+        if weightin.split('_')[1] == "SIS": weight_index = 20
+        if weightin.split('_')[1] == "SIShalo": weight_index = 21
+        if weightin.split('_')[1] == "gamma": weight_index = None
+        return weight_index
+if lens == "J1206":
+    def declareweight(weightin):
+        if weightin.split('_')[1] == "gal": weight_index = 4
+        if weightin.split('_')[1] == "z": weight_index = 5
+        if weightin.split('_')[1] == "oneoverr": weight_index = 6
+        if weightin.split('_')[1] == "zoverr": weight_index = 7
+        if weightin.split('_')[1] == "gamma": weight_index = None
+        return weight_index
+
+weight1_index = declareweight(weightin1)
+if conjoined >= 2:
+    weight2_index = declareweight(weightin2)
+    if conjoined >= 3:
+        weight3_index = declareweight(weightin3)
+        if conjoined >= 4:
+            weight4_index = declareweight(weightin4)
+            if conjoined == 5:
+                weight5_index = declareweight(weightin5)
+
+if lens == "J1206":
+    plane = 34
+    filters = "griK"
 if lens == "WFI2033":
-    constr_gamma = 0.16
-    constrwidth_gamma_inf = 0.14
-    constrwidth_gamma_sup = 0.18
+    plane = 35
     filters = "ugrizJHK"
 
-if mag == "23" and radius == "45":
-    measured_index = 0 # specifies the column index in weightsfile
-    measured_index_inf = 1
-    measured_index_sup = 2
-if mag == "23" and radius == "120":
-    measured_index = 3
-    measured_index_inf = 4
-    measured_index_sup = 5
+# read weight constraints
+constr_gamma = 0.119
+constrwidth_gamma_inf = 0.116# 0.109 #
+constrwidth_gamma_sup = 0.121# 0.129 #
 
-if mag == "23":
-    if weightin1 == "gal": weight1_index = 4
-    if weightin1 == "z": weight1_index = 5
-    if weightin1 == "mass": weight1_index = 6
-    if weightin1 == "mass2": weight1_index = 7
-    if weightin1 == "mass3": weight1_index = 8
-    if weightin1 == "oneoverr": weight1_index = 9
-    if weightin1 == "zoverr": weight1_index = 10
-    if weightin1 == "massoverr": weight1_index = 11
-    if weightin1 == "mass2overr": weight1_index = 12
-    if weightin1 == "mass3overr": weight1_index = 13
-    if weightin1 == "mass2rms": weight1_index = 14
-    if weightin1 == "mass3rms": weight1_index = 15
-    if weightin1 == "mass2overrrms": weight1_index = 16
-    if weightin1 == "mass3overrrms": weight1_index = 17
-    if weightin1 == "flexion": weight1_index = 18
-    if weightin1 == "tidal": weight1_index = 19
-    if weightin1 == "SIS": weight1_index = 20
-    if weightin1 == "SIShalo": weight1_index = 21
-if conjoined >= 2:
-    if mag == "23":
-        if weightin2 == "gal": weight2_index = 4
-        if weightin2 == "z": weight2_index = 5
-        if weightin2 == "mass": weight2_index = 6
-        if weightin2 == "mass2": weight2_index = 7
-        if weightin2 == "mass3": weight2_index = 8
-        if weightin2 == "oneoverr": weight2_index = 9
-        if weightin2 == "zoverr": weight2_index = 10
-        if weightin2 == "massoverr": weight2_index = 11
-        if weightin2 == "mass2overr": weight2_index = 12
-        if weightin2 == "mass3overr": weight2_index = 13
-        if weightin2 == "mass2rms": weight2_index = 14
-        if weightin2 == "mass3rms": weight2_index = 15
-        if weightin2 == "mass2overrrms": weight2_index = 16
-        if weightin2 == "mass3overrrms": weight2_index = 17
-        if weightin2 == "flexion": weight2_index = 18
-        if weightin2 == "tidal": weight2_index = 19
-        if weightin2 == "SIS": weight2_index = 20
-        if weightin2 == "SIShalo": weight2_index = 21
-    if conjoined >= 3:
-        if mag == "23":
-            if weightin3 == "gal": weight3_index = 4
-            if weightin3 == "z": weight3_index = 5
-            if weightin3 == "mass": weight3_index = 6
-            if weightin3 == "mass2": weight3_index = 7
-            if weightin3 == "mass3": weight3_index = 8
-            if weightin3 == "oneoverr": weight3_index = 9
-            if weightin3 == "zoverr": weight3_index = 10
-            if weightin3 == "massoverr": weight3_index = 11
-            if weightin3 == "mass2overr": weight3_index = 12
-            if weightin3 == "mass3overr": weight3_index = 13
-            if weightin3 == "mass2rms": weight3_index = 14
-            if weightin3 == "mass3rms": weight3_index = 15
-            if weightin3 == "mass2overrrms": weight3_index = 16
-            if weightin3 == "mass3overrrms": weight3_index = 17
-            if weightin3 == "flexion": weight3_index = 18
-            if weightin3 == "tidal": weight3_index = 19
-            if weightin3 == "SIS": weight3_index = 20
-            if weightin3 == "SIShalo": weight3_index = 21
-        if conjoined == 4:
-            if mag == "23":
-                if weightin4 == "gal": weight4_index = 4
-                if weightin4 == "z": weight4_index = 5
-                if weightin4 == "mass": weight4_index = 6
-                if weightin4 == "mass2": weight4_index = 7
-                if weightin4 == "mass3": weight4_index = 8
-                if weightin4 == "oneoverr": weight4_index = 9
-                if weightin4 == "zoverr": weight4_index = 10
-                if weightin4 == "massoverr": weight4_index = 11
-                if weightin4 == "mass2overr": weight4_index = 12
-                if weightin4 == "mass3overr": weight4_index = 13
-                if weightin4 == "mass2rms": weight4_index = 14
-                if weightin4 == "mass3rms": weight4_index = 15
-                if weightin4 == "mass2overrrms": weight4_index = 16
-                if weightin4 == "mass3overrrms": weight4_index = 17
-                if weightin4 == "flexion": weight4_index = 18
-                if weightin4 == "tidal": weight4_index = 19
-                if weightin4 == "SIS": weight4_index = 20
-                if weightin4 == "SIShalo": weight4_index = 21
+constr_gal_meds45 = 0.6
+constr_gal_meds_inf45 = 0.5
+constr_gal_meds_sup45 = 0.7
 
-constr_gal_meds = weightsfile[measured_index][0]
-constrwidth_gal_meds_inf = weightsfile[measured_index_inf][0]
-constrwidth_gal_meds_sup = weightsfile[measured_index_sup][0]
+constr_gal_meds120 = 0.6
+constr_gal_meds_inf120 = 0.5
+constr_gal_meds_sup120 = 0.7
 
-constr_z_meds = weightsfile[measured_index][1]
-constrwidth_z_meds_inf = weightsfile[measured_index_inf][1]
-constrwidth_z_meds_sup = weightsfile[measured_index_sup][1]
+constr_oneoverr_meds45 = 0.6
+constr_oneoverr_meds_inf45 = 0.5
+constr_oneoverr_meds_sup45 = 0.7
 
-constr_mass_meds = weightsfile[measured_index][2]
-constrwidth_mass_meds_inf = weightsfile[measured_index_inf][2]
-constrwidth_mass_meds_sup = weightsfile[measured_index_sup][2]
+constr_oneoverr_meds120 = 0.6
+constr_oneoverr_meds_inf120 = 0.5
+constr_oneoverr_meds_sup120 = 0.7
 
-constr_mass2_meds = weightsfile[measured_index][3]
-constrwidth_mass2_meds_inf = weightsfile[measured_index_inf][3]
-constrwidth_mass2_meds_sup = weightsfile[measured_index_sup][3]
+#constr_z_meds45 =
+#constrwidth_z_meds_inf45 =
+#constrwidth_z_meds_sup45 =
 
-constr_mass3_meds = weightsfile[measured_index][4]
-constrwidth_mass3_meds_inf = weightsfile[measured_index_inf][4]
-constrwidth_mass3_meds_sup = weightsfile[measured_index_sup][4]
+#constr_mass_meds45 =
+#constrwidth_mass_meds_inf45 =
+#constrwidth_mass_meds_sup45 =
 
-constr_oneoverr_meds = weightsfile[measured_index][5]
-constrwidth_oneoverr_meds_inf = weightsfile[measured_index_inf][5]
-constrwidth_oneoverr_meds_sup = weightsfile[measured_index_sup][5]
+#constr_mass2_meds45 =
+#constrwidth_mass2_meds_inf45 =
+#constrwidth_mass2_meds_sup45 =
 
-constr_zoverr_meds = weightsfile[measured_index][6]
-constrwidth_zoverr_meds_inf = weightsfile[measured_index_inf][6]
-constrwidth_zoverr_meds_sup = weightsfile[measured_index_sup][6]
+#constr_mass3_meds45 =
+#constrwidth_mass3_meds_inf45 =
+#constrwidth_mass3_meds_sup45 =
 
-constr_massoverr_meds = weightsfile[measured_index][7]
-constrwidth_massoverr_meds_inf = weightsfile[measured_index_inf][7]
-constrwidth_massoverr_meds_sup = weightsfile[measured_index_sup][7]
+#constr_oneoverr_meds45 =
+#constrwidth_oneoverr_meds_inf45 =
+#constrwidth_oneoverr_meds_sup45 =
 
-constr_mass2overr_meds = weightsfile[measured_index][8]
-constrwidth_mass2overr_meds_inf = weightsfile[measured_index_inf][8]
-constrwidth_mass2overr_meds_sup = weightsfile[measured_index_sup][8]
+#constr_zoverr_meds45 =
+#constrwidth_zoverr_meds_inf45 =
+#constrwidth_zoverr_meds_sup45 =
 
-constr_mass3overr_meds = weightsfile[measured_index][9]
-constrwidth_mass3overr_meds_inf = weightsfile[measured_index_inf][9]
-constrwidth_mass3overr_meds_sup = weightsfile[measured_index_sup][9]
+#constr_massoverr_meds45 =
+#constrwidth_massoverr_meds_inf45 =
+#constrwidth_massoverr_meds_sup45 =
 
-constr_mass2rms_meds = weightsfile[measured_index][10]
-constrwidth_mass2rms_meds_inf = weightsfile[measured_index_inf][10]
-constrwidth_mass2rms_meds_sup = weightsfile[measured_index_sup][10]
+#constr_mass2overr_meds45 =
+#constrwidth_mass2overr_meds_inf45 =
+#constrwidth_mass2overr_meds_sup45 =
 
-constr_mass3rms_meds = weightsfile[measured_index][11]
-constrwidth_mass3rms_meds_inf = weightsfile[measured_index_inf][11]
-constrwidth_mass3rms_meds_sup = weightsfile[measured_index_sup][11]
+#constr_mass3overr_meds45 =
+#constrwidth_mass3overr_meds_inf45 =
+#constrwidth_mass3overr_meds_sup45 =
 
-constr_mass2overrrms_meds = weightsfile[measured_index][12]
-constrwidth_mass2overrrms_meds_inf = weightsfile[measured_index_inf][12]
-constrwidth_mass2overrrms_meds_sup = weightsfile[measured_index_sup][12]
+#constr_mass2rms_meds45 =
+#constrwidth_mass2rms_meds_inf45 =
+#constrwidth_mass2rms_meds_sup45 =
 
-constr_mass3overrrms_meds = weightsfile[measured_index][13]
-constrwidth_mass3overrrms_meds_inf = weightsfile[measured_index_inf][13]
-constrwidth_mass3overrrms_meds_sup = weightsfile[measured_index_sup][13]
+#constr_mass3rms_meds45 =
+#constrwidth_mass3rms_meds_inf45 =
+#constrwidth_mass3rms_meds_sup45 =
 
-constr_flexion_meds = weightsfile[measured_index][14]
-constrwidth_flexion_meds_inf = weightsfile[measured_index_inf][14]
-constrwidth_flexion_meds_sup = weightsfile[measured_index_sup][14]
+#constr_mass2overrrms_meds45 =
+#constrwidth_mass2overrrms_meds_inf45 =
+#constrwidth_mass2overrrms_meds_sup45 =
 
-constr_tidal_meds = weightsfile[measured_index][15]
-constrwidth_tidal_meds_inf = weightsfile[measured_index_inf][15]
-constrwidth_tidal_meds_sup = weightsfile[measured_index_sup][15]
+#constr_mass3overrrms_meds45 =
+#constrwidth_mass3overrrms_meds_inf45 =
+#constrwidth_mass3overrrms_meds_sup45 =
 
-constr_SIS_meds = weightsfile[measured_index][16]
-constrwidth_SIS_meds_inf = weightsfile[measured_index_inf][16]
-constrwidth_SIS_meds_sup = weightsfile[measured_index_sup][16]
+#constr_flexion_meds45 =
+#constrwidth_flexion_meds_inf45 =
+#constrwidth_flexion_meds_sup45 =
 
-constr_SIShalo_meds = weightsfile[measured_index][17]
-constrwidth_SIShalo_meds_inf = weightsfile[measured_index_inf][17]
-constrwidth_SIShalo_meds_sup = weightsfile[measured_index_sup][17]
+#constr_tidal_meds45 =
+#constrwidth_tidal_meds_inf45 =
+#constrwidth_tidal_meds_sup45 =
 
-if conjoined == 4:
-        if weightin4 == "gal": constr_weight4 = constr_gal_meds; constrwidth_weight4_inf = constrwidth_gal_meds_inf; constrwidth_weight4_sup = constrwidth_gal_meds_sup
-        if weightin4 == "z": constr_weight4 = constr_z_meds; constrwidth_weight4_inf = constrwidth_z_meds_inf; constrwidth_weight4_sup = constrwidth_z_meds_sup
-        if weightin4 == "mass": constr_weight4 = constr_mass_meds; constrwidth_weight4_inf = constrwidth_mass_meds_inf; constrwidth_weight4_sup = constrwidth_mass_meds_sup
-        if weightin4 == "mass2": constr_weight4 = constr_mass2_meds; constrwidth_weight4_inf = constrwidth_mass2_meds_inf; constrwidth_weight4_sup = constrwidth_mass2_meds_sup
-        if weightin4 == "mass3": constr_weight4 = constr_mass3_meds; constrwidth_weight4_inf = constrwidth_mass3_meds_inf; constrwidth_weight4_sup = constrwidth_mass3_meds_sup
-        if weightin4 == "oneoverr": constr_weight4 = constr_oneoverr_meds; constrwidth_weight4_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight4_sup = constrwidth_oneoverr_meds_sup
-        if weightin4 == "zoverr": constr_weight4 = constr_zoverr_meds; constrwidth_weight4_inf = constrwidth_zoverr_meds_inf; constrwidth_weight4_sup = constrwidth_zoverr_meds_sup
-        if weightin4 == "massoverr": constr_weight4 = constr_massoverr_meds; constrwidth_weight4_inf = constrwidth_massoverr_meds_inf; constrwidth_weight4_sup = constrwidth_massoverr_meds_sup
-        if weightin4 == "mass2overr": constr_weight4 = constr_mass2overr_meds; constrwidth_weight4_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight4_sup = constrwidth_mass2overr_meds_sup
-        if weightin4 == "mass3overr": constr_weight4 = constr_mass3overr_meds; constrwidth_weight4_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight4_sup = constrwidth_mass3overr_meds_sup
-        if weightin4 == "mass2rms": constr_weight4 = constr_mass2rms_meds; constrwidth_weight4_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight4_sup = constrwidth_mass2rms_meds_sup
-        if weightin4 == "mass3rms": constr_weight4 = constr_mass3rms_meds; constrwidth_weight4_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight4_sup = constrwidth_mass3rms_meds_sup
-        if weightin4 == "mass2overrrms": constr_weight4 = constr_mass2overrrms_meds; constrwidth_weight4_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight4_sup = constrwidth_mass2overrrms_meds_sup
-        if weightin4 == "mass3overrrms": constr_weight4 = constr_mass3overrrms_meds; constrwidth_weight4_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight4_sup = constrwidth_mass3overrrms_meds_sup
-        if weightin4 == "flexion": constr_weight4 = constr_flexion_meds; constrwidth_weight4_inf = constrwidth_flexion_meds_inf; constrwidth_weight4_sup = constrwidth_flexion_meds_sup
-        if weightin4 == "tidal": constr_weight4 = constr_tidal_meds; constrwidth_weight4_inf = constrwidth_tidal_meds_inf; constrwidth_weight4_sup = constrwidth_tidal_meds_sup
-        if weightin4 == "SIS": constr_weight4 = constr_SIS_meds; constrwidth_weight4_inf = constrwidth_SIS_meds_inf; constrwidth_weight4_sup = constrwidth_SIS_meds_sup
-        if weightin4 == "SIShalo": constr_weight4 = constr_SIShalo_meds; constrwidth_weight4_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight4_sup = constrwidth_SIShalo_meds_sup
-        if weightin4 == "gamma": constr_weight4 = constr_gamma; constrwidth_weight4_inf = constrwidth_gamma_inf; constrwidth_weight4_sup = constrwidth_gamma_sup
+#constr_SIS_meds45 =
+#constrwidth_SIS_meds_inf45 =
+#constrwidth_SIS_meds_sup45 =
 
-if (conjoined == 3) | (conjoined == 4):
-        if weightin3 == "gal": constr_weight3 = constr_gal_meds; constrwidth_weight3_inf = constrwidth_gal_meds_inf; constrwidth_weight3_sup = constrwidth_gal_meds_sup
-        if weightin3 == "z": constr_weight3 = constr_z_meds; constrwidth_weight3_inf = constrwidth_z_meds_inf; constrwidth_weight3_sup = constrwidth_z_meds_sup
-        if weightin3 == "mass": constr_weight3 = constr_mass_meds; constrwidth_weight3_inf = constrwidth_mass_meds_inf; constrwidth_weight3_sup = constrwidth_mass_meds_sup
-        if weightin3 == "mass2": constr_weight3 = constr_mass2_meds; constrwidth_weight3_inf = constrwidth_mass2_meds_inf; constrwidth_weight3_sup = constrwidth_mass2_meds_sup
-        if weightin3 == "mass3": constr_weight3 = constr_mass3_meds; constrwidth_weight3_inf = constrwidth_mass3_meds_inf; constrwidth_weight3_sup = constrwidth_mass3_meds_sup
-        if weightin3 == "oneoverr": constr_weight3 = constr_oneoverr_meds; constrwidth_weight3_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight3_sup = constrwidth_oneoverr_meds_sup
-        if weightin3 == "zoverr": constr_weight3 = constr_zoverr_meds; constrwidth_weight3_inf = constrwidth_zoverr_meds_inf; constrwidth_weight3_sup = constrwidth_zoverr_meds_sup
-        if weightin3 == "massoverr": constr_weight3 = constr_massoverr_meds; constrwidth_weight3_inf = constrwidth_massoverr_meds_inf; constrwidth_weight3_sup = constrwidth_massoverr_meds_sup
-        if weightin3 == "mass2overr": constr_weight3 = constr_mass2overr_meds; constrwidth_weight3_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight3_sup = constrwidth_mass2overr_meds_sup
-        if weightin3 == "mass3overr": constr_weight3 = constr_mass3overr_meds; constrwidth_weight3_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight3_sup = constrwidth_mass3overr_meds_sup
-        if weightin3 == "mass2rms": constr_weight3 = constr_mass2rms_meds; constrwidth_weight3_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight3_sup = constrwidth_mass2rms_meds_sup
-        if weightin3 == "mass3rms": constr_weight3 = constr_mass3rms_meds; constrwidth_weight3_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight3_sup = constrwidth_mass3rms_meds_sup
-        if weightin3 == "mass2overrrms": constr_weight3 = constr_mass2overrrms_meds; constrwidth_weight3_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight3_sup = constrwidth_mass2overrrms_meds_sup
-        if weightin3 == "mass3overrrms": constr_weight3 = constr_mass3overrrms_meds; constrwidth_weight3_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight3_sup = constrwidth_mass3overrrms_meds_sup
-        if weightin3 == "flexion": constr_weight3 = constr_flexion_meds; constrwidth_weight3_inf = constrwidth_flexion_meds_inf; constrwidth_weight3_sup = constrwidth_flexion_meds_sup
-        if weightin3 == "tidal": constr_weight3 = constr_tidal_meds; constrwidth_weight3_inf = constrwidth_tidal_meds_inf; constrwidth_weight3_sup = constrwidth_tidal_meds_sup
-        if weightin3 == "SIS": constr_weight3 = constr_SIS_meds; constrwidth_weight3_inf = constrwidth_SIS_meds_inf; constrwidth_weight3_sup = constrwidth_SIS_meds_sup
-        if weightin3 == "SIShalo": constr_weight3 = constr_SIShalo_meds; constrwidth_weight3_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight3_sup = constrwidth_SIShalo_meds_sup
-        if weightin3 == "gamma": constr_weight3 = constr_gamma; constrwidth_weight3_inf = constrwidth_gamma_inf; constrwidth_weight3_sup = constrwidth_gamma_sup
+#constr_SIShalo_meds45 =
+#constrwidth_SIShalo_meds_inf45 =
+#constrwidth_SIShalo_meds_sup45 =
 
-if (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
-        if weightin2 == "gal": constr_weight2 = constr_gal_meds; constrwidth_weight2_inf = constrwidth_gal_meds_inf; constrwidth_weight2_sup = constrwidth_gal_meds_sup
-        if weightin2 == "z": constr_weight2 = constr_z_meds; constrwidth_weight2_inf = constrwidth_z_meds_inf; constrwidth_weight2_sup = constrwidth_z_meds_sup
-        if weightin2 == "mass": constr_weight2 = constr_mass_meds; constrwidth_weight2_inf = constrwidth_mass_meds_inf; constrwidth_weight2_sup = constrwidth_mass_meds_sup
-        if weightin2 == "mass2": constr_weight2 = constr_mass2_meds; constrwidth_weight2_inf = constrwidth_mass2_meds_inf; constrwidth_weight2_sup = constrwidth_mass2_meds_sup
-        if weightin2 == "mass3": constr_weight2 = constr_mass3_meds; constrwidth_weight2_inf = constrwidth_mass3_meds_inf; constrwidth_weight2_sup = constrwidth_mass3_meds_sup
-        if weightin2 == "oneoverr": constr_weight2 = constr_oneoverr_meds; constrwidth_weight2_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight2_sup = constrwidth_oneoverr_meds_sup
-        if weightin2 == "zoverr": constr_weight2 = constr_zoverr_meds; constrwidth_weight2_inf = constrwidth_zoverr_meds_inf; constrwidth_weight2_sup = constrwidth_zoverr_meds_sup
-        if weightin2 == "massoverr": constr_weight2 = constr_massoverr_meds; constrwidth_weight2_inf = constrwidth_massoverr_meds_inf; constrwidth_weight2_sup = constrwidth_massoverr_meds_sup
-        if weightin2 == "mass2overr": constr_weight2 = constr_mass2overr_meds; constrwidth_weight2_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight2_sup = constrwidth_mass2overr_meds_sup
-        if weightin2 == "mass3overr": constr_weight2 = constr_mass3overr_meds; constrwidth_weight2_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight2_sup = constrwidth_mass3overr_meds_sup
-        if weightin2 == "mass2rms": constr_weight2 = constr_mass2rms_meds; constrwidth_weight2_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight2_sup = constrwidth_mass2rms_meds_sup
-        if weightin2 == "mass3rms": constr_weight2 = constr_mass3rms_meds; constrwidth_weight2_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight2_sup = constrwidth_mass3rms_meds_sup
-        if weightin2 == "mass2overrrms": constr_weight2 = constr_mass2overrrms_meds; constrwidth_weight2_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight2_sup = constrwidth_mass2overrrms_meds_sup
-        if weightin2 == "mass3overrrms": constr_weight2 = constr_mass3overrrms_meds; constrwidth_weight2_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight2_sup = constrwidth_mass3overrrms_meds_sup
-        if weightin2 == "flexion": constr_weight2 = constr_flexion_meds; constrwidth_weight2_inf = constrwidth_flexion_meds_inf; constrwidth_weight2_sup = constrwidth_flexion_meds_sup
-        if weightin2 == "tidal": constr_weight2 = constr_tidal_meds; constrwidth_weight2_inf = constrwidth_tidal_meds_inf; constrwidth_weight2_sup = constrwidth_tidal_meds_sup
-        if weightin2 == "SIS": constr_weight2 = constr_SIS_meds; constrwidth_weight2_inf = constrwidth_SIS_meds_inf; constrwidth_weight2_sup = constrwidth_SIS_meds_sup
-        if weightin2 == "SIShalo": constr_weight2 = constr_SIShalo_meds; constrwidth_weight2_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight2_sup = constrwidth_SIShalo_meds_sup
-        if weightin2 == "gamma": constr_weight2 = constr_gamma; constrwidth_weight2_inf = constrwidth_gamma_inf; constrwidth_weight2_sup = constrwidth_gamma_sup
 
-if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
-        if weightin1 == "gal": constr_weight1 = constr_gal_meds; constrwidth_weight1_inf = constrwidth_gal_meds_inf; constrwidth_weight1_sup = constrwidth_gal_meds_sup
-        if weightin1 == "z": constr_weight1 = constr_z_meds; constrwidth_weight1_inf = constrwidth_z_meds_inf; constrwidth_weight1_sup = constrwidth_z_meds_sup
-        if weightin1 == "mass": constr_weight1 = constr_mass_meds; constrwidth_weight1_inf = constrwidth_mass_meds_inf; constrwidth_weight1_sup = constrwidth_mass_meds_sup
-        if weightin1 == "mass2": constr_weight1 = constr_mass2_meds; constrwidth_weight1_inf = constrwidth_mass2_meds_inf; constrwidth_weight1_sup = constrwidth_mass2_meds_sup
-        if weightin1 == "mass3": constr_weight1 = constr_mass3_meds; constrwidth_weight1_inf = constrwidth_mass3_meds_inf; constrwidth_weight1_sup = constrwidth_mass3_meds_sup
-        if weightin1 == "oneoverr": constr_weight1 = constr_oneoverr_meds; constrwidth_weight1_inf = constrwidth_oneoverr_meds_inf; constrwidth_weight1_sup = constrwidth_oneoverr_meds_sup
-        if weightin1 == "zoverr": constr_weight1 = constr_zoverr_meds; constrwidth_weight1_inf = constrwidth_zoverr_meds_inf; constrwidth_weight1_sup = constrwidth_zoverr_meds_sup
-        if weightin1 == "massoverr": constr_weight1 = constr_massoverr_meds; constrwidth_weight1_inf = constrwidth_massoverr_meds_inf; constrwidth_weight1_sup = constrwidth_massoverr_meds_sup
-        if weightin1 == "mass2overr": constr_weight1 = constr_mass2overr_meds; constrwidth_weight1_inf = constrwidth_mass2overr_meds_inf; constrwidth_weight1_sup = constrwidth_mass2overr_meds_sup
-        if weightin1 == "mass3overr": constr_weight1 = constr_mass3overr_meds; constrwidth_weight1_inf = constrwidth_mass3overr_meds_inf; constrwidth_weight1_sup = constrwidth_mass3overr_meds_sup
-        if weightin1 == "mass2rms": constr_weight1 = constr_mass2rms_meds; constrwidth_weight1_inf = constrwidth_mass2rms_meds_inf; constrwidth_weight1_sup = constrwidth_mass2rms_meds_sup
-        if weightin1 == "mass3rms": constr_weight1 = constr_mass3rms_meds; constrwidth_weight1_inf = constrwidth_mass3rms_meds_inf; constrwidth_weight1_sup = constrwidth_mass3rms_meds_sup
-        if weightin1 == "mass2overrrms": constr_weight1 = constr_mass2overrrms_meds; constrwidth_weight1_inf = constrwidth_mass2overrrms_meds_inf; constrwidth_weight1_sup = constrwidth_mass2overrrms_meds_sup
-        if weightin1 == "mass3overrrms": constr_weight1 = constr_mass3overrrms_meds; constrwidth_weight1_inf = constrwidth_mass3overrrms_meds_inf; constrwidth_weight1_sup = constrwidth_mass3overrrms_meds_sup
-        if weightin1 == "flexion": constr_weight1 = constr_flexion_meds; constrwidth_weight1_inf = constrwidth_flexion_meds_inf; constrwidth_weight1_sup = constrwidth_flexion_meds_sup
-        if weightin1 == "tidal": constr_weight1 = constr_tidal_meds; constrwidth_weight1_inf = constrwidth_tidal_meds_inf; constrwidth_weight1_sup = constrwidth_tidal_meds_sup
-        if weightin1 == "SIS": constr_weight1 = constr_SIS_meds; constrwidth_weight1_inf = constrwidth_SIS_meds_inf; constrwidth_weight1_sup = constrwidth_SIS_meds_sup
-        if weightin1 == "SIShalo": constr_weight1 = constr_SIShalo_meds; constrwidth_weight1_inf = constrwidth_SIShalo_meds_inf; constrwidth_weight1_sup = constrwidth_SIShalo_meds_sup
-        if weightin1 == "gamma": constr_weight1 = constr_gamma; constrwidth_weight1_inf = constrwidth_gamma_inf; constrwidth_weight1_sup = constrwidth_gamma_sup
+#constr_gal_meds120 =
+#constrwidth_gal_meds_inf120 =
+#constrwidth_gal_meds_sup120 =
+
+#constr_z_meds120 =
+#constrwidth_z_meds_inf120 =
+#constrwidth_z_meds_sup120 =
+
+#constr_mass_meds120 =
+#constrwidth_mass_meds_inf120 =
+#constrwidth_mass_meds_sup120 =
+
+#constr_mass2_meds120 =
+#constrwidth_mass2_meds_inf120 =
+#constrwidth_mass2_meds_sup120 =
+
+#constr_mass3_meds120 =
+#constrwidth_mass3_meds_inf120 =
+#constrwidth_mass3_meds_sup120 =
+
+#constr_oneoverr_meds120 =
+#constrwidth_oneoverr_meds_inf120 =
+#constrwidth_oneoverr_meds_sup120 =
+
+#constr_zoverr_meds120 =
+#constrwidth_zoverr_meds_inf120 =
+#constrwidth_zoverr_meds_sup120 =
+
+#constr_massoverr_meds120 =
+#constrwidth_massoverr_meds_inf120 =
+#constrwidth_massoverr_meds_sup120 =
+
+#constr_mass2overr_meds120 =
+#constrwidth_mass2overr_meds_inf120 =
+#constrwidth_mass2overr_meds_sup120 =
+
+#constr_mass3overr_meds120 =
+#constrwidth_mass3overr_meds_inf120 =
+#constrwidth_mass3overr_meds_sup120 =
+
+#constr_mass2rms_meds120 =
+#constrwidth_mass2rms_meds_inf120 =
+#constrwidth_mass2rms_meds_sup120 =
+
+#constr_mass3rms_meds120 =
+#constrwidth_mass3rms_meds_inf120 =
+#constrwidth_mass3rms_meds_sup120 =
+
+#constr_mass2overrrms_meds120 =
+#constrwidth_mass2overrrms_meds_inf120 =
+#constrwidth_mass2overrrms_meds_sup120 =
+
+#constr_mass3overrrms_meds120 =
+#constrwidth_mass3overrrms_meds_inf120 =
+#constrwidth_mass3overrrms_meds_sup120 =
+
+#constr_flexion_meds120 =
+#constrwidth_flexion_meds_inf120 =
+#constrwidth_flexion_meds_sup120 =
+
+#constr_tidal_meds120 =
+#constrwidth_tidal_meds_inf120 =
+#constrwidth_tidal_meds_sup120 =
+
+#constr_SIS_meds120 =
+#constrwidth_SIS_meds_inf120 =
+#constrwidth_SIS_meds_sup120 =
+
+#constr_SIShalo_meds120 =
+#constrwidth_SIShalo_meds_inf120 =
+#constrwidth_SIShalo_meds_sup120 =
+
+def declareweight(weightin):
+    if weightin.split('_')[0] == "45":
+        if weightin.split('_')[1] == "gal": constr_weight = constr_gal_meds45; constrwidth_weight_inf = constrwidth_gal_meds_inf45; constrwidth_weight_sup = constrwidth_gal_meds_sup45
+        if weightin.split('_')[1] == "z": constr_weight = constr_z_meds45; constrwidth_weight_inf = constrwidth_z_meds_inf45; constrwidth_weight_sup = constrwidth_z_meds_sup45
+        if weightin.split('_')[1] == "mass": constr_weight = constr_mass_meds45; constrwidth_weight_inf = constrwidth_mass_meds_inf45; constrwidth_weight_sup = constrwidth_mass_meds_sup45
+        if weightin.split('_')[1] == "mass2": constr_weight = constr_mass2_meds45; constrwidth_weight_inf = constrwidth_mass2_meds_inf45; constrwidth_weight_sup = constrwidth_mass2_meds_sup45
+        if weightin.split('_')[1] == "mass3": constr_weight = constr_mass3_meds45; constrwidth_weight_inf = constrwidth_mass3_meds_inf45; constrwidth_weight_sup = constrwidth_mass3_meds_sup45
+        if weightin.split('_')[1] == "oneoverr": constr_weight = constr_oneoverr_meds45; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf45; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup45
+        if weightin.split('_')[1] == "zoverr": constr_weight = constr_zoverr_meds45; constrwidth_weight_inf = constrwidth_zoverr_meds_inf45; constrwidth_weight_sup = constrwidth_zoverr_meds_sup45
+        if weightin.split('_')[1] == "massoverr": constr_weight = constr_massoverr_meds45; constrwidth_weight_inf = constrwidth_massoverr_meds_inf45; constrwidth_weight_sup = constrwidth_massoverr_meds_sup45
+        if weightin.split('_')[1] == "mass2overr": constr_weight = constr_mass2overr_meds45; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf45; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup45
+        if weightin.split('_')[1] == "mass3overr": constr_weight = constr_mass3overr_meds45; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf45; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup45
+        if weightin.split('_')[1] == "mass2rms": constr_weight = constr_mass2rms_meds45; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf45; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup45
+        if weightin.split('_')[1] == "mass3rms": constr_weight = constr_mass3rms_meds45; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf45; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup45
+        if weightin.split('_')[1] == "mass2overrrms": constr_weight = constr_mass2overrrms_meds45; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf45; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup45
+        if weightin.split('_')[1] == "mass3overrrms": constr_weight = constr_mass3overrrms_meds45; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf45; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup45
+        if weightin.split('_')[1] == "flexion": constr_weight = constr_flexion_meds45; constrwidth_weight_inf = constrwidth_flexion_meds_inf45; constrwidth_weight_sup = constrwidth_flexion_meds_sup45
+        if weightin.split('_')[1] == "tidal": constr_weight = constr_tidal_meds45; constrwidth_weight_inf = constrwidth_tidal_meds_inf45; constrwidth_weight_sup = constrwidth_tidal_meds_sup45
+        if weightin.split('_')[1] == "SIS": constr_weight = constr_SIS_meds45; constrwidth_weight_inf = constrwidth_SIS_meds_inf45; constrwidth_weight_sup = constrwidth_SIS_meds_sup45
+        if weightin.split('_')[1] == "SIShalo": constr_weight = constr_SIShalo_meds45; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf45; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup45
+    if weightin.split('_')[0] == "120":
+        if weightin.split('_')[1] == "gal": constr_weight = constr_gal_meds120; constrwidth_weight_inf = constrwidth_gal_meds_inf120; constrwidth_weight_sup = constrwidth_gal_meds_sup120
+        if weightin.split('_')[1] == "z": constr_weight = constr_z_meds120; constrwidth_weight_inf = constrwidth_z_meds_inf120; constrwidth_weight_sup = constrwidth_z_meds_sup120
+        if weightin.split('_')[1] == "mass": constr_weight = constr_mass_meds120; constrwidth_weight_inf = constrwidth_mass_meds_inf120; constrwidth_weight_sup = constrwidth_mass_meds_sup120
+        if weightin.split('_')[1] == "mass2": constr_weight = constr_mass2_meds120; constrwidth_weight_inf = constrwidth_mass2_meds_inf120; constrwidth_weight_sup = constrwidth_mass2_meds_sup120
+        if weightin.split('_')[1] == "mass3": constr_weight = constr_mass3_meds120; constrwidth_weight_inf = constrwidth_mass3_meds_inf120; constrwidth_weight_sup = constrwidth_mass3_meds_sup120
+        if weightin.split('_')[1] == "oneoverr": constr_weight = constr_oneoverr_meds120; constrwidth_weight_inf = constrwidth_oneoverr_meds_inf120; constrwidth_weight_sup = constrwidth_oneoverr_meds_sup120
+        if weightin.split('_')[1] == "zoverr": constr_weight = constr_zoverr_meds120; constrwidth_weight_inf = constrwidth_zoverr_meds_inf120; constrwidth_weight_sup = constrwidth_zoverr_meds_sup120
+        if weightin.split('_')[1] == "massoverr": constr_weight = constr_massoverr_meds120; constrwidth_weight_inf = constrwidth_massoverr_meds_inf120; constrwidth_weight_sup = constrwidth_massoverr_meds_sup120
+        if weightin.split('_')[1] == "mass2overr": constr_weight = constr_mass2overr_meds120; constrwidth_weight_inf = constrwidth_mass2overr_meds_inf120; constrwidth_weight_sup = constrwidth_mass2overr_meds_sup120
+        if weightin.split('_')[1] == "mass3overr": constr_weight = constr_mass3overr_meds120; constrwidth_weight_inf = constrwidth_mass3overr_meds_inf120; constrwidth_weight_sup = constrwidth_mass3overr_meds_sup120
+        if weightin.split('_')[1] == "mass2rms": constr_weight = constr_mass2rms_meds120; constrwidth_weight_inf = constrwidth_mass2rms_meds_inf120; constrwidth_weight_sup = constrwidth_mass2rms_meds_sup120
+        if weightin.split('_')[1] == "mass3rms": constr_weight = constr_mass3rms_meds120; constrwidth_weight_inf = constrwidth_mass3rms_meds_inf120; constrwidth_weight_sup = constrwidth_mass3rms_meds_sup120
+        if weightin.split('_')[1] == "mass2overrrms": constr_weight = constr_mass2overrrms_meds120; constrwidth_weight_inf = constrwidth_mass2overrrms_meds_inf120; constrwidth_weight_sup = constrwidth_mass2overrrms_meds_sup120
+        if weightin.split('_')[1] == "mass3overrrms": constr_weight = constr_mass3overrrms_meds120; constrwidth_weight_inf = constrwidth_mass3overrrms_meds_inf120; constrwidth_weight_sup = constrwidth_mass3overrrms_meds_sup120
+        if weightin.split('_')[1] == "flexion": constr_weight = constr_flexion_meds120; constrwidth_weight_inf = constrwidth_flexion_meds_inf120; constrwidth_weight_sup = constrwidth_flexion_meds_sup120
+        if weightin.split('_')[1] == "tidal": constr_weight = constr_tidal_meds120; constrwidth_weight_inf = constrwidth_tidal_meds_inf120; constrwidth_weight_sup = constrwidth_tidal_meds_sup120
+        if weightin.split('_')[1] == "SIS": constr_weight = constr_SIS_meds120; constrwidth_weight_inf = constrwidth_SIS_meds_inf120; constrwidth_weight_sup = constrwidth_SIS_meds_sup120
+        if weightin.split('_')[1] == "SIShalo": constr_weight = constr_SIShalo_meds120; constrwidth_weight_inf = constrwidth_SIShalo_meds_inf120; constrwidth_weight_sup = constrwidth_SIShalo_meds_sup120
+    if weightin.split('_')[1] == "gamma": constr_weight = constr_gamma; constrwidth_weight_inf = constrwidth_gamma_inf; constrwidth_weight_sup = constrwidth_gamma_sup
+    return constr_weight, constrwidth_weight_inf, constrwidth_weight_sup
+
+if conjoined == 5: constr_weight5, constrwidth_weight5_inf, constrwidth_weight5_sup = declareweight(weightin5)
+if (conjoined == 4) | (conjoined == 5): constr_weight4, constrwidth_weight4_inf, constrwidth_weight4_sup = declareweight(weightin4)
+if (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight3, constrwidth_weight3_inf, constrwidth_weight3_sup = declareweight(weightin3)
+if (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight2, constrwidth_weight2_inf, constrwidth_weight2_sup = declareweight(weightin2)
+if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4) | (conjoined == 5): constr_weight1, constrwidth_weight1_inf, constrwidth_weight1_sup = declareweight(weightin1)
 
 print "Reading..."
 
-#if mode == "sum":
-#str1 = ""
-if mode == "meds":
-    str1 = "med"
-
+if empty == 'empty': emptystr = '_emptymsk'
+else: emptystr = ''
+if removegroups == 'removegroups': groupsstr = '_removegroups'
+else: groupsstr = ''
+if conjoined == 5:
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,constr_weight1,constr_weight2,constr_weight3,constr_weight4,constr_weight5)
 if conjoined == 4:
-    output = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_%s_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,weightin4,mag,radius,mode)
-    outputLOS = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_%s_LOS_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,weightin4,mag,radius,mode)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,weightin4,mag,mode,constr_weight1,constr_weight2,constr_weight3,constr_weight4)
 if conjoined == 3:
-    output = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,mag,radius,mode)
-    outputLOS = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_%s_LOS_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,weightin3,mag,radius,mode)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,mag,mode,constr_weight1,constr_weight2,constr_weight3)
 if conjoined == 2:
-    output = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,mag,radius,mode)
-    outputLOS = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_%s_LOS_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,weightin2,mag,radius,mode)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
 if conjoined == 1:
-    output = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,mag,radius,mode)
-    outputLOS = '%skappasimbias_%s_%sinnermask_nobeta_%s_%s_%s_%s_LOS_8of64fields_increments.cat' % (rootout,lens,innermask,weightin1,mag,radius,mode)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1,constr_weight1)
 
-if conjoined == 1:
+def readfile(file,usecols):
+    f = fitsio.FITS(file)
+    print f # I need to print it, or f.hdu_list will not read
+    ext = len(f.hdu_list)
+    for i in range(ext - 1):
+        if i == 0:
+            data = fitsio.read(file, columns=usecols, ext=i+1)
+        else:
+            data = np.r_[data,fitsio.read(file, columns=usecols, ext=i+1)]
+    # for speed, fitsio always returns columns and rows in order, so for instance in [1,2,3] even when usecols=[2,3,1]
+    sort = np.argsort(np.argsort(usecols))
+    if len(usecols) == 1:
+        return data[data.dtype.names[0]]
+    if len(usecols) == 2:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]]
+    if len(usecols) == 3:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]]
+    if len(usecols) == 4:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]]
+    if len(usecols) == 5:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]]
+    if len(usecols) == 6:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]]
+    if len(usecols) == 7:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]],data[data.dtype.names[sort[6]]]
+    if len(usecols) == 8:
+        return data[data.dtype.names[sort[0]]],data[data.dtype.names[sort[1]]],data[data.dtype.names[sort[2]]],data[data.dtype.names[sort[3]]],data[data.dtype.names[sort[4]]],data[data.dtype.names[sort[5]]],data[data.dtype.names[sort[6]]],data[data.dtype.names[sort[7]]]
+
+def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup):
     ''' Here I only read the columns of interest, without kappa, for ugriz, in order to find the medians of their values over the whole MS.'''
-    for i in range(8):
-        if weightin1 != "gamma":
-            weight1_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=[weight1_index], unpack=True)
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    filters1 = "ugriz"
+    for j in range(field):
+      for i in range(8):
+        if type(weight1_index) == int:
+            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=[2,3], unpack=True)
+            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3])
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
             else:
                 weight1_1 = np.append(weight1_1,weight1_1_)
                 weight1_2 = np.append(weight1_2,weight1_2_)
-        print i
-    if weightin1 != "gamma":
-        med1 = np.median(weight1)
-    else:
-        med1 = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
-    med_weight1 = med1 # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
+        #print j,i
+      if type(weight1_index) == int:
+        med1[j] = np.median(weight1)
+      else:
+        med1[j] = np.median(np.sqrt(weight1_1**2 + weight1_2**2))
+    med_weight1 = np.mean(med1) # throughout the code I use med_weight1 when computing intervals, following Green et al. For this, weight1 should always refer to simple galaxy number counts
+    if type(weight1_index) != int:
+        constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights, so that it is meaningful to multiply later by the median number of galaxies
+        constrwidth_weight1_inf = constrwidth_weight1_inf / med_weight1
+        constrwidth_weight1_sup = constrwidth_weight1_sup / med_weight1
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))]) # absolute number, e.g. of galaxies within the lower width
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
-    if weightin1 == "gamma":
-        constr_weight1 = constr_weight1 / med_weight1 # for gamma, measured shear divided by the median value of shear in MS; this turns it into an overdensity, like the other weights
-    
-    ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
-    for i in range(8):
-        if weightin1 != "gamma":
-            kappa_, weight1_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index), unpack=True)
-            weight1_ = weight1_ / med_weight1
-        else:
-            kappa_, gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,2,3), unpack=True)
-            gamma1 = gamma1_
-            gamma2 = gamma2_
-            gamma = gamma1 # just so that the array has the correct shape
-            gamma = np.sqrt(gamma1**2 + gamma2**2)
-            weight1_ = gamma / med_weight1_
-        weight = np.copy(weight1_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        del weight
-        if i == 0:
-            kappa = kappa_
-            weight1 = weight1_
-        else:
-            kappa = np.append(kappa,kappa_)
-            weight1 = np.append(weight1,weight1_)
-        print i
+    return constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup
 
-if conjoined == 2:
-    for i in range(8):
-        if weightin2 != "gamma":
-            weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=(weight1_index,weight2_index), unpack=True)
+def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup):
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
+    filters1 = "ugriz"
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -382,7 +438,7 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=[weight1_index,1,2], unpack=True)
+            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,2,3])
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -391,59 +447,36 @@ if conjoined == 2:
                 weight1 = np.append(weight1,weight1_)
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
-        print i
-    if weightin2 != "gamma":
-        med1 = np.median(weight1)
-        med2 = np.median(weight2)
-    else:
-        med1 = np.median(weight1)
-        med2 = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-    med_weight1 = med1
-    med_weight2 = med2
+        #print j,i
+      if type(weight2_index) == int:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(weight2)
+      else:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+    med_weight1 = np.mean(med1)
+    med_weight2 = np.mean(med2)
+    if type(weight2_index) != int:
+        constr_weight2 = constr_weight2 / med_weight2
+        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
+        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-    
-    for i in range(8):
-        if weightin2 != "gamma":
-            kappa_, weight1_,weight2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,weight2_index), unpack=True)
-            weight1_ = weight1_ / med_weight1
-            weight2_ = weight2_ / med_weight2
-        else:
-            kappa_, weight1_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,2,3), unpack=True)
-            gamma1 = gamma1_
-            gamma2 = gamma2_
-            gamma = gamma1 # just so that the array has the correct shape
-            gamma = np.sqrt(gamma1**2 + gamma2**2)
-            weight1_ = weight1_ / med_weight1
-            weight2_ = gamma / med_weight2
-        weight = np.copy(weight1_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        del weight
-        weight = np.copy(weight2_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        del weight
-        if i == 0:
-            kappa = kappa_
-            weight1 = weight1_
-            weight2 = weight2_
-        else:
-            kappa = np.append(kappa,kappa_)
-            weight1 = np.append(weight1,weight1_)
-            weight2 = np.append(weight2,weight2_)
-        print i
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup
 
-if conjoined == 3:
-    for i in range(8):
-        if weightin2 != "gamma":
-            weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=(weight1_index,weight2_index,weight3_index), unpack=True)
+def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup):
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
+    med3 = np.zeros(field)
+    filters1 = "ugriz"
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -453,7 +486,7 @@ if conjoined == 3:
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=(weight1_index,1,2,weight3_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -464,76 +497,42 @@ if conjoined == 3:
                 weight2_1 = np.append(weight2_1,weight2_1_)
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
-        print i
-    if weightin2 != "gamma":
-        med1 = np.median(weight1)
-        med2 = np.median(weight2)
-        med3 = np.median(weight3)
-    else:
-        med1 = np.median(weight1)
-        med2 = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-        med3 = np.median(weight3)
-    med_weight1 = med1
-    med_weight2 = med2
-    med_weight3 = med3
+        #print j,i
+      if type(weight2_index) == int:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(weight2)
+        med3[j] = np.median(weight3)
+      else:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+        med3[j] = np.median(weight3)
+    med_weight1 = np.mean(med1)
+    med_weight2 = np.mean(med2)
+    med_weight3 = np.mean(med3)
+    if type(weight2_index) != int:
+        constr_weight2 = constr_weight2 / med_weight2
+        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
+        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
     E_w2_sup = np.max([1, round(med_weight1 * (-constr_weight2 + constrwidth_weight2_sup))])
     E_w3_inf = np.max([1, round(med_weight1 * (constr_weight3 - constrwidth_weight3_inf))])
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-    
-    for i in range(8):
-        if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,weight2_index,weight3_index), unpack=True)
-            weight1_ = weight1_ / med_weight1
-            weight2_ = weight2_ / med_weight2
-            weight3_ = weight3_ / med_weight3
-        else:
-            kappa_, weight1_,weight3_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,weight3_index,2,3), unpack=True)
-            gamma1 = gamma1_
-            gamma2 = gamma2_
-            gamma = gamma1 # just so that the array has the correct shape
-            gamma = np.sqrt(gamma1**2 + gamma2**2)
-            weight1_ = weight1_ / med_weight1
-            weight2_ = gamma / med_weight2
-            weight3_ = weight3_ / med_weight3
-        weight = np.copy(weight1_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
-        del weight
-        weight = np.copy(weight2_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
-        del weight
-        weight = np.copy(weight3_)
-        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
-        del weight
-        if i == 0:
-            kappa = kappa_
-            weight1 = weight1_
-            weight2 = weight2_
-            weight3 = weight3_
-        else:
-            kappa = np.append(kappa,kappa_)
-            weight1 = np.append(weight1,weight1_)
-            weight2 = np.append(weight2,weight2_)
-            weight3 = np.append(weight3,weight3_)
-        print i
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup
 
-if conjoined == 4:
-    for i in range(8):
-        if weightin2 != "gamma":
-            weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=(weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup):
+    if only8 == True: field = 1
+    else: field = 8
+    med1 = np.zeros(field)
+    med2 = np.zeros(field)
+    med3 = np.zeros(field)
+    med4 = np.zeros(field)
+    filters1 = "ugriz"
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -545,7 +544,7 @@ if conjoined == 4:
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_ugriz_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,str(i),radius,innermask), usecols=(weight1_index,1,2,weight3_index,weight4_index), unpack=True)
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -558,21 +557,25 @@ if conjoined == 4:
                 weight2_2 = np.append(weight2_2,weight2_2_)
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
-        print i
-    if weightin2 != "gamma":
-        med1 = np.median(weight1)
-        med2 = np.median(weight2)
-        med3 = np.median(weight3)
-        med4 = np.median(weight4)
-    else:
-        med1 = np.median(weight1)
-        med2 = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
-        med3 = np.median(weight3)
-        med4 = np.median(weight4)
-    med_weight1 = med1
-    med_weight2 = med2
-    med_weight3 = med3
-    med_weight4 = med4
+        #print j,i
+      if type(weight2_index) == int:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(weight2)
+        med3[j] = np.median(weight3)
+        med4[j] = np.median(weight4)
+      else:
+        med1[j] = np.median(weight1)
+        med2[j] = np.median(np.sqrt(weight2_1**2 + weight2_2**2))
+        med3[j] = np.median(weight3)
+        med4[j] = np.median(weight4)
+    med_weight1 = np.mean(med1)
+    med_weight2 = np.mean(med2)
+    med_weight3 = np.mean(med3)
+    med_weight4 = np.mean(med4)
+    if type(weight2_index) != int:
+        constr_weight2 = constr_weight2 / med_weight2
+        constrwidth_weight2_inf = constrwidth_weight2_inf / med_weight2
+        constrwidth_weight2_sup = constrwidth_weight2_sup / med_weight2
     E_w1_inf = np.max([1, round(med_weight1 * (constr_weight1 - constrwidth_weight1_inf))])
     E_w1_sup = np.max([1, round(med_weight1 * (-constr_weight1 + constrwidth_weight1_sup))])
     E_w2_inf = np.max([1, round(med_weight1 * (constr_weight2 - constrwidth_weight2_inf))])
@@ -581,18 +584,220 @@ if conjoined == 4:
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
-    if weightin2 == "gamma":
-        constr_weight2 = constr_weight2 / med_weight2
-    
-    for i in range(8):
-        if weightin2 != "gamma":
-            kappa_, weight1_,weight2_,weight3_,weight4_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,weight2_index,weight3_index,weight4_index), unpack=True)
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
+
+
+def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
+    ''' Here I read ugrizJHK, converting weighted counts into overdensities, and recording the kappa values only for overdensities satisfying the constraint. I consider the full range of the constraint.'''
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        if type(weight1_index) == int:
+            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index))
+            weight1_ = weight1_ / med_weight1
+        else:
+            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3))
+            gamma1 = gamma1_
+            gamma2 = gamma2_
+            gamma = gamma1 # just so that the array has the correct shape
+            gamma = np.sqrt(gamma1**2 + gamma2**2)
+            weight1_ = gamma / med_weight1
+        weight = np.copy(weight1_)
+        print np.shape(kappa_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        if (i == 0) and (j == 0):
+            id = id_
+            kappa = kappa_
+            weight1 = weight1_
+            ind1 = np.ones(np.shape(id_)) * j # this is to record the field name, and will be used together with id when matching different apertures
+            ind2 = np.ones(np.shape(id_)) * i
+        else:
+            id = np.append(id,id_)
+            ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+            ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+            kappa = np.append(kappa,kappa_)
+            weight1 = np.append(weight1,weight1_)
+        #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
+    return id,ind1,ind2,kappa,weight1
+
+
+def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            id_,kappa_, weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index))
+            weight1_ = weight1_ / med_weight1
+            weight2_ = weight2_ / med_weight2
+        else:
+            id_,kappa_,weight1_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,2,3))
+            gamma1 = gamma1_
+            gamma2 = gamma2_
+            gamma = gamma1 # just so that the array has the correct shape
+            gamma = np.sqrt(gamma1**2 + gamma2**2)
+            weight1_ = weight1_ / med_weight1
+            weight2_ = gamma / med_weight2
+        weight = np.copy(weight1_)
+        print np.shape(kappa_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        weight = np.copy(weight2_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        if (i == 0) and (j == 0):
+            id = id_
+            kappa = kappa_
+            weight1 = weight1_
+            weight2 = weight2_
+            ind1 = np.ones(np.shape(id_)) * j
+            ind2 = np.ones(np.shape(id_)) * i
+        else:
+            id = np.append(id,id_)
+            ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+            ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+            kappa = np.append(kappa,kappa_)
+            weight1 = np.append(weight1,weight1_)
+            weight2 = np.append(weight2,weight2_)
+        #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          #global x
+          #global y
+          x = np.array([])
+          y = np.array([])
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              #x=np.append(x,k+1)
+              #y=np.append(y,len(id))
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
+    return id,ind1,ind2,kappa,weight1,weight2
+
+def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            id_,kappa_, weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index))
+            weight1_ = weight1_ / med_weight1
+            weight2_ = weight2_ / med_weight2
+            weight3_ = weight3_ / med_weight3
+        else:
+            id_,kappa_, weight1_,weight3_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,2,3))
+            gamma1 = gamma1_
+            gamma2 = gamma2_
+            gamma = gamma1 # just so that the array has the correct shape
+            gamma = np.sqrt(gamma1**2 + gamma2**2)
+            weight1_ = weight1_ / med_weight1
+            weight2_ = gamma / med_weight2
+            weight3_ = weight3_ / med_weight3
+        weight = np.copy(weight1_)
+        print np.shape(kappa_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        weight = np.copy(weight2_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        weight = np.copy(weight3_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        if (i == 0) and (j == 0):
+            id = id_
+            kappa = kappa_
+            weight1 = weight1_
+            weight2 = weight2_
+            weight3 = weight3_
+            ind1 = np.ones(np.shape(id_)) * j
+            ind2 = np.ones(np.shape(id_)) * i
+        else:
+            id = np.append(id,id_)
+            ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+            ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+            kappa = np.append(kappa,kappa_)
+            weight1 = np.append(weight1,weight1_)
+            weight2 = np.append(weight2,weight2_)
+            weight3 = np.append(weight3,weight3_)
+        #print j,i
+    return id,ind1,ind2,kappa,weight1,weight2,weight3
+
+def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        if type(weight2_index) == int:
+            id_,kappa_, weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         else:
-            kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = np.loadtxt("%snobeta35measured%sinject_%s_WFI2033_GGL_los_8_0_%s_%s_%sarcsecinnermsk.cat" % (root,str1,filters,str(i),radius,innermask), usecols=(1,weight1_index,weight3_index,weight4_index,2,3), unpack=True)
+            id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -602,46 +807,786 @@ if conjoined == 4:
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         weight = np.copy(weight1_)
+        print np.shape(kappa_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
         weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+        print np.shape(kappa_)
         del weight
         weight = np.copy(weight2_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
         weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+        print np.shape(kappa_)
         del weight
         weight = np.copy(weight3_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
         weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+        print np.shape(kappa_)
         del weight
-        if i == 0:
+        weight = np.copy(weight4_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+        print np.shape(kappa_)
+        del weight
+        if (i == 0) and (j == 0):
+            id = id_
             kappa = kappa_
             weight1 = weight1_
             weight2 = weight2_
             weight3 = weight3_
             weight4 = weight4_
+            ind1 = np.ones(np.shape(id_)) * j
+            ind2 = np.ones(np.shape(id_)) * i
         else:
+            id = np.append(id,id_)
+            ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+            ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
             kappa = np.append(kappa,kappa_)
             weight1 = np.append(weight1,weight1_)
             weight2 = np.append(weight2,weight2_)
             weight3 = np.append(weight3,weight3_)
             weight4 = np.append(weight4,weight4_)
-        print i
+        #print j,i
+    return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
+
+
+
+def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
+            sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
+        else:
+            if type(weight1_index) == int:
+                id_,kappa_, weight1_,galinner_ = readfile(file, usecols=(0,1,weight1_index,len(f[1].get_colnames()) - 1))
+                weight1_ = weight1_ / med_weight1
+            else:
+                id_,kappa_, gamma1_,gamma2_,galinner_ = np.loadtxt(file, usecols=(0,1,2,3,len(f[1].get_colnames()) - 1))
+                gamma1 = gamma1_
+                gamma2 = gamma2_
+                gamma = gamma1 # just so that the array has the correct shape
+                gamma = np.sqrt(gamma1**2 + gamma2**2)
+                weight1_ = gamma / med_weight1
+            weight = np.copy(weight1_)
+            print np.shape(kappa_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ] # convert overdensities into absolute counts
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            if (i == 0) and (j == 0):
+                id = id_
+                kappa = kappa_
+                weight1 = weight1_
+                ind1 = np.ones(np.shape(id_)) * j # this is to record the field name, and will be used together with id when matching different apertures
+                ind2 = np.ones(np.shape(id_)) * i
+            else:
+                id = np.append(id,id_)
+                ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+                ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+                kappa = np.append(kappa,kappa_)
+                weight1 = np.append(weight1,weight1_)
+            #print j,i
+    return id,ind1,ind2,kappa,weight1
+
+def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
+            sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
+        else:
+            if type(weight2_index) == int:
+                id_,kappa_, weight1_,weight2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,len(f[1].get_colnames()) - 1))
+                weight1_ = weight1_ / med_weight1
+                weight2_ = weight2_ / med_weight2
+            else:
+                id_,kappa_,weight1_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,2,3,len(f[1].get_colnames()) - 1))
+                gamma1 = gamma1_
+                gamma2 = gamma2_
+                gamma = gamma1 # just so that the array has the correct shape
+                gamma = np.sqrt(gamma1**2 + gamma2**2)
+                weight1_ = weight1_ / med_weight1
+                weight2_ = gamma / med_weight2
+            weight = np.copy(weight1_)
+            print np.shape(kappa_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight2_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
+            if (i == 0) and (j == 0):
+                id = id_
+                kappa = kappa_
+                weight1 = weight1_
+                weight2 = weight2_
+                ind1 = np.ones(np.shape(id_)) * j
+                ind2 = np.ones(np.shape(id_)) * i
+            else:
+                id = np.append(id,id_)
+                ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+                ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+                kappa = np.append(kappa,kappa_)
+                weight1 = np.append(weight1,weight1_)
+                weight2 = np.append(weight2,weight2_)
+            #print j,i
+    return id,ind1,ind2,kappa,weight1,weight2
+
+def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
+            sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
+        else:
+            if type(weight2_index) == int:
+                id_,kappa_, weight1_,weight2_,weight3_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,len(f[1].get_colnames()) - 1))
+                weight1_ = weight1_ / med_weight1
+                weight2_ = weight2_ / med_weight2
+                weight3_ = weight3_ / med_weight3
+            else:
+                id_,kappa_, weight1_,weight3_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight3_index,2,3,len(f[1].get_colnames()) - 1))
+                gamma1 = gamma1_
+                gamma2 = gamma2_
+                gamma = gamma1 # just so that the array has the correct shape
+                gamma = np.sqrt(gamma1**2 + gamma2**2)
+                weight1_ = weight1_ / med_weight1
+                weight2_ = gamma / med_weight2
+                weight3_ = weight3_ / med_weight3
+            weight = np.copy(weight1_)
+            print np.shape(kappa_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight2_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight3_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
+            weight3_ = weight3_[galinner_ == 0]
+            if (i == 0) and (j == 0):
+                id = id_
+                kappa = kappa_
+                weight1 = weight1_
+                weight2 = weight2_
+                weight3 = weight3_
+                ind1 = np.ones(np.shape(id_)) * j
+                ind2 = np.ones(np.shape(id_)) * i
+            else:
+                id = np.append(id,id_)
+                ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+                ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+                kappa = np.append(kappa,kappa_)
+                weight1 = np.append(weight1,weight1_)
+                weight2 = np.append(weight2,weight2_)
+                weight3 = np.append(weight3,weight3_)
+    return id,ind1,ind2,kappa,weight1,weight2,weight3
+
+def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
+    filters1 = filters
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+      for i in range(8):
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        f = fitsio.FITS(file)
+        if 'galinner' not in f[1].get_colnames()[-1]:
+            sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
+        else:
+            if type(weight2_index) == int:
+                id_,kappa_, weight1_,weight2_,weight3_,weight4_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index,len(f[1].get_colnames()) - 1))
+                weight1_ = weight1_ / med_weight1
+                weight2_ = weight2_ / med_weight2
+                weight3_ = weight3_ / med_weight3
+                weight4_ = weight4_ / med_weight4
+            else:
+                id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_,galinner_ = readfile(file, usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3,len(f[1].get_colnames()) - 1))
+                gamma1 = gamma1_
+                gamma2 = gamma2_
+                gamma = gamma1 # just so that the array has the correct shape
+                gamma = np.sqrt(gamma1**2 + gamma2**2)
+                weight1_ = weight1_ / med_weight1
+                weight2_ = gamma / med_weight2
+                weight3_ = weight3_ / med_weight3
+                weight4_ = weight4_ / med_weight4
+            weight = np.copy(weight1_)
+            print np.shape(kappa_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight1 * med_weight1) - limsigma * E_w1_inf - increment1/2.0) & (weight * med_weight1 < round(constr_weight1 * med_weight1) + limsigma * E_w1_sup + increment1/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight2_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight2 * med_weight1) - limsigma * E_w2_inf - increment2/2.0) & (weight * med_weight1 < round(constr_weight2 * med_weight1) + limsigma * E_w2_sup + increment2/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight3_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight3 * med_weight1) - limsigma * E_w3_inf - increment3/2.0) & (weight * med_weight1 < round(constr_weight3 * med_weight1) + limsigma * E_w3_sup + increment3/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            weight = np.copy(weight4_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            weight3_ = weight3_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            weight4_ = weight4_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            galinner_ = galinner_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
+            print np.shape(kappa_)
+            del weight
+            id_ = id_[galinner_ == 0]
+            kappa_ = kappa_[galinner_ == 0]
+            weight1_ = weight1_[galinner_ == 0]
+            weight2_ = weight2_[galinner_ == 0]
+            weight3_ = weight3_[galinner_ == 0]
+            weight4_ = weight4_[galinner_ == 0]
+            if (i == 0) and (j == 0):
+                id = id_
+                kappa = kappa_
+                weight1 = weight1_
+                weight2 = weight2_
+                weight3 = weight3_
+                weight4 = weight4_
+                ind1 = np.ones(np.shape(id_)) * j
+                ind2 = np.ones(np.shape(id_)) * i
+            else:
+                id = np.append(id,id_)
+                ind1 = np.append(ind1,np.ones(np.shape(id_)) * j)
+                ind2 = np.append(ind2,np.ones(np.shape(id_)) * i)
+                kappa = np.append(kappa,kappa_)
+                weight1 = np.append(weight1,weight1_)
+                weight2 = np.append(weight2,weight2_)
+                weight3 = np.append(weight3,weight3_)
+                weight4 = np.append(weight4,weight4_)
+            #print j,i
+    return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
+
+if conjoined == 1:
+    constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup) # the constr argument representing 'gamma' (if 'gamma' is used) needs to be used here, so that it can be updated by the code. In addition, all constr arguments must be used because, as I am using multiple radii, global arguments such as constr_weight1 for one radius will correspond to a different global argument for another radius
+    if empty != 'empty': id,ind1,ind2,kappa,weight1 = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+    else: id,ind1,ind2,kappa,weight1 = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+    del id,ind1,ind2
+
+if conjoined == 2:
+    if weightin1.split('_')[0] == weightin2.split('_')[0]:
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        if empty != 'empty': id,ind1,ind2,kappa,weight1,weight2 = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+        else: id,ind1,ind2,kappa,weight1,weight2 = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+        del id,ind1,ind2
+    else:
+        constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+        if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+        else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight2,E_w2_inf,E_w2_sup = readconjoined1_ugriz(weightin2.split('_')[0],weight2_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_ = readconjoined1_ugrizJHK(weightin2.split('_')[0],weight2_index,constr_weight2,increment2,med_weight2,E_w2_inf,E_w2_sup)
+        else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_ = readconjoined1galinner_ugrizJHK(weightin2.split('_')[0],weight2_index,constr_weight2,increment2,med_weight2,E_w2_inf,E_w2_sup)
+        if only8 == True: field = 1
+        else: field = 8
+        for j in range(field):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight2_ij = weight2_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                weight2_ij = weight2_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                diff = kappa_rad1_ij - kappa_rad2_ij
+                if diff.any()!=0: print "error kappa"  # testing sanity
+
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                else:
+                    kappa = np.append(kappa,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+        del sort1,sort2
+        del weight1_ij
+        del weight2_ij
+        del id_rad1_ij,id_rad1
+        del id_rad2_ij,id_rad2
+        del ind1_rad1_ij,ind1_rad1
+        del ind1_rad2_ij,ind1_rad2
+        del ind2_rad1_ij,ind2_rad1
+        del ind2_rad2_ij,ind2_rad2
+        del kappa_rad1_ij,kappa_rad1
+        del kappa_rad2_ij,kappa_rad2
+
+if conjoined == 3:
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+        if empty != 'empty': id,ind1,ind2,kappa,weight1,weight2,weight3 = readconjoined3_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+        else: id,ind1,ind2,kappa,weight1,weight2,weight3 = readconjoined3galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+        del id,ind1,ind2
+    else:
+        if weightin1.split('_')[0] == weightin2.split('_')[0]:
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+            if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+            else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight3,E_w3_inf,E_w3_sup = readconjoined1_ugriz(weightin3.split('_')[0],weight3_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_ = readconjoined1_ugrizJHK(weightin3.split('_')[0],weight3_index,constr_weight3,increment3,med_weight3,E_w3_inf,E_w3_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_ = readconjoined1galinner_ugrizJHK(weightin3.split('_')[0],weight3_index,constr_weight3,increment3,med_weight3,E_w3_inf,E_w3_sup)
+        if weightin2.split('_')[0] == weightin3.split('_')[0]:
+            constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+            if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+            else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined2_ugriz(weightin2.split('_')[0],weight2_index,weight3_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_ = readconjoined2_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,constr_weight2,constr_weight3,increment2,increment3,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_ = readconjoined2galinner_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,constr_weight2,constr_weight3,increment2,increment3,med_weight2,med_weight3,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+        if only8 == True: field = 1
+        else: field = 8
+        for j in range(field):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                    weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                    weight2_ij = weight2_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                    weight2_ij = weight2_ij[sort2]
+                if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                    weight2_ij = weight2_ij[sort1]
+                weight3_ij = weight3_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                diff = kappa_rad1_ij - kappa_rad2_ij
+                if diff.any()!=0: print "error kappa"  # testing sanity
+
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                else:
+                    kappa = np.append(kappa,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+        del sort1,sort2
+        del weight1_ij,weight1_
+        del weight2_ij,weight2_
+        del weight3_ij,weight3_
+        del id_rad1_ij,id_rad1
+        del id_rad2_ij,id_rad2
+        del ind1_rad1_ij,ind1_rad1
+        del ind1_rad2_ij,ind1_rad2
+        del ind2_rad1_ij,ind2_rad1
+        del ind2_rad2_ij,ind2_rad2
+        del kappa_rad1_ij,kappa_rad1
+        del kappa_rad2_ij,kappa_rad2
+
+if conjoined == 4:
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+        if empty != 'empty': id,ind1,ind2,kappa,weight1,weight2,weight3,weight4 = readconjoined4_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        else: id,ind1,ind2,kappa,weight1,weight2,weight3,weight4 = readconjoined4galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        del id,ind1,ind2
+    else:
+        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+            if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+            else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+            constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight4,E_w4_inf,E_w4_sup = readconjoined1_ugriz(weightin4.split('_')[0],weight4_index,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_ = readconjoined1_ugrizJHK(weightin4.split('_')[0],weight4_index,constr_weight4,increment4,med_weight4,E_w4_inf,E_w4_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_ = readconjoined1galinner_ugrizJHK(weightin4.split('_')[0],weight4_index,constr_weight4,increment4,med_weight4,E_w4_inf,E_w4_sup)
+        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+            constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+            if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+            else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup)
+            constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,med_weight4,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined3_ugriz(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_ = readconjoined3_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,constr_weight2,constr_weight3,constr_weight4,increment2,increment3,increment4,med_weight2,med_weight3,med_weight4,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_ = readconjoined3galinner_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,constr_weight2,constr_weight3,constr_weight4,increment2,increment3,increment4,med_weight2,med_weight3,med_weight4,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+            constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+            if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+            else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+            constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined2_ugriz(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+            if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+            else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_ = readconjoined2galinner_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,constr_weight3,constr_weight4,increment3,increment4,med_weight3,med_weight4,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        if only8 == True: field = 1
+        else: field = 8
+        for j in range(field):
+            for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                    weight2_ij = weight2_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if ((weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    weight3_ij = weight3_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight4_ij = weight4_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight4_ij = weight4_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                    weight2_ij = weight2_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight2_ij = weight2_ij[sort1]
+                if ((weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0])):
+                    weight3_ij = weight3_ij[sort2]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    weight3_ij = weight3_ij[sort1]
+                weight4_ij = weight4_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                diff = kappa_rad1_ij - kappa_rad2_ij
+                if diff.any()!=0: print "error kappa"  # testing sanity
+
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                    weight4 = weight4_ij
+                else:
+                    kappa = np.append(kappa,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+                    weight4 = np.append(weight4,weight4_ij)
+        del sort1,sort2
+        del weight1_ij,weight1_
+        del weight2_ij,weight2_
+        del weight3_ij,weight3_
+        del weight4_ij,weight4_
+        del id_rad1_ij,id_rad1
+        del id_rad2_ij,id_rad2
+        del ind1_rad1_ij,ind1_rad1
+        del ind1_rad2_ij,ind1_rad2
+        del ind2_rad1_ij,ind2_rad1
+        del ind2_rad2_ij,ind2_rad2
+        del kappa_rad1_ij,kappa_rad1
+        del kappa_rad2_ij,kappa_rad2
+
+if conjoined == 5:
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        sys.exit('For a single given radius, a maximum of 4 conjoined constraints is allowed (5 given).')
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup = readconjoined4_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup)
+        if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_,weight4_ = readconjoined4_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_,weight4_ = readconjoined4galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup)
+        constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup,med_weight5,E_w5_inf,E_w5_sup = readconjoined1_ugriz(weightin5.split('_')[0],weight5_index,constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight5_ = readconjoined1_ugrizJHK(weightin5.split('_')[0],weight5_index,constr_weight5,increment5,med_weight5,E_w5_inf,E_w5_sup)
+        else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight5_ = readconjoined1galinner_ugrizJHK(weightin5.split('_')[0],weight5_index,constr_weight5,increment5,med_weight5,E_w5_inf,E_w5_sup)
+    if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,med_weight1,E_w1_inf,E_w1_sup = readconjoined1_ugriz(weightin1.split('_')[0],weight1_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup)
+        if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight5,E_w5_inf,E_w5_sup)
+        else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_ = readconjoined1galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,constr_weight1,increment1,med_weight5,E_w5_inf,E_w5_sup)
+        constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,med_weight2,med_weight3,med_weight4,med_weight5,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined4_ugriz(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,weight5_index,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_,weight5_ = readconjoined4_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,weight5_index,constr_weight2,constr_weight3,constr_weight4,constr_weight5,increment2,increment3,increment4,increment5,med_weight2,med_weight3,med_weight4,med_weight5,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+        else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight2_,weight3_,weight4_,weight5_ = readconjoined4galinner_ugrizJHK(weightin2.split('_')[0],weight2_index,weight3_index,weight4_index,weight5_index,constr_weight2,constr_weight3,constr_weight4,constr_weight5,increment2,increment3,increment4,increment5,med_weight2,med_weight3,med_weight4,med_weight5,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup = readconjoined3_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup)
+        if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+        else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_,weight3_ = readconjoined3galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup)
+        constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup,med_weight4,med_weight5,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined2_ugriz(weightin4.split('_')[0],weight4_index,weight5_index,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_,weight5_ = readconjoined2_ugrizJHK(weightin4.split('_')[0],weight4_index,weight5_index,constr_weight4,constr_weight5,increment4,increment5,med_weight4,med_weight5,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+        else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight4_,weight5_ = readconjoined2galinner_ugrizJHK(weightin4.split('_')[0],weight4_index,weight5_index,constr_weight4,constr_weight5,increment4,increment5,med_weight4,med_weight5,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+        constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup = readconjoined2_ugriz(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constrwidth_weight1_inf,constrwidth_weight1_sup,constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup)
+        if empty != 'empty': id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+        else: id_rad1,ind1_rad1,ind2_rad1,kappa_rad1,weight1_,weight2_ = readconjoined2galinner_ugrizJHK(weightin1.split('_')[0],weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup)
+        constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup = readconjoined3_ugriz(weightin3.split('_')[0],weight3_index,weight4_index,weight5_index,constr_weight3,constrwidth_weight3_inf,constrwidth_weight3_sup,constr_weight4,constrwidth_weight4_inf,constrwidth_weight4_sup,constr_weight5,constrwidth_weight5_inf,constrwidth_weight5_sup)
+        if empty != 'empty': id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_,weight5_ = readconjoined3_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,weight5_index,constr_weight3,constr_weight4,constr_weight5,increment3,increment4,increment5,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+        else: id_rad2,ind1_rad2,ind2_rad2,kappa_rad2,weight3_,weight4_,weight5_ = readconjoined3galinner_ugrizJHK(weightin3.split('_')[0],weight3_index,weight4_index,weight5_index,constr_weight3,constr_weight4,constr_weight5,increment3,increment4,increment5,med_weight3,med_weight4,med_weight5,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup,E_w5_inf,E_w5_sup)
+
+    if only8 == True: field = 1
+    else: field = 8
+    for j in range(field):
+        for i in range(8):
+                id_rad1_ij = id_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                id_rad2_ij = id_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind1_rad1_ij = ind1_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind1_rad2_ij = ind1_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                ind2_rad1_ij = ind2_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                ind2_rad2_ij = ind2_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                kappa_rad1_ij = kappa_rad1[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                kappa_rad2_ij = kappa_rad2[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                weight1_ij = weight1_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                    weight2_ij = weight2_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight2_ij = weight2_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight4_ij = weight4_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                    weight4_ij = weight4_[(ind1_rad1 == j) & (ind2_rad1 == i)]
+                weight5_ij = weight5_[(ind1_rad2 == j) & (ind2_rad2 == i)]
+
+                ind1_rad2_ij = ind1_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                ind2_rad2_ij = ind2_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                kappa_rad2_ij = kappa_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight4_ij = weight4_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                weight5_ij = weight5_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+                id_rad2_ij = id_rad2_ij[np.where(np.in1d(id_rad2_ij, id_rad1_ij))[0]]
+
+                ind1_rad1_ij = ind1_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                ind2_rad1_ij = ind2_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                kappa_rad1_ij = kappa_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                weight1_ij = weight1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                    weight4_ij = weight4_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight2_ij = weight2_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+                id_rad1_ij = id_rad1_ij[np.where(np.in1d(id_rad1_ij, id_rad2_ij))[0]]
+
+                sort1 = np.argsort(id_rad1_ij)
+                kappa_rad1_ij = kappa_rad1_ij[sort1]
+                weight1_ij = weight1_ij[sort1]
+                sort2 = np.argsort(id_rad2_ij)
+                if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                    weight2_ij = weight2_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight2_ij = weight2_ij[sort1]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[sort2]
+                if ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight3_ij = weight3_ij[sort1]
+                if ((weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])) | ((weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0])):
+                    weight4_ij = weight4_ij[sort2]
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                    weight4_ij = weight4_ij[sort1]
+                weight5_ij = weight5_ij[sort2]
+                kappa_rad2_ij = kappa_rad2_ij[sort2]
+
+                diff = kappa_rad1_ij - kappa_rad2_ij
+                if diff.any()!=0: print "error kappa"  # testing sanity
+
+                if (i == 0) and (j == 0):
+                    kappa = kappa_rad1_ij
+                    weight1 = weight1_ij
+                    weight2 = weight2_ij
+                    weight3 = weight3_ij
+                    weight4 = weight4_ij
+                    weight5 = weight5_ij
+                else:
+                    kappa = np.append(kappa,kappa_rad1_ij)
+                    weight1 = np.append(weight1,weight1_ij)
+                    weight2 = np.append(weight2,weight2_ij)
+                    weight3 = np.append(weight3,weight3_ij)
+                    weight4 = np.append(weight4,weight4_ij)
+                    weight5 = np.append(weight5,weight5_ij)
+    del sort1,sort2
+    del weight1_ij,weight1_
+    del weight2_ij,weight2_
+    del weight3_ij,weight3_
+    del weight4_ij,weight4_
+    del weight5_ij,weight5_
+    del id_rad1_ij,id_rad1
+    del id_rad2_ij,id_rad2
+    del ind1_rad1_ij,ind1_rad1
+    del ind1_rad2_ij,ind1_rad2
+    del ind2_rad1_ij,ind2_rad1
+    del ind2_rad2_ij,ind2_rad2
+    del kappa_rad1_ij,kappa_rad1
+    del kappa_rad2_ij,kappa_rad2
 
 print(" Read in %s seconds" % (time.time() - start_time))
 
 start1 = time.time()
 
+if conjoined == 5:
+    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
+    true = np.zeros(sizing)
+    med = np.zeros(sizing)
+    std16 = np.zeros(sizing)
+    std84 = np.zeros(sizing)
+    los = np.zeros(sizing)
+    rand = np.random.randint(0,kappa.size,sizing) # get indices for each sample
+    for i in range(sizing):
+        print i, "/",sizing
+        data = kappa[(weight1 * med_weight1 >= round(weight1[rand[i]] * med_weight1) - increment1/2.0) & (weight1 * med_weight1 < round(weight1[rand[i]] * med_weight1) + increment1/2.0) & (weight2 * med_weight1 >= round(weight2[rand[i]] * med_weight1) - increment2/2.0) & (weight2 * med_weight1 < round(weight2[rand[i]] * med_weight1) + increment2/2.0) & (weight3 * med_weight1 >= round(weight3[rand[i]] * med_weight1) - increment3/2.0) & (weight3 * med_weight1 < round(weight3[rand[i]] * med_weight1) + increment3/2.0) & (weight4 * med_weight1 >= round(weight4[rand[i]] * med_weight1) - increment4/2.0) & (weight4 * med_weight1 < round(weight4[rand[i]] * med_weight1) + increment4/2.0) & (weight5 * med_weight1 >= round(weight5[rand[i]] * med_weight1) - increment5/2.0) & (weight5 * med_weight1 < round(weight5[rand[i]] * med_weight1) + increment5/2.0)] # for each sample, randomly select weights from within the permitted range, and get all kappa points consistent with that weight, within the narrowest interval
+        if data.size > 0:
+            true[i] = kappa[rand[i]]
+            med[i] = np.median(data)
+            std16[i] = np.percentile(data,16)
+            std84[i] = np.percentile(data,84)
+            los[i] = data.size
+
 if conjoined == 4:
-    sizing = np.min([10000,kappa.size]) # get either 10000 samples, or as many as there are
+    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
     true = np.zeros(sizing)
     med = np.zeros(sizing)
     std16 = np.zeros(sizing)
@@ -659,7 +1604,7 @@ if conjoined == 4:
             los[i] = data.size
 
 if conjoined == 3:
-    sizing = np.min([10000,kappa.size]) # get either 10000 samples, or as many as there are
+    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
     true = np.zeros(sizing)
     med = np.zeros(sizing)
     std16 = np.zeros(sizing)
@@ -677,7 +1622,7 @@ if conjoined == 3:
             los[i] = data.size
 
 if conjoined == 2:
-    sizing = np.min([10000,kappa.size]) # get either 10000 samples, or as many as there are
+    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
     true = np.zeros(sizing)
     med = np.zeros(sizing)
     std16 = np.zeros(sizing)
@@ -695,7 +1640,7 @@ if conjoined == 2:
             los[i] = data.size
 
 if conjoined == 1:
-    sizing = np.min([10000,kappa.size]) # get either 10000 samples, or as many as there are
+    sizing = np.min([samples,kappa.size]) # get either 10000 samples, or as many as there are
     true = np.zeros(sizing)
     med = np.zeros(sizing)
     std16 = np.zeros(sizing)
@@ -715,16 +1660,6 @@ if conjoined == 1:
 head = "kappa_true kappa_median 16th 84th kappa_LOS"
 np.savetxt(output,np.c_[true,med,std16,std84,los],fmt='%s',delimiter='\t',newline='\n',header=head)
 print(" time for computing kappa %s seconds" % (time.time() - start1))
-
-if (conjoined == 1) | (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
-    print "increment1 = ", increment1
-if (conjoined == 2) | (conjoined == 3) | (conjoined == 4):
-    print "increment2 = ", increment2
-if (conjoined == 3) | (conjoined == 4):
-    print "increment3 = ", increment3
-if conjoined == 4:
-    print "increment4 = ", increment4
-
 print(" Total time --- %s seconds ---" % (time.time() - start_time))
 
 print 'Done!'

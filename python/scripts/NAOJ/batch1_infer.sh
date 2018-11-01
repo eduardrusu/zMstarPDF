@@ -29,15 +29,15 @@ cd /lfs08/rusucs/code/
 #python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr 45_mass2overr
 #python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr 45_mass3overr
 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_gamma 120_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr 45_gal 45_gamma 45_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 45_gal 45_oneoverr
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_gamma 120_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 45_gal 45_gamma 45_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr 45_gal 45_gamma 45_oneoverr 
-python kappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_gamma 120_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr 45_gal 45_gamma 45_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removelensgrouphandpicked fiducial empty notremovegroups 5 22.5 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 45_gal 45_oneoverr
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_gamma 120_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 45_gal 45_gamma 45_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr 45_gal 45_gamma 45_oneoverr 
+python inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 23 measured med 120_gal 120_oneoverr 45_gal 45_oneoverr

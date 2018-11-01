@@ -67,7 +67,7 @@ rootcode = "/lfs08/rusucs/code/"
 #rootcode = "/mnt/scratch/rusucs/code/"
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
-#rootout = "/mnt/scratch/rusucs/%s/kapparesults/" % lens
+#rootout = "/mnt/scratch/rusucs/%s/MSkapparesults/" % lens
 weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
@@ -94,11 +94,11 @@ if lens == "WFI2033":
         constr_gamma = 0.119
         constrwidth_gamma_inf = 0.116# 0.109 #
         constrwidth_gamma_sup = 0.121# 0.129 #
-    if other == 'fiducial' and handpicked == 'removegrouplenshandpicked' and innermask == '5' and float(zsup) < 0:
+    if other == 'fiducial' and handpicked == 'removelensgrouphandpicked' and innermask == '5' and float(zsup) < 0:
         constr_gamma = 0.107
         constrwidth_gamma_inf = 0.102# 0.097 #
         constrwidth_gamma_sup = 0.112# 0.117 #
-    if other == 'fiducial' and handpicked == 'removegrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
+    if other == 'fiducial' and handpicked == 'removelensgrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
         constr_gamma = 0.111
         constrwidth_gamma_inf = 0.105# .101 #
         constrwidth_gamma_sup = 0.115# 0.121 #
@@ -608,7 +608,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
     E_w3_sup = np.max([1, round(med_weight1 * (-constr_weight3 + constrwidth_weight3_sup))])
     E_w4_inf = np.max([1, round(med_weight1 * (constr_weight4 - constrwidth_weight4_inf))])
     E_w4_sup = np.max([1, round(med_weight1 * (-constr_weight4 + constrwidth_weight4_sup))])
-    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
+    return constr_weight2,constrwidth_weight2_inf,constrwidth_weight2_sup,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup
 
 
 def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_weight1,E_w1_inf,E_w1_sup):
@@ -859,6 +859,7 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
         print np.shape(kappa_)
         del weight
         weight = np.copy(weight4_)
+        id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
         weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
@@ -1132,6 +1133,7 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
             print np.shape(kappa_)
             del weight
             weight = np.copy(weight4_)
+            id_ = id_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             kappa_ = kappa_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             weight1_ = weight1_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]
             weight2_ = weight2_[(weight * med_weight1 >= round(constr_weight4 * med_weight1) - limsigma * E_w4_inf - increment4/2.0) & (weight * med_weight1 < round(constr_weight4 * med_weight1) + limsigma * E_w4_sup + increment4/2.0) ]

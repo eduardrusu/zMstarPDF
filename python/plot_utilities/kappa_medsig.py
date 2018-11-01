@@ -16,8 +16,8 @@ max_kappa = 1
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
-root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappa/"
-list = glob.glob(root+'*.cat')
+root = "/Users/cerusu/Desktop/kappa/"
+list = glob.glob(root+'kappahist*.cat')
 
 def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
     a, kappa_values = np.histogram([0], bins = bin_stat_, range=(min_kappa_,max_kappa_)) # create an empty histogram of the correct shape
