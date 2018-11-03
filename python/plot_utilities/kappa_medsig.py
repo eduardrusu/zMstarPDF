@@ -16,7 +16,7 @@ max_kappa = 1
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
-root = "/Users/cerusu/Desktop/kappa/"
+root = "/Users/cerusu/Desktop/kappadependencezeta/"
 list = glob.glob(root+'kappahist*.cat')
 
 def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):

@@ -939,6 +939,24 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
             #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
@@ -1000,6 +1018,25 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
             #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
@@ -1076,6 +1113,26 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight3 = weight3[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
@@ -1171,6 +1228,28 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
             #print j,i
+
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight3 = weight3[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight4 = weight4[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
 
 if conjoined == 1:
@@ -1722,7 +1801,8 @@ if conjoined == 1:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
                     LOS = LOS + data.size
 
-head = 'LOS: %d' % np.array([LOS])
+#head = 'LOS: %d' % np.array([LOS])
+head = 'LOS: %d' % np.array([len(kappa)])
 np.savetxt(output,unbiased_kappa_constrained,header=head,fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 
