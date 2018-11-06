@@ -11,7 +11,7 @@ from astropy.io import fits
 path = "/Volumes/LaCieSubaru/Gaia/James/"
 os.chdir(path)
 folder_cutout = glob.glob('arch*')
-folder_psf = glob.glob('psf-*')
+#folder_psf = glob.glob('psf-*')
 
 list_cutout = np.array([])
 for i in range(len(folder_cutout)):
@@ -19,24 +19,24 @@ for i in range(len(folder_cutout)):
     files_array = np.asarray(files)
     list_cutout = np.r_[list_cutout,files_array]
 
-list_psf = np.array([])
-for i in range(len(folder_psf)):
-    files = glob.glob('%s/*' % folder_psf[i])
-    files_array = np.asarray(files)
-    list_psf = np.r_[list_psf,files_array]
+#list_psf = np.array([])
+#for i in range(len(folder_psf)):
+#    files = glob.glob('%s/*' % folder_psf[i])
+#    files_array = np.asarray(files)
+#    list_psf = np.r_[list_psf,files_array]
 
-list_psf_filter = np.empty(len(list_psf),dtype="string")
-list_psf_ra = np.zeros(len(list_psf))
-list_psf_dec = np.zeros(len(list_psf))
-for i in range(len(list_psf)):
-    str = list_psf[i].split("-")
-    ra = float(str[10])
-    if str[-2] == '': str[-1] = '-' + str[-1]
-    dec = float(str[-1][:-5])
-    filter = str[7]
-    list_psf_filter[i] = filter
-    list_psf_ra[i] = ra
-    list_psf_dec[i] = dec
+#list_psf_filter = np.empty(len(list_psf),dtype="string")
+#list_psf_ra = np.zeros(len(list_psf))
+#list_psf_dec = np.zeros(len(list_psf))
+#for i in range(len(list_psf)):
+#    str = list_psf[i].split("-")
+#    ra = float(str[10])
+#    if str[-2] == '': str[-1] = '-' + str[-1]
+#    dec = float(str[-1][:-5])
+#    filter = str[7]
+#    list_psf_filter[i] = filter
+#    list_psf_ra[i] = ra
+#    list_psf_dec[i] = dec
 
 list_cutout_filter = np.empty(len(list_cutout),dtype="string")
 list_cutout_ra = np.zeros(len(list_cutout))
@@ -54,14 +54,14 @@ for i in range(len(list_cutout)):
     list_cutout_filter[i] = filter
 
 out_cutout = np.c_[list_cutout,list_cutout_filter,list_cutout_ra,list_cutout_dec]
-out_psf = np.c_[list_psf,list_psf_filter,list_psf_ra,list_psf_dec]
+#out_psf = np.c_[list_psf,list_psf_filter,list_psf_ra,list_psf_dec]
 np.savetxt("cutouts_g.cat",out_cutout[out_cutout[:,1]=='G'],'%s \t %s \t %s \t %s')
 np.savetxt("cutouts_r.cat",out_cutout[out_cutout[:,1]=='R'],'%s \t %s \t %s \t %s')
 np.savetxt("cutouts_i.cat",out_cutout[out_cutout[:,1]=='I'],'%s \t %s \t %s \t %s')
 np.savetxt("cutouts_z.cat",out_cutout[out_cutout[:,1]=='Z'],'%s \t %s \t %s \t %s')
 np.savetxt("cutouts_y.cat",out_cutout[out_cutout[:,1]=='Y'],'%s \t %s \t %s \t %s')
-np.savetxt("psf_g.cat",out_psf[out_psf[:,1]=='G'],'%s \t %s \t %s \t %s')
-np.savetxt("psf_r.cat",out_psf[out_psf[:,1]=='R'],'%s \t %s \t %s \t %s')
-np.savetxt("psf_i.cat",out_psf[out_psf[:,1]=='I'],'%s \t %s \t %s \t %s')
-np.savetxt("psf_z.cat",out_psf[out_psf[:,1]=='Z'],'%s \t %s \t %s \t %s')
-np.savetxt("psf_y.cat",out_psf[out_psf[:,1]=='Y'],'%s \t %s \t %s \t %s')
+#np.savetxt("psf_g.cat",out_psf[out_psf[:,1]=='G'],'%s \t %s \t %s \t %s')
+#np.savetxt("psf_r.cat",out_psf[out_psf[:,1]=='R'],'%s \t %s \t %s \t %s')
+#np.savetxt("psf_i.cat",out_psf[out_psf[:,1]=='I'],'%s \t %s \t %s \t %s')
+#np.savetxt("psf_z.cat",out_psf[out_psf[:,1]=='Z'],'%s \t %s \t %s \t %s')
+#np.savetxt("psf_y.cat",out_psf[out_psf[:,1]=='Y'],'%s \t %s \t %s \t %s')
