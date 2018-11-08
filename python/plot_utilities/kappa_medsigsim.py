@@ -33,8 +33,8 @@ popt = np.mean([popt45,popt120],axis=0)
 # But the way inferkappa_unbiasedwithshear45and120FITSio_customzeta.py computes std is not a simple np.std, which is output by inferkappasimbias.py
 # Normalizing std(truekappa-medkappa):
 root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/"
-#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
-x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
+x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
+#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
 
 list = glob.glob(root+'kappasim_WFI2033*.cat')
 fout = root + 'medstdbias.dat'
