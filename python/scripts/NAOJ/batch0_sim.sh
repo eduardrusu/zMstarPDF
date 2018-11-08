@@ -265,3 +265,9 @@ python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5
 python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr 45_tidal 120_gal 120_gamma
 python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr 45_SIS 120_gal 120_gamma
 python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_oneoverr 45_SIShalo 120_gal 120_gamma
+
+python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 120_gal 120_zoverr 120_SIS
+python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 120_gal 120_gamma 45_gal 45_zoverr 45_SIS
+python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 120_gal 120_z 120_SIS
+python inferkappasimbiasactual.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 120_gal 120_gamma 45_gal 45_z 45_SIS
+

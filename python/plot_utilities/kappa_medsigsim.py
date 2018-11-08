@@ -17,18 +17,25 @@ stdpdf_45=np.array([0.018 ,0.021,0.024,0.029,0.035,0.042,0.051,0.061,0.092])
 medpdf_120=np.array([-0.045,-0.030,-0.012,0.009,0.034,0.064,0.097,0.118])
 stdpdf_120=np.array([0.017,0.021,0.026,0.033,0.042,0.052,0.068,0.076])
 
+# I used inferkappa_unbiasedwithshear45and120FITSio_customzeta.py on WFI2033 22.5 with pure number counts, zeta=0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,(2.6,3.0,3.4)
+# with width +/-0.1 and E=1 to explore the relation between kappamed and sigma:
+medpdf_45=np.array([ -0.027,-0.022,-0.016,-0.010,-0.004,0.003,0.011,0.020,0.031,0.043,0.056,0.086,0.118])
+stdpdf_45=np.array([0.026,0.030,0.029,0.027,0.036,0.036,0.038,0.046,0.052,0.064,0.063,0.073,0.092])
+medpdf_120=np.array([-0.033,-0.025,-0.016,-0.006,0.006,0.018,0.034,0.051,0.072,0.092])
+stdpdf_120=np.array([0.023,0.031,0.029,0.034,0.040,0.043,0.054,0.066,0.077,0.077])
+
 def func(x, a, b):
     return a * x + b
 
 popt45, pcov45 = curve_fit(func, medpdf_45, stdpdf_45)
 popt120, pcov120 = curve_fit(func, medpdf_120, stdpdf_120)
 #plt.plot(medpdf_45, stdpdf_45, 'b-', label='data45')
-#plt.plot(medpdf_120, stdpdf_120, 'b-', label='data120')
-#plt.plot(medpdf_45, func(medpdf_45, *popt45), 'r-',label='fit: a=%5.3f, b=%5.3f' % tuple(popt45))
-#plt.plot(medpdf_120, func(medpdf_120, *popt120), 'r-',label='fit: a=%5.3f, b=%5.3f' % tuple(popt120))
+#plt.plot(medpdf_120, stdpdf_120, 'r-', label='data120')
+#plt.plot(medpdf_45, func(medpdf_45, *popt45), 'b-.',label='fit: a=%5.3f, b=%5.3f' % tuple(popt45))
+#plt.plot(medpdf_120, func(medpdf_120, *popt120), 'r-.',label='fit: a=%5.3f, b=%5.3f' % tuple(popt120))
 #plt.legend()
 #plt.show()
-popt = np.mean([popt45,popt120],axis=0)
+#popt = np.mean([popt45,popt120],axis=0)
 
 # But the way inferkappa_unbiasedwithshear45and120FITSio_customzeta.py computes std is not a simple np.std, which is output by inferkappasimbias.py
 # Normalizing std(truekappa-medkappa):
