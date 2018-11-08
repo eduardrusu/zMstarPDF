@@ -60,12 +60,12 @@ rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 1 # sigma limits on either side of the assumed gaussians
 
-increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 4
-increment3 = 4
-increment4 = 4
-increment5 = 4
-samples = 5000
+increment1 = 1 # refers to the E interval from Greene et al. 2014
+increment2 = 1
+increment3 = 1
+increment4 = 1
+increment5 = 1
+samples = 1000
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
