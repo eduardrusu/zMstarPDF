@@ -62,11 +62,11 @@ weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner_removehandpi
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 1 # sigma limits on either side of the assumed gaussians
 
-increment1 = 1 # refers to the E interval from Greene et al. 2014
-increment2 = 1
-increment3 = 1
-increment4 = 1
-increment5 = 1
+increment1 = 2 # refers to the E interval from Greene et al. 2014
+increment2 = 2
+increment3 = 2
+increment4 = 2
+increment5 = 2
 samples = 1000
 
 # these quantities are only for dealing with galaxy groups
@@ -126,9 +126,9 @@ if conjoined >= 2:
                 weight5_index = declareweight(weightin5)
 
 if lens == "WFI2033":
-    constr_gamma = 0.119
-    constrwidth_gamma_inf = 0.109# 0.109 #
-    constrwidth_gamma_sup = 0.129# 0.129 #
+    constr_gamma = 0.120
+    constrwidth_gamma_inf = 0.115# 0.109 #
+    constrwidth_gamma_sup = 0.125# 0.129 #
     filters = "ugrizJHK"
     plane = 35
     print 'shear: ',constr_gamma

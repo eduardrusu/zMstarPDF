@@ -18,7 +18,7 @@ for i in range(10): # 8
     with open(file, 'w') as f:
         f.writelines(code)
         f.close()
-    os.system("python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal")
+    os.system("python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 45_gal 45_gamma")
     #os.system("python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 22.5 measured med 120_gal")
     #os.system("python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 23.5 measured med 45_gal")
     #os.system("python inferkappasimbias.py WFI2033 -1.0 -1.0 empty notremovegroups 5 23.5 measured med 120_gal")

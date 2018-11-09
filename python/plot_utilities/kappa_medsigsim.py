@@ -12,10 +12,10 @@ import glob
 
 # I used inferkappa_unbiasedwithshear45and120FITSio_customzeta.py on J1206 24 with pure number counts, zeta=0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0(,2.6)
 # with width +/-0.05 to explore the relation between kappamed and sigma:
-medpdf_45=np.array([ -0.036,-0.025,-0.014,-0.000,0.017,0.036,0.060,0.087,0.180])
-stdpdf_45=np.array([0.018 ,0.021,0.024,0.029,0.035,0.042,0.051,0.061,0.092])
-medpdf_120=np.array([-0.045,-0.030,-0.012,0.009,0.034,0.064,0.097,0.118])
-stdpdf_120=np.array([0.017,0.021,0.026,0.033,0.042,0.052,0.068,0.076])
+#medpdf_45=np.array([ -0.036,-0.025,-0.014,-0.000,0.017,0.036,0.060,0.087,0.180])
+#stdpdf_45=np.array([0.018 ,0.021,0.024,0.029,0.035,0.042,0.051,0.061,0.092])
+#medpdf_120=np.array([-0.045,-0.030,-0.012,0.009,0.034,0.064,0.097,0.118])
+#stdpdf_120=np.array([0.017,0.021,0.026,0.033,0.042,0.052,0.068,0.076])
 
 # I used inferkappa_unbiasedwithshear45and120FITSio_customzeta.py on WFI2033 22.5 with pure number counts, zeta=0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,(2.6,3.0,3.4)
 # with width +/-0.1 and E=1 to explore the relation between kappamed and sigma:
@@ -35,13 +35,13 @@ popt120, pcov120 = curve_fit(func, medpdf_120, stdpdf_120)
 #plt.plot(medpdf_120, func(medpdf_120, *popt120), 'r-.',label='fit: a=%5.3f, b=%5.3f' % tuple(popt120))
 #plt.legend()
 #plt.show()
-#popt = np.mean([popt45,popt120],axis=0)
+popt = np.mean([popt45,popt120],axis=0)
 
 # But the way inferkappa_unbiasedwithshear45and120FITSio_customzeta.py computes std is not a simple np.std, which is output by inferkappasimbias.py
 # Normalizing std(truekappa-medkappa):
 root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/"
-x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
-#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
+#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
+x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
 
 list = glob.glob(root+'kappasim_WFI2033*.cat')
 fout = root + 'medstdbias.dat'

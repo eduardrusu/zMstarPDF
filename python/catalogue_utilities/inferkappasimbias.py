@@ -131,9 +131,9 @@ if lens == "WFI2033":
     filters = "ugrizJHK"
 
 # read weight constraints
-constr_gamma = 0.119
-constrwidth_gamma_inf = 0.116# 0.109 #
-constrwidth_gamma_sup = 0.121# 0.129 #
+constr_gamma = 0.05
+constrwidth_gamma_inf = 0.045# 0.109 #
+constrwidth_gamma_sup = 0.055# 0.129 #
 
 constr_gal_meds45 = 0.6
 constr_gal_meds_inf45 = 0.5
@@ -353,7 +353,7 @@ if conjoined == 4:
 if conjoined == 3:
     output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,mag,mode,constr_weight1,constr_weight2,constr_weight3)
 if conjoined == 2:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
 if conjoined == 1:
     output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1,constr_weight1)
 
