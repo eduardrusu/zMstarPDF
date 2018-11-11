@@ -39,9 +39,9 @@ popt = np.mean([popt45,popt120],axis=0)
 
 # But the way inferkappa_unbiasedwithshear45and120FITSio_customzeta.py computes std is not a simple np.std, which is output by inferkappasimbias.py
 # Normalizing std(truekappa-medkappa):
-root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new/"
-x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
-#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
+root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E4new/"
+#x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_45_gal_22.5_med_overdensities1.44.cat',unpack=True)
+x = np.loadtxt(root+'kappasim_WFI2033_measured_5innermask_nobeta_zgap-1.0_-1.0_120_gal_22.5_med_overdensities1.55.cat',unpack=True)
 
 list = glob.glob(root+'kappasim_WFI2033*.cat')
 fout = root + 'medstdbias.dat'
@@ -49,9 +49,13 @@ os.system('rm -f %s' % fout)
 
 for i in range(len(list)):
     file = list[i]
-    data  = np.loadtxt(file,unpack=True)
-    scaledstd = np.std(data[1]-data[0]) * (func(np.median(x[1]), *popt)/func(np.median(data[1]), *popt)) / np.std(x[1]-x[0])
-    str = "%s %.3f %.3f %.3f %.3f \n" % (list[i],np.median(data[0]-data[1]),np.std(data[0]-data[1]),np.median(data[4]),scaledstd)
+    data  = np.loadtxt(file)
+    data = data[data[:,4] >= 3] # at least 3 LOS
+    data = data.T
+    if np.shape(data)[1] != 0:
+        scaledstd = np.std(data[1]-data[0]) * (func(np.median(x[1]), *popt)/func(np.median(data[1]), *popt)) / np.std(x[1]-x[0])
+        str = "%s %.3f %.3f %d %.3f \n" % (list[i],np.median(data[0]-data[1]),np.std(data[0]-data[1]),np.median(data[4]),scaledstd)
+    else: str = "%s 0.000 0.000 0 0.000 \n" % (list[i])
     file =open(fout,'a')
     file.write(str)
 file.close()

@@ -3,9 +3,9 @@
 import numpy as np
 from functools import reduce
 
-file1 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1/medstdbias_base120.dat"
-file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new/medstdbias_base120.dat"
-file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2/medstdbias_base120.dat"
+file1 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new0/medstdbias.dat"
+file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new1/medstdbias.dat"
+file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E4new/medstdbias.dat"
 
 f1 = np.genfromtxt(file1,usecols=[0,3,4],dtype='S200,f,f')
 f2 = np.genfromtxt(file2,usecols=[0,3,4],dtype='S200,f,f')
