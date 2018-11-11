@@ -65,7 +65,7 @@ increment2 = 1
 increment3 = 1
 increment4 = 1
 increment5 = 1
-samples = 1000
+samples = 10000
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
