@@ -131,9 +131,9 @@ if lens == "WFI2033":
     filters = "ugrizJHK"
 
 # read weight constraints
-constr_gamma = 0.05
-constrwidth_gamma_inf = 0.045# 0.109 #
-constrwidth_gamma_sup = 0.055# 0.129 #
+constr_gamma = 0.11
+constrwidth_gamma_inf = 0.105# 0.109 #
+constrwidth_gamma_sup = 0.115# 0.129 #
 
 constr_gal_meds45 = 0.6
 constr_gal_meds_inf45 = 0.5
