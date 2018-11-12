@@ -54,8 +54,8 @@ for i in range(len(list)):
     data = data.T
     if np.shape(data)[1] != 0:
         scaledstd = np.std(data[1]-data[0]) * (func(np.median(x[1]), *popt)/func(np.median(data[1]), *popt)) / np.std(x[1]-x[0])
-        str = "%s %.3f %.3f %d %.3f \n" % (list[i],np.median(data[0]-data[1]),np.std(data[0]-data[1]),np.median(data[4]),scaledstd)
-    else: str = "%s 0.000 0.000 0 0.000 \n" % (list[i])
+        str = "%s %.3f %.3f %d %d %.3f \n" % (list[i],np.median(data[0]-data[1]),np.std(data[0]-data[1]),np.median(data[4]),np.len(data[0]),scaledstd)
+    else: str = "%s 0.000 0.000 0 0 0.000 \n" % (list[i])
     file =open(fout,'a')
     file.write(str)
 file.close()
