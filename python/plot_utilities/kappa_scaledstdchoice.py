@@ -3,13 +3,13 @@
 import numpy as np
 from functools import reduce
 
-file1 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new0/medstdbias.dat"
-file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E1new1/medstdbias.dat"
-file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E4new/medstdbias.dat"
+file1 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_0/medstdbias_base120.dat"
+file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_0/medstdbias_base45.dat"
+file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_1/medstdbias_base45.dat"
 
-f1 = np.genfromtxt(file1,usecols=[0,3,4,5],dtype='S200,f,f')
-f2 = np.genfromtxt(file2,usecols=[0,3,4,5],dtype='S200,f,f')
-f3 = np.genfromtxt(file3,usecols=[0,3,4,5],dtype='S200,f,f')
+f1 = np.genfromtxt(file1,usecols=[0,3,4,5],dtype='S200,f,f,f')
+f2 = np.genfromtxt(file2,usecols=[0,3,4,5],dtype='S200,f,f,f')
+f3 = np.genfromtxt(file3,usecols=[0,3,4,5],dtype='S200,f,f,f')
 f1name = np.array([])
 f1los = np.array([])
 f1lines = np.array([])
@@ -41,7 +41,7 @@ for i in range(len(f3)):
 matches = reduce(np.intersect1d, (f1name,f2name,f3name))
 matches = np.sort(matches) # alphabetical sort
 
-out = np.zeros(7)
+out = np.zeros(10)
 for i in range(len(matches)):
     out_ = np.array([matches[i],int(f1los[np.where(f1name == matches[i])][0]),int(f2los[np.where(f2name == matches[i])][0]),int(f3los[np.where(f3name == matches[i])][0]),int(f1lines[np.where(f1name == matches[i])][0]),int(f2lines[np.where(f2name == matches[i])][0]),int(f3lines[np.where(f3name == matches[i])][0]),np.around(float(f1std[np.where(f1name == matches[i])][0]),3),np.around(float(f2std[np.where(f2name == matches[i])][0]),3),np.around(float(f3std[np.where(f3name == matches[i])][0]),3)])
     out = np.c_[out,out_]
@@ -52,4 +52,4 @@ np.savetxt(fout,out.T,fmt='%s %s %s %s %s %s %s %s %s %s')
 # the RMS from inferkappasimbiasscript1.py and inferkappasimbiasscript2.py:
 #45: np.std([1.071,1.020,0.995,1.141,1.043,0.901,0.999,0.966,1.108,1.013,0.844,0.972,1.052,1.033,0.935]) = 0.074
 #120: np.std([1.168,0.992,1.069,1.008,0.955,0.955,1.071,0.932,1.031,0.977]) = 0.068
-rms2 = 2 * 0.075
+rms2 = 2 * 0.045
