@@ -4,12 +4,18 @@ import numpy as np
 from functools import reduce
 
 file1 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_0/medstdbias_base120.dat"
-file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_0/medstdbias_base45.dat"
-file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_1/medstdbias_base45.dat"
+file2 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_1/medstdbias_base120.dat"
+file3 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_2/medstdbias_base120.dat"
+file4 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_0/medstdbias_base45.dat"
+file5 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_1/medstdbias_base45.dat"
+file6 = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/E2new5000_2/medstdbias_base45.dat"
 
 f1 = np.genfromtxt(file1,usecols=[0,3,4,5],dtype='S200,f,f,f')
 f2 = np.genfromtxt(file2,usecols=[0,3,4,5],dtype='S200,f,f,f')
 f3 = np.genfromtxt(file3,usecols=[0,3,4,5],dtype='S200,f,f,f')
+f4 = np.genfromtxt(file1,usecols=[0,3,4,5],dtype='S200,f,f,f')
+f5 = np.genfromtxt(file2,usecols=[0,3,4,5],dtype='S200,f,f,f')
+f6 = np.genfromtxt(file3,usecols=[0,3,4,5],dtype='S200,f,f,f')
 f1name = np.array([])
 f1los = np.array([])
 f1lines = np.array([])
@@ -22,6 +28,18 @@ f3name = np.array([])
 f3los = np.array([])
 f3lines = np.array([])
 f3std = np.array([])
+f4name = np.array([])
+f4los = np.array([])
+f4lines = np.array([])
+f4std = np.array([])
+f5name = np.array([])
+f5los = np.array([])
+f5lines = np.array([])
+f5std = np.array([])
+f6name = np.array([])
+f6los = np.array([])
+f6lines = np.array([])
+f6std = np.array([])
 for i in range(len(f1)):
     f1name = np.append(f1name,f1[i][0])
     f1los = np.append(f1los,f1[i][1])
@@ -37,17 +55,34 @@ for i in range(len(f3)):
     f3los = np.append(f3los,f3[i][1])
     f3lines = np.append(f3lines,f3[i][2])
     f3std = np.append(f3std,f3[i][3])
+for i in range(len(f4)):
+    f4name = np.append(f4name,f4[i][0])
+    f4los = np.append(f4los,f4[i][1])
+    f4lines = np.append(f4lines,f4[i][2])
+    f4std = np.append(f4std,f4[i][3])
+for i in range(len(f5)):
+    f5name = np.append(f5name,f5[i][0])
+    f5los = np.append(f5los,f5[i][1])
+    f5lines = np.append(f5lines,f5[i][2])
+    f5std = np.append(f5std,f5[i][3])
+for i in range(len(f6)):
+    f6name = np.append(f6name,f6[i][0])
+    f6los = np.append(f6los,f6[i][1])
+    f6lines = np.append(f6lines,f6[i][2])
+    f6std = np.append(f6std,f6[i][3])
 
-matches = reduce(np.intersect1d, (f1name,f2name,f3name))
+matches = reduce(np.intersect1d, (f1name,f2name,f3name,f4name,f5name,f6name))
 matches = np.sort(matches) # alphabetical sort
 
-out = np.zeros(10)
+out = np.zeros(21)
 for i in range(len(matches)):
-    out_ = np.array([matches[i],int(f1los[np.where(f1name == matches[i])][0]),int(f2los[np.where(f2name == matches[i])][0]),int(f3los[np.where(f3name == matches[i])][0]),int(f1lines[np.where(f1name == matches[i])][0]),int(f2lines[np.where(f2name == matches[i])][0]),int(f3lines[np.where(f3name == matches[i])][0]),np.around(float(f1std[np.where(f1name == matches[i])][0]),3),np.around(float(f2std[np.where(f2name == matches[i])][0]),3),np.around(float(f3std[np.where(f3name == matches[i])][0]),3)])
+    med = np.around(np.mean([np.around(float(f1std[np.where(f1name == matches[i])][0]),3),np.around(float(f2std[np.where(f2name == matches[i])][0]),3),np.around(float(f3std[np.where(f3name == matches[i])][0]),3),np.around(float(f4std[np.where(f4name == matches[i])][0]),3),np.around(float(f5std[np.where(f5name == matches[i])][0]),3),np.around(float(f6std[np.where(f6name == matches[i])][0]),3)]),3)
+    std = np.around(np.std([np.around(float(f1std[np.where(f1name == matches[i])][0]),3),np.around(float(f2std[np.where(f2name == matches[i])][0]),3),np.around(float(f3std[np.where(f3name == matches[i])][0]),3),np.around(float(f4std[np.where(f4name == matches[i])][0]),3),np.around(float(f5std[np.where(f5name == matches[i])][0]),3),np.around(float(f6std[np.where(f6name == matches[i])][0]),3)]),3)
+    out_ = np.array([matches[i],int(f1los[np.where(f1name == matches[i])][0]),int(f2los[np.where(f2name == matches[i])][0]),int(f3los[np.where(f3name == matches[i])][0]),int(f4los[np.where(f4name == matches[i])][0]),int(f5los[np.where(f5name == matches[i])][0]),int(f6los[np.where(f6name == matches[i])][0]),int(f1lines[np.where(f1name == matches[i])][0]),int(f2lines[np.where(f2name == matches[i])][0]),int(f3lines[np.where(f3name == matches[i])][0]),int(f4lines[np.where(f4name == matches[i])][0]),int(f5lines[np.where(f5name == matches[i])][0]),int(f6lines[np.where(f6name == matches[i])][0]),np.around(float(f1std[np.where(f1name == matches[i])][0]),3),np.around(float(f2std[np.where(f2name == matches[i])][0]),3),np.around(float(f3std[np.where(f3name == matches[i])][0]),3),np.around(float(f4std[np.where(f4name == matches[i])][0]),3),np.around(float(f5std[np.where(f5name == matches[i])][0]),3),np.around(float(f6std[np.where(f6name == matches[i])][0]),3),med,std])
     out = np.c_[out,out_]
 
 fout = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/scaledstdchoice.dat"
-np.savetxt(fout,out.T,fmt='%s %s %s %s %s %s %s %s %s %s')
+np.savetxt(fout,out.T,fmt='%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s')
 
 # the RMS from inferkappasimbiasscript1.py and inferkappasimbiasscript2.py:
 #45: np.std([1.071,1.020,0.995,1.141,1.043,0.901,0.999,0.966,1.108,1.013,0.844,0.972,1.052,1.033,0.935]) = 0.074
