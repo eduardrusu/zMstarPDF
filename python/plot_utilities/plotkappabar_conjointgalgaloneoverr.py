@@ -26,7 +26,7 @@ kappastat_45 = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_22.5_
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_mass_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_mass2_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_mass3_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_22.5_med_increments1_1_1_emptymsk.cat'][0][1:].astype(float), # 1/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_zoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_massoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
                         kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_120_mass2overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
@@ -45,7 +45,7 @@ kappastat_120 = np.c_[  kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_22.5_
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_mass_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_mass2_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_mass3_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_22.5_med_increments1_1_1_emptymsk.cat'][0][1:].astype(float), # 1/r
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_zoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_massoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
                         kappastat.T[kappastat[0]=='fiducial_120_gal_45_gal_45_oneoverr_45_mass2overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
@@ -89,7 +89,7 @@ ax.set_ylabel('$\sigma_\kappa$')
 #ax.set_ylabel('$\sigma_{\kappa_\mathrm{med} - \kappa_\mathrm{true}}$')
 ax.set_xticks(ind + width)
 ax.set_xticklabels(('$1-1/r$', '$z$',  '$M_\star$', '$M^2_\star$', '$M^3_\star$', '$1/r$', '$z/r$', '$M_\star/r$', '$M^2_\star/r$', '$M^3_\star/r$', '$M^2_{\star\mathrm{rms}}$', '$M^3_{\star\mathrm{rms}}$', '$M^2_\star/r_\mathrm{,rms}$', '$M^3_\star/r_\mathrm{,rms}$', '$M_\star/r^3$', '$M_\star/r^2$', '$\sqrt{M_\star}/r$', '$\sqrt{M_h}/r$'), fontsize=10, rotation='vertical')
-ax.legend((rects1[0], rects2[0]), ('45 22.5 gal+1/r+$\gamma$+', '120 22.5 gal+1/r+$\gamma$+'), bbox_to_anchor=(0.65, 1.4), fontsize=10)
+ax.legend((rects1[0], rects2[0]), ('22.5 45 gal 120 gal+1/r+', '22.5 120 gal 45 gal+1/r+'), bbox_to_anchor=(0.65, 1.4), fontsize=10)
 #ax.legend((rects1[0], rects2[0]), ('45 22.5 gal+1/r+$\gamma$+', '120 22.5 gal+1/r+$\gamma$+'), bbox_to_anchor=(0.3, 0.97), fontsize=10)
 plt.subplots_adjust(left=0.15, bottom=0.15, right=0.95, top=0.95, wspace=0.7, hspace=0.7)
 plt.savefig('%skappashistbar-conjointgalgaloneoverr.png' % root, dpi=250)
