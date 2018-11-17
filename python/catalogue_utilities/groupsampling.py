@@ -9,29 +9,29 @@ from astropy.coordinates import SkyCoord
 mode = "mcmc"
 samples = 20
 photoztolerance = 1.5 # number of sigmas
-zgroup = 0.6592
+zgroup = 0.6588
 #zgroup = 0.4956
 limmag = 22.5
 faintmagspec = 22.5
 center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00'
 center_lens = SkyCoord(center_lensx + ' ' + center_lensy, frame='fk5', unit=(u.hourangle, u.deg))
-if zgroup == 0.6592:
-    center_groupx = '308.434659'; center_groupy = '-47.384838'
+if zgroup == 0.6588:
+    center_groupx = '308.43557011'; center_groupy = '-47.37411275'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
-    err_group = 0.53 * 60 # converted to arcsec
+    err_group = 60 # converted to arcsec
     virrad = 220 # actually R_200 in arcsec
     virrad_err = 27
 if zgroup == 0.4956:
-    center_groupx = '308.428143'; center_groupy = '-47.383722'
+    center_groupx = '308.46337200'; center_groupy = '-47.36336725'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
-    err_group = 1.18 * 60
+    err_group = 26
     virrad = 270
     virrad_err = 65
 sep_groupx = center_lens.separation(SkyCoord(center_groupx + ' ' + center_lensy, frame='fk5', unit=(u.deg, u.deg))).arcsec
 sep_groupy = center_lens.separation(SkyCoord(center_lensx + ' ' + center_groupy, frame='fk5', unit=(u.hourangle, u.deg))).arcsec
  # arcsec # using R_200, which is robust agains Dominique's and is used in the reference papers
 # Each of the 2 groups have 3 galaxies outside R_200 so I should not count these
-if zgroup == 0.6592: observed_members = 19
+if zgroup == 0.6588: observed_members = 19
 if zgroup == 0.4956: observed_members = 10
 file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
 data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
@@ -69,14 +69,18 @@ if mode == "mcmc":
         cx = 1.0 * sep_group / virrad_sample
         cy = 0
         rad = 120.0 / virrad_sample
-        # fraction of volume out of the virial sphere which contains the 120"-radius cylinder centered on the lens
+        # fraction of volume of the virial sphere which contains the 120"-radius cylinder centered on the lens
         global frac
         frac = 1.0*len(x[(x**2 + y**2 + z**2 <= 1) & ((x-cx)**2 + (y-cy)**2 <=rad**2)]) / len(x[x**2 + y**2 + z**2 <= 1])
         while True:
-            #veldisp0.66 = 522+/-80 -> Fig 5 Andreon 2010 [13-40 at 68%] galaxies inside R_200
-            #veldisp0.49 = 557+/-125 -> Fig 5 Andreon 2010 [8-50 at 68%] galaxies inside R_200
-            if zgroup == 0.6592: x = np.abs(np.random.normal(27, 13, 1)).astype(int)[0] # based on the velocity dispersion - concentration relation above
-            if zgroup == 0.4956: x = np.abs(np.random.normal(31, 22, 1)).astype(int)[0]
+            #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
+            #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
+            if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
+            if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
+            rand = np.random.uniform(0,1,1)[0]
+            if rand <= 0.5: x = med - np.abs(np.random.normal(med, stdinf, 1).astype(int)[0] - med) # based on the velocity dispersion - concentration relation above
+            else: x = med + np.abs(np.random.normal(med, stdsup, 1).astype(int)[0] - med)
+            #print x,frac * x, observed_members, len(observed120_membersID)
             if (x > observed_members) and (frac * x > len(observed120_membersID)): break
         return x
 if mode == "poisson":
@@ -88,7 +92,7 @@ if mode == "poisson":
 
 pdz = np.array([])
 for i in range(10000):
-    if i % 1000 == 0: print i,'/10000'
+    if i % 10 == 0: print i,'/10000'
     #print i
     expected = expected_members()
     if mode == "mcmc": pdz = np.append(pdz,frac * expected)
@@ -108,7 +112,7 @@ for i in range(samples):
         # removing also the known group members
         missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==observed120_membersID[k]][0])
         missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==observed120_membersID[k]][0])
-    #if zgroup == 0.6592: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+    #if zgroup == 0.6588: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
     #if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
 import pylab as plt
 plt.clf()
