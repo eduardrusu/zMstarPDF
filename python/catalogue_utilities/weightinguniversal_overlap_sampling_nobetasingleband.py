@@ -1,6 +1,6 @@
 # CE Rusu, Feb 14 2018
 # This code makes use of the CFHTLens *galphotmstar.cat files and the lens photometric+Mstar+photoz catalogue; it computes weighted ratios (lens/field) with proper masking, for various radii, limiting mag, number of samples and classification scheme.
-# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobetasingleband.py PG1115 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_r24galphot.fits /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/PG1115 45 5 meds removehandpicked
+# run as: python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/weightinguniversal_overlap_sampling_nobetasingleband.py PG1115 /Volumes/LaCieDavis/CFHTcatalogues/W1m0m0_r24galphot.fits /Volumes/LaCieDavis/CFHTLenSmasks/W1m0m0_izrgu_finalmask_mosaic.fits /Users/cerusu/Dropbox/Davis_work/code /Volumes/LaCieSubaru/weightedcounts/PG1115/ 45 5 meds removehandpicked
 # the scripts to run en masse are in /Users/cerusu/GITHUB/zMstarPDF/python/scripts/DESKTOP/
 # the code is optimized for speed, but may be memory intensive because it stores the input catalogue in memory
 # definitions:
@@ -101,12 +101,9 @@ print "Initializing the lens catalogue..."
 if lensID == "PG1115":
     center_lens = SkyCoord('11:18:16.900 +07:45:59.00', frame='fk5', unit=(u.hourangle, u.deg))
 
-lensbpz = np.loadtxt('%s.cat' % rootlenscat, unpack=True)
-if np.shape(lensbpz)[0] != 8 + 3 * samples:
-    print("Number of declared samples and the ones inside the input file do not match!!!")
-    sys.exit()
+lensbpz = np.loadtxt('%s/%s.cat' % (rootlenscat,lensID), unpack=True)
 
-msk_lens = fits.open('%s/msk%sarcsecrad%sarcsecgap.fits' % (rootlenscat,radius,inner))
+msk_lens = fits.open('%s/%s/msk%sarcsecrad%sarcsecgap.fits' % (rootlens,lensID,radius,inner))
 # defining the columns:
 x_lens = 0
 y_lens = 1
@@ -132,7 +129,7 @@ def lensprep(lenscat):
     #print np.shape(lenscat)
     #print lenscat[RA_lens],lenscat[DEC_lens],SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5').separation(center_lens).arcsec,lenscat[classify]
     if remove != 'no':
-        removecat = np.loadtxt('%s/%s.cat' % (rootlenscat,remove))
+        removecat = np.loadtxt('%s/%s/%s.cat' % (rootlens,lensID,remove))
         for i in range(len(removecat)):
             coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5') # redefine this whenever I remove rows
             coordremove = SkyCoord('%s %s' %(removecat[i][0],removecat[i][1]), frame='fk5', unit=(u.deg, u.deg))
@@ -145,7 +142,7 @@ def lensprep(lenscat):
         suffix = '_%s' % remove
     #for i in range(np.shape(lensbpz)[1]): # used for testing
         #print lensbpz[:,i][x_lens],lensbpz[:,i][y_lens]
-    #print lenscat[RA_lens],lenscat[DEC_lens],SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5').separation(center_lens).arcsec,lenscat[classify]
+    #print lenscat[RA_lens],lenscat[DEC_lens]#,SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5').separation(center_lens).arcsec,lenscat[classify]
     lenscat[x_lens] = lenscat[x_lens] - (pixnr - (2/pixlens.value) * radius)/2   # rescale the pixel coordinates in the original catalogue as appropriate for the relevant aperture radius; since the original is fractional, I am not using ((pixnr - (2/pixlens.value) * radius)/2).astype(int)
     lenscat[y_lens] = lenscat[y_lens] - (pixnr - (2/pixlens.value) * radius)/2
     return lenscat
@@ -261,21 +258,24 @@ for k in range(overlap):
 
                     for n in range(samples):
                         lensbpz_maskedlimmag = np.copy(lensbpz_masked)
-
+                        #print n, np.shape(lensbpz_maskedlimmag)[1]
                         if n == 0:
                             if limmag != limbright:
-                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where(lensbpz_maskedlimmag[r_lens] > limmag),axis=1)
-                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where(lensbpz_maskedlimmag[r_lens] > limbright),axis=1)
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[r_lens] > limmag) | (lensbpz_maskedlimmag[flux_radius] <= 1.25)),axis=1)
+                                #stars = np.where((lensbpz_maskedlimmag[flux_radius] <= 1.25) & (lensbpz_maskedlimmag[r_lens] > 21.5) & (lensbpz_maskedlimmag[r_lens] < 23))
+                                #missclass = int(classfrac * np.shape(stars)[1]) # for 45" the expected number of missclassified galaxies is 0, for 125" it is 1. I therefore safely ignore it.
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[r_lens] > limbright) | (lensbpz_maskedlimmag[flux_radius] <= 1.25)),axis=1)
                         else:
                             for o in range(lensbpz_maskedlimmag.shape[1]):
-                                lensbpz_maskedlimmag[r_lens][o] = np.random.normal(lensbpz_maskedlimmag[r_lens][o], np.max([lensbpz_maskedlimmag[i_err_lens][o],0.005]),1)[0]
+                                lensbpz_maskedlimmag[r_lens][o] = np.random.normal(lensbpz_maskedlimmag[r_lens][o], np.max([np.sqrt(lensbpz_maskedlimmag[r_err_lens][o]**2 + boosterr**2),0.005]),1)[0]
                             if limmag != limbright:
-                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where(lensbpz_maskedlimmag[r_lens] > limmag),axis=1)
-                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where(lensbpz_maskedlimmag[r_lens] > limbright),axis=1)
+                                lensbpz_maskedlimmag = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[r_lens] > limmag) | (lensbpz_maskedlimmag[flux_radius] <= 1.25)),axis=1)
+                            lensbpz_maskedlimbright = np.delete(lensbpz_maskedlimmag,np.where((lensbpz_maskedlimmag[r_lens] > limbright) | (lensbpz_maskedlimmag[flux_radius] <= 1.25)),axis=1)
                         if limmag != limbright:
                             lens_gal_limmagbpz,lens_oneoverr_limmagbpz = lensinit(lensbpz_maskedlimmag,lens_gal_limmagbpz,lens_oneoverr_limmagbpz)
                         #print "d ",lens_gal_limmagbpz[k][l][i][j][n]# test to check if the function actually returns the result globally
-                        lens_gal_limbrightbpz,lens_oneoverr_limbrightbpz = lensinit(lensbpz_maskedlimbright,lens_gal_limbrightbpz)
+                        lens_gal_limbrightbpz,lens_oneoverr_limbrightbpz = lensinit(lensbpz_maskedlimbright,lens_gal_limbrightbpz,lens_oneoverr_limbrightbpz)
+                        #print n, np.shape(lensbpz_maskedlimmag)[1]
                         #print "d ",lens_gal_limbrightbpz[k][l][i][j][n]# test to check if the function actually returns the result globally
 
                     '''Compute weights for the field catalogue'''
@@ -347,98 +347,98 @@ print "Writing output..."
 count = "Fields above .75 and .50 limits: %d %d, %d %d" % (unmaskedcell[unmaskedcell>=0.75].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3], unmaskedcell[unmaskedcell>=0.5].shape[0], unmaskedcell.shape[0] * unmaskedcell.shape[1] * unmaskedcell.shape[2] * unmaskedcell.shape[3])
 print count
 mskname = 'msk%sarcsecrad%sarcsecgap.fits'[0:-5] % (radius,inner)
-fcount = open('%s/%s_wghtratios_%s_%s_%s_zgap%s_%s_count.cat' % (output,fieldID[-26:-20],mskname,lensID,det,irac,type,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_limmaggalphotmstar
+fcount = open('%s/%s_wghtratios_%s_%s_%s_zgap%s_count.cat' % (output,fieldID[-22:-16],mskname,lensID,type,suffix),'w') # [-25:-4] corresponds to strings of the form W1m0m0_limmaggalphotmstar
 fcount.write(count)
 fcount.close()
 
-if do50 == True: fout50_bpzlimbright_0 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-fout75_bpzlimbright_0 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-if do50 == True: fout50_bpzlimbright_1 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-fout75_bpzlimbright_1 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-if do50 == True: fout50_bpzlimbright_2 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-fout75_bpzlimbright_2 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-if do50 == True: fout50_bpzlimbright_3 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-fout75_bpzlimbright_3 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-if do50 == True: fout50_bpzlimbright_4 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-fout75_bpzlimbright_4 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
+if do50 == True: fout50_bpzlimbright_0 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_0.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+fout75_bpzlimbright_0 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_0.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+if do50 == True: fout50_bpzlimbright_1 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_1.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+fout75_bpzlimbright_1 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_1.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+if do50 == True: fout50_bpzlimbright_2 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_2.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+fout75_bpzlimbright_2 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_2.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+if do50 == True: fout50_bpzlimbright_3 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_3.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+fout75_bpzlimbright_3 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_3.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+if do50 == True: fout50_bpzlimbright_4 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_4.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+fout75_bpzlimbright_4 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_4.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
 if samples > 5:
-    if do50 == True: fout50_bpzlimbright_5 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_5 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_6 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_6 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_7 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_7 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_8 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_8 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_9 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_9 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_10 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_10.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_10 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_10.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_11 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_11.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_11 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_11.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_12 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_12.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_12 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_12.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_13 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_13.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_13 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_13.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_14 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_14.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_14 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_14.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_15 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_15.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_15 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_15.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_16 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_16.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_16 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_16.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_17 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_17.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_17 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_17.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_18 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_18.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_18 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_18.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_19 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_19.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_19 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_19.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimbright_20 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_20.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimbright_20 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_20.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_5 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_5.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_5 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_5.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_6 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_6.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_6 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_6.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_7 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_7.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_7 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_7.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_8 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_8.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_8 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_8.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_9 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_9.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_9 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_9.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_10 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_10.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_10 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_10.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_11 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_11.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_11 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_11.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_12 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_12.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_12 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_12.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_13 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_13.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_13 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_13.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_14 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_14.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_14 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_14.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_15 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_15.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_15 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_15.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_16 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_16.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_16 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_16.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_17 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_17.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_17 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_17.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_18 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_18.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_18 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_18.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_19 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_19.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_19 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_19.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimbright_20 = '%s/%s_wghtratios_50_%s_%s_%s_bpz_%s_zgap%s_20.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
+    fout75_bpzlimbright_20 = '%s/%s_wghtratios_75_%s_%s_%s_bpz_%s_zgap%s_20.fits' % (output,fieldID[-22:-16],mskname,lensID,limbright,type,suffix)
 #os.system('rm -f %s' % fout50_0) # '-f' ignores non-existent files
 if limmag != brightmag:
-    if do50 == True: fout50_bpzlimmag_0 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimmag_0 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_0.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimmag_1 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimmag_1 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_1.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimmag_2 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimmag_2 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_2.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimmag_3 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimmag_3 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_3.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    if do50 == True: fout50_bpzlimmag_4 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-    fout75_bpzlimmag_4 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_4.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
+    if do50 == True: fout50_bpzlimmag_0 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_0.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    fout75_bpzlimmag_0 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_0.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    if do50 == True: fout50_bpzlimmag_1 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_1.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    fout75_bpzlimmag_1 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_1.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    if do50 == True: fout50_bpzlimmag_2 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_2.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    fout75_bpzlimmag_2 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_2.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    if do50 == True: fout50_bpzlimmag_3 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_3.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    fout75_bpzlimmag_3 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_3.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    if do50 == True: fout50_bpzlimmag_4 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_4.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+    fout75_bpzlimmag_4 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_4.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
     if samples > 5:
-        if do50 == True: fout50_bpzlimmag_5 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_5 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_5.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_6 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_6 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_6.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_7 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_7 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_7.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_8 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_8 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_8.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_9 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_9 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_9.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_10 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_10.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_10 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_10.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_11 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_11.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_11 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_11.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_12 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_12.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_12 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_12.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_13 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_13.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_13 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_13.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_14 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_14.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_14 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_14.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_15 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_15.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_15 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_15.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_16 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_16.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_16 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_16.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_17 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_17.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_17 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_17.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_18 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_18.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_18 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_18.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_19 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_19.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_19 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_19.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        if do50 == True: fout50_bpzlimmag_20 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_20.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
-        fout75_bpzlimmag_20 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_%s_%s_zgap%s_%s%s_20.fits' % (output,fieldID[-26:-20],mskname,lensID,limbright,type,suffix)
+        if do50 == True: fout50_bpzlimmag_5 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_5.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_5 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_5.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_6 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_6.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_6 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_6.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_7 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_7.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_7 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_7.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_8 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_8.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_8 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_8.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_9 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_9.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_9 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_9.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_10 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_10.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_10 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_10.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_11 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_11.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_11 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_11.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_12 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_12.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_12 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_12.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_13 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_13.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_13 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_13.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_14 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_14.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_14 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_14.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_15 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_15.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_15 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_15.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_16 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_16.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_16 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_16.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_17 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_17.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_17 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_17.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_18 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_18.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_18 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_18.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_19 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_19.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_19 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_19.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        if do50 == True: fout50_bpzlimmag_20 = '%s/%s_wghtratios_50_%s_%s_limmag_bpz_%s_zgap%s_20.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
+        fout75_bpzlimmag_20 = '%s/%s_wghtratios_75_%s_%s_limmag_bpz_%s_zgap%s_20.fits' % (output,fieldID[-22:-16],mskname,lensID,type,suffix)
 
 def outputfunc(*argv):
     start0 = True; start1 = True; start2 = True; start3 = True; start4 = True; start5 = True; start6 = True; start7 = True; start8 = True; start9 = True; start10 = True; start11 = True; start12 = True; start13 = True; start14 = True; start15 = True; start16 = True; start17 = True; start18 = True; start19 = True; start20 = True
@@ -446,13 +446,13 @@ def outputfunc(*argv):
         '''limbright limmag bpz'''
         # frac,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright
         frac_ = argv[0]; lens_gal_limmagbpz_ = argv[1]; field_gal_limmag_ = argv[2]; lens_gal_limbrightbpz_ = argv[3]; field_gal_limbright_ = argv[4]; lens_oneoverr_limmagbpz_ = argv[5]; field_oneoverr_limmag_ = argv[6]; lens_oneoverr_limbrightbpz_ = argv[7]; field_oneoverr_limbright_ = argv[8]
-        outbpzlimbright = np.zeros(22)
-        outbpzlimmag = np.zeros(22)
+        outbpzlimbright = np.zeros(6)
+        outbpzlimmag = np.zeros(6)
     if len(argv) == 5:
         '''limbright bpz'''
         # frac,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright
         frac_ = argv[0]; lens_gal_limbrightbpz_ = argv[1]; field_gal_limbright_ = argv[2]; lens_oneoverr_limbrightbpz_ = argv[3]; field_oneoverr_limbright_ = argv[4]
-        outbpzlimbright = np.zeros(22)
+        outbpzlimbright = np.zeros(6)
 
     for k in range(overlap):
         for l in range(overlap):
@@ -472,7 +472,7 @@ def outputfunc(*argv):
                                 outbpzlimbright[3] = np.int16(j)
                                 outbpzlimbright[4] = np.float32(1.0*lens_gal_limbrightbpz_[k][l][i][j][n]/field_gal_limbright_[k][l][i][j])
                                 outbpzlimbright[5] = np.float32(1.0*lens_oneoverr_limbrightbpz_[k][l][i][j][n]/field_oneoverr_limbright_[k][l][i][j])
-                            if len(argv) == 5:
+                            if len(argv) == 9:
                                 outbpzlimmag[0] = np.int16(k)
                                 outbpzlimmag[1] = np.int16(l)
                                 outbpzlimmag[2] = np.int16(i)
@@ -482,150 +482,150 @@ def outputfunc(*argv):
                             if n == 0:
                                 if start0 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_0 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_0 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_0 = outbpzlimmag
                                     start0 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_0 = np.c_[outlistbpzlimbright_0,outbpzlimbright] # normally this line should start with else, but for some reason that makes it lose the first row and duplicate the second; this way it will duplicate the first line, and at the end I will mask its first instance
-                                if len(argv) == 5: outlistbpzlimmag_0 = np.c_[outlistbpzlimmag_0,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_0 = np.c_[outlistbpzlimmag_0,outbpzlimmag]
                             if n == 1:
                                 if start1 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_1 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_1 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_1 = outbpzlimmag
                                     start1 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_1 = np.c_[outlistbpzlimbright_1,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_1 = np.c_[outlistbpzlimmag_1,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_1 = np.c_[outlistbpzlimmag_1,outbpzlimmag]
                             if n == 2:
                                 if start2 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_2 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_2 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_2 = outbpzlimmag
                                     start2 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_2 = np.c_[outlistbpzlimbright_2,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_2 = np.c_[outlistbpzlimmag_2,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_2 = np.c_[outlistbpzlimmag_2,outbpzlimmag]
                             if n == 3:
                                 if start3 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_3 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_3 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_3 = outbpzlimmag
                                     start3 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_3 = np.c_[outlistbpzlimbright_3,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_3 = np.c_[outlistbpzlimmag_3,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_3 = np.c_[outlistbpzlimmag_3,outbpzlimmag]
                             if n == 4:
                                 if start4 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_4 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_4 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_4 = outbpzlimmag
                                     start4 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_4 = np.c_[outlistbpzlimbright_4,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_4 = np.c_[outlistbpzlimmag_4,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_4 = np.c_[outlistbpzlimmag_4,outbpzlimmag]
                             if n == 5:
                                 if start5 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_5 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_5 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_5 = outbpzlimmag
                                     start5 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_5 = np.c_[outlistbpzlimbright_5,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_5 = np.c_[outlistbpzlimmag_5,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_5 = np.c_[outlistbpzlimmag_5,outbpzlimmag]
                             if n == 6:
                                 if start6 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_6 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_6 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_6 = outbpzlimmag
                                     start6 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_6 = np.c_[outlistbpzlimbright_6,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_6 = np.c_[outlistbpzlimmag_6,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_6 = np.c_[outlistbpzlimmag_6,outbpzlimmag]
                             if n == 7:
                                 if start7 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_7 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_7 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_7 = outbpzlimmag
                                     start7 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_7 = np.c_[outlistbpzlimbright_7,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_7 = np.c_[outlistbpzlimmag_7,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_7 = np.c_[outlistbpzlimmag_7,outbpzlimmag]
                             if n == 8:
                                 if start8 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_8 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_8 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_8 = outbpzlimmag
                                     start8 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_8 = np.c_[outlistbpzlimbright_8,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_8 = np.c_[outlistbpzlimmag_8,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_8 = np.c_[outlistbpzlimmag_8,outbpzlimmag]
                             if n == 9:
                                 if start9 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_9 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_9 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_9 = outbpzlimmag
                                     start9 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_9 = np.c_[outlistbpzlimbright_9,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_9 = np.c_[outlistbpzlimmag_9,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_9 = np.c_[outlistbpzlimmag_9,outbpzlimmag]
                             if n == 10:
                                 if start10 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_10 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_10 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_10 = outbpzlimmag
                                     start10 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_10 = np.c_[outlistbpzlimbright_10,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_10 = np.c_[outlistbpzlimmag_10,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_10 = np.c_[outlistbpzlimmag_10,outbpzlimmag]
                             if n == 11:
                                 if start11 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_11 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_11 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_11 = outbpzlimmag
                                     start11 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_11 = np.c_[outlistbpzlimbright_11,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_11 = np.c_[outlistbpzlimmag_11,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_11 = np.c_[outlistbpzlimmag_11,outbpzlimmag]
                             if n == 12:
                                 if start12 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_12 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_12 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_12 = outbpzlimmag
                                     start12 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_12 = np.c_[outlistbpzlimbright_12,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_12 = np.c_[outlistbpzlimmag_12,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_12 = np.c_[outlistbpzlimmag_12,outbpzlimmag]
                             if n == 13:
                                 if start13 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_13 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_13 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_13 = outbpzlimmag
                                     start13 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_13 = np.c_[outlistbpzlimbright_13,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_13 = np.c_[outlistbpzlimmag_13,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_13 = np.c_[outlistbpzlimmag_13,outbpzlimmag]
                             if n == 14:
                                 if start14 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_14 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_14 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_14 = outbpzlimmag
                                     start14 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_14 = np.c_[outlistbpzlimbright_14,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_14 = np.c_[outlistbpzlimmag_14,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_14 = np.c_[outlistbpzlimmag_14,outbpzlimmag]
                             if n == 15:
                                 if start15 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_15 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_15 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_15 = outbpzlimmag
                                     start15 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_15 = np.c_[outlistbpzlimbright_15,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_15 = np.c_[outlistbpzlimmag_15,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_15 = np.c_[outlistbpzlimmag_15,outbpzlimmag]
                             if n == 16:
                                 if start16 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_16 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_16 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_16 = outbpzlimmag
                                     start16 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_16 = np.c_[outlistbpzlimbright_16,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_16 = np.c_[outlistbpzlimmag_16,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_16 = np.c_[outlistbpzlimmag_16,outbpzlimmag]
                             if n == 17:
                                 if start17 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_17 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_17 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_17 = outbpzlimmag
                                     start17 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_17 = np.c_[outlistbpzlimbright_17,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_17 = np.c_[outlistbpzlimmag_17,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_17 = np.c_[outlistbpzlimmag_17,outbpzlimmag]
                             if n == 18:
                                 if start18 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_18 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_18 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_18 = outbpzlimmag
                                     start18 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_18 = np.c_[outlistbpzlimbright_18,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_18 = np.c_[outlistbpzlimmag_18,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_18 = np.c_[outlistbpzlimmag_18,outbpzlimmag]
                             if n == 19:
                                 if start19 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_19 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag_19 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag_19 = outbpzlimmag
                                     start19 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_19 = np.c_[outlistbpzlimbright_19,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_19 = np.c_[outlistbpzlimmag_19,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_19 = np.c_[outlistbpzlimmag_19,outbpzlimmag]
                             if n == 20:
                                 if start20 == True:
                                     if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_20 = outbpzlimbright
-                                    if len(argv) == 5: outlistbpzlimmag20 = outbpzlimmag
+                                    if len(argv) == 9: outlistbpzlimmag20 = outbpzlimmag
                                     start20 = False
                                 if len(argv) == 9 or len(argv) == 5: outlistbpzlimbright_20 = np.c_[outlistbpzlimbright_20,outbpzlimbright]
-                                if len(argv) == 5: outlistbpzlimmag_20 = np.c_[outlistbpzlimmag_20,outbpzlimmag]
+                                if len(argv) == 9: outlistbpzlimmag_20 = np.c_[outlistbpzlimmag_20,outbpzlimmag]
 
     if len(argv) == 9:
         if samples > 5: return outlistbpzlimbright_0[:,1:],outlistbpzlimbright_1[:,1:],outlistbpzlimbright_2[:,1:],outlistbpzlimbright_3[:,1:],outlistbpzlimbright_4[:,1:],outlistbpzlimbright_5[:,1:],outlistbpzlimbright_6[:,1:],outlistbpzlimbright_7[:,1:],outlistbpzlimbright_8[:,1:],outlistbpzlimbright_9[:,1:],outlistbpzlimbright_10[:,1:],outlistbpzlimbright_11[:,1:],outlistbpzlimbright_12[:,1:],outlistbpzlimbright_13[:,1:],outlistbpzlimbright_14[:,1:],outlistbpzlimbright_15[:,1:],outlistbpzlimbright_16[:,1:],outlistbpzlimbright_17[:,1:],outlistbpzlimbright_18[:,1:],outlistbpzlimbright_19[:,1:],outlistbpzlimbright_20[:,1:],outlistbpzlimmag_0[:,1:],outlistbpzlimmag_1[:,1:],outlistbpzlimmag_2[:,1:],outlistbpzlimmag_3[:,1:],outlistbpzlimmag_4[:,1:],outlistbpzlimmag_5[:,1:],outlistbpzlimmag_6[:,1:],outlistbpzlimmag_7[:,1:],outlistbpzlimmag_8[:,1:],outlistbpzlimmag_9[:,1:],outlistbpzlimmag_10[:,1:],outlistbpzlimmag_11[:,1:],outlistbpzlimmag_12[:,1:],outlistbpzlimmag_13[:,1:],outlistbpzlimmag_14[:,1:],outlistbpzlimmag_15[:,1:],outlistbpzlimmag_16[:,1:],outlistbpzlimmag_17[:,1:],outlistbpzlimmag_18[:,1:],outlistbpzlimmag_19[:,1:],outlistbpzlimmag_20[:,1:]
@@ -642,8 +642,8 @@ if limmag != limbright:
             if do50 == True: outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimbright_5,outlist50bpzlimbright_6,outlist50bpzlimbright_7,outlist50bpzlimbright_8,outlist50bpzlimbright_9,outlist50bpzlimbright_10,outlist50bpzlimbright_11,outlist50bpzlimbright_12,outlist50bpzlimbright_13,outlist50bpzlimbright_14,outlist50bpzlimbright_15,outlist50bpzlimbright_16,outlist50bpzlimbright_17,outlist50bpzlimbright_18,outlist50bpzlimbright_19,outlist50bpzlimbright_20,outlist50bpzlimmag_0,outlist50bpzlimmag_1,outlist50bpzlimmag_2,outlist50bpzlimmag_3,outlist50bpzlimmag_4,outlist50bpzlimmag_5,outlist50bpzlimmag_6,outlist50bpzlimmag_7,outlist50bpzlimmag_8,outlist50bpzlimmag_9,outlist50bpzlimmag_10,outlist50bpzlimmag_11,outlist50bpzlimmag_12,outlist50bpzlimmag_13,outlist50bpzlimmag_14,outlist50bpzlimmag_15,outlist50bpzlimmag_16,outlist50bpzlimmag_17,outlist50bpzlimmag_18,outlist50bpzlimmag_19,outlist50bpzlimmag_20 = outputfunc(0.5,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright)
             outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimbright_5,outlist75bpzlimbright_6,outlist75bpzlimbright_7,outlist75bpzlimbright_8,outlist75bpzlimbright_9,outlist75bpzlimbright_10,outlist75bpzlimbright_11,outlist75bpzlimbright_12,outlist75bpzlimbright_13,outlist75bpzlimbright_14,outlist75bpzlimbright_15,outlist75bpzlimbright_16,outlist75bpzlimbright_17,outlist75bpzlimbright_18,outlist75bpzlimbright_19,outlist75bpzlimbright_20,outlist75bpzlimmag_0,outlist75bpzlimmag_1,outlist75bpzlimmag_2,outlist75bpzlimmag_3,outlist75bpzlimmag_4,outlist75bpzlimmag_5,outlist75bpzlimmag_6,outlist75bpzlimmag_7,outlist75bpzlimmag_8,outlist75bpzlimmag_9,outlist75bpzlimmag_10,outlist75bpzlimmag_11,outlist75bpzlimmag_12,outlist75bpzlimmag_13,outlist75bpzlimmag_14,outlist75bpzlimmag_15,outlist75bpzlimmag_16,outlist75bpzlimmag_17,outlist75bpzlimmag_18,outlist75bpzlimmag_19,outlist75bpzlimmag_20 = outputfunc(0.75,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright)
         else:
-            if do50 == True: outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimmag_0,outlist50bpzlimmag_1,outlist50bpzlimmag_2,outlist50bpzlimmag_3,outlist50bpzlimmag_4 = outputfunc(0.5,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
-            outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimmag_0,outlist75bpzlimmag_1,outlist75bpzlimmag_2,outlist75bpzlimmag_3,outlist75bpzlimmag_4 = outputfunc(0.75,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_zweight_limmagbpz,field_zweight_limmag,lens_zweight_limbrightbpz,field_zweight_limbright,lens_mass_limmagbpz,field_mass_limmag,lens_mass_limbrightbpz,field_mass_limbright,lens_mass2_limmagbpz,field_mass2_limmag,lens_mass2_limbrightbpz,field_mass2_limbright,lens_mass3_limmagbpz,field_mass3_limmag,lens_mass3_limbrightbpz,field_mass3_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright,lens_zoverr_limmagbpz,field_zoverr_limmag,lens_zoverr_limbrightbpz,field_zoverr_limbright,lens_massoverr_limmagbpz,field_massoverr_limmag,lens_massoverr_limbrightbpz,field_massoverr_limbright,lens_mass2overr_limmagbpz,field_mass2overr_limmag,lens_mass2overr_limbrightbpz,field_mass2overr_limbright,lens_mass3overr_limmagbpz,field_mass3overr_limmag,lens_mass3overr_limbrightbpz,field_mass3overr_limbright,lens_mass2rms_limmagbpz,field_mass2rms_limmag,lens_mass2rms_limbrightbpz,field_mass2rms_limbright,lens_mass3rms_limmagbpz,field_mass3rms_limmag,lens_mass3rms_limbrightbpz,field_mass3rms_limbright,lens_mass2overrms_limmagbpz,field_mass2overrms_limmag,lens_mass2overrms_limbrightbpz,field_mass2overrms_limbright,lens_mass3overrms_limmagbpz,field_mass3overrms_limmag,lens_mass3overrms_limbrightbpz,field_mass3overrms_limbright,lens_flexion_limmagbpz,field_flexion_limmag,lens_flexion_limbrightbpz,field_flexion_limbright,lens_tidal_limmagbpz,field_tidal_limmag,lens_tidal_limbrightbpz,field_tidal_limbright,lens_convergence_limmagbpz,field_convergence_limmag,lens_convergence_limbrightbpz,field_convergence_limbright,lens_convergencehalo_limmagbpz,field_convergencehalo_limmag,lens_convergencehalo_limbrightbpz,field_convergencehalo_limbright)
+            if do50 == True: outlist50bpzlimbright_0,outlist50bpzlimbright_1,outlist50bpzlimbright_2,outlist50bpzlimbright_3,outlist50bpzlimbright_4,outlist50bpzlimmag_0,outlist50bpzlimmag_1,outlist50bpzlimmag_2,outlist50bpzlimmag_3,outlist50bpzlimmag_4 = outputfunc(0.5,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright)
+            outlist75bpzlimbright_0,outlist75bpzlimbright_1,outlist75bpzlimbright_2,outlist75bpzlimbright_3,outlist75bpzlimbright_4,outlist75bpzlimmag_0,outlist75bpzlimmag_1,outlist75bpzlimmag_2,outlist75bpzlimmag_3,outlist75bpzlimmag_4 = outputfunc(0.75,lens_gal_limmagbpz,field_gal_limmag,lens_gal_limbrightbpz,field_gal_limbright,lens_oneoverr_limmagbpz,field_oneoverr_limmag,lens_oneoverr_limbrightbpz,field_oneoverr_limbright)
 
 if limmag == limbright:
         if samples > 5:
@@ -744,6 +744,6 @@ if limmag != limbright:
             t = table.Table(outlist75bpzlimmag_20.T, names=names, dtype=dtype); t.write(fout75_bpzlimmag_20,overwrite=True)
 
 print("Writing output completed in %0.1f seconds" % ((time.time() - start_write)))
-print("Total time for %s: --- %0.2f seconds ---" % ('%s_wghtratios_75_%s_%s_%s_%s_zgap%s' % (fieldID[-26:-20],mskname,lensID,limmag,det,irac,type,zinf,zsup,suffix), (time.time() - start_time)))
+print("Total time for %s: --- %0.2f seconds ---" % ('%s_wghtratios_75_%s_%s_%s_%s_zgap%s' % (fieldID[-22:-16],mskname,lensID,limmag,type,suffix), (time.time() - start_time)))
 
 print 'Done!'
