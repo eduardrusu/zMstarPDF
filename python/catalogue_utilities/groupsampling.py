@@ -49,7 +49,7 @@ if zgroup == 0.3097: observed_members = 13
 if zgroup == 0.3097: file = '/Users/cerusu/Dropbox/Davis_work/code/PG1115/PG1115.cat'
 #data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
 if zgroup == 0.3097:
-    data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
+    data = np.loadtxt(file,usecols=[2,3,4,8,11])
 ra = 0
 dec = 1
 i = 2
@@ -59,19 +59,25 @@ zinf = 5
 zsup = 6
 spec = 7
 cls = 8
+if zgroup == 0.3097:
+    ra = 0
+    dec = 1
+    id = 2
+    flux_rad = 3
+    i = 4
+
 coord = SkyCoord(ra=data[:,ra]*u.degree, dec=data[:,dec]*u.degree, frame='fk5')
 sep = coord.separation(center_lens).arcsec
-all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)])
+#all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)])
+all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,flux_rad] >= 1.25)])
 print "gals: ",all
-specs = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
+#specs = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
+specs = 11 # PG1115
 print "specs: ",specs
-#print data[:,i][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
-#print data[:,spec][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
-#print data[:,id][(sep <= 120) & (data[:,i] >= limmag) & (data[:,spec] > 0)]
-observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
-print 'members',len(observed120_membersID)
-pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,cls] >= 0) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
-print 'pool',len(pool)
+#observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
+#print 'members',len(observed120_membersID)
+#pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,cls] >= 0) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
+#print 'pool',len(pool)
 
 if mode == "mcmc":
     def expected_members():
@@ -90,13 +96,17 @@ if mode == "mcmc":
         while True:
             #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
             #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
+            #veldisp0.31 = 390+50-60 -> Fig 5 Andreon 2010 [median range: 5-(8)-12; 68% range around central '()' median 6-12, in quadrature 8-4+6] galaxies inside R_200
+
             if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
             if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
+            if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6
             rand = np.random.uniform(0,1,1)[0]
             if rand <= 0.5: x = med - np.abs(np.random.normal(med, stdinf, 1).astype(int)[0] - med) # based on the velocity dispersion - concentration relation above
             else: x = med + np.abs(np.random.normal(med, stdsup, 1).astype(int)[0] - med)
             #print x,frac * x, observed_members, len(observed120_membersID)
-            if (x > observed_members) and (frac * x > len(observed120_membersID)): break
+            #if (x > observed_members) and (frac * x > len(observed120_membersID)): break
+            if (x > observed_members) and (frac * x > specs): break # PG1115
         return x
 if mode == "poisson":
     def expected_members():
