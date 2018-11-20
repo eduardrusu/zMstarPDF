@@ -9,11 +9,15 @@ from astropy.coordinates import SkyCoord
 mode = "mcmc"
 samples = 20
 photoztolerance = 1.5 # number of sigmas
-zgroup = 0.6588
-#zgroup = 0.4956
-limmag = 22.5
-faintmagspec = 22.5
-center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00'
+#zgroup = 0.6588 # WFI2033lens
+#zgroup = 0.4956 # WFI2033
+zgroup = 0.3097 # PG1115
+limmag = 22.5 # WFI2033
+limmag = 22.0 # PG1115, less than a mag fainter then the faintest in Wilson
+faintmagspec = 22.5 # WFI2033
+faintmagspec = 22.0 # PG1115, less than a mag fainter then the faintest in Wilson
+#center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00' # WFI2033
+center_lensx = '11:18:16.90'; center_lensy = '+07:45:59.00' # PG1115
 center_lens = SkyCoord(center_lensx + ' ' + center_lensy, frame='fk5', unit=(u.hourangle, u.deg))
 if zgroup == 0.6588:
     center_groupx = '308.43557011'; center_groupy = '-47.37411275'
@@ -27,14 +31,25 @@ if zgroup == 0.4956:
     err_group = 26
     virrad = 270
     virrad_err = 65
+if zgroup == 0.3097: # PG1115
+    center_groupx = '169.5681'; center_groupy = '7.7648'
+    center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
+    err_group = 20
+    virrad = 180
+    virrad_err = 18 # arbitrary 20%, as average between the ones from Dominique
+
 sep_groupx = center_lens.separation(SkyCoord(center_groupx + ' ' + center_lensy, frame='fk5', unit=(u.deg, u.deg))).arcsec
 sep_groupy = center_lens.separation(SkyCoord(center_lensx + ' ' + center_groupy, frame='fk5', unit=(u.hourangle, u.deg))).arcsec
- # arcsec # using R_200, which is robust agains Dominique's and is used in the reference papers
+# arcsec # using R_200, which is robust agains Dominique's and is used in the reference papers
 # Each of the 2 groups have 3 galaxies outside R_200 so I should not count these
-if zgroup == 0.6588: observed_members = 19
+if zgroup == 0.6588: observed_members = 19 # inside virial radius
 if zgroup == 0.4956: observed_members = 10
-file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
-data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
+if zgroup == 0.3097: observed_members = 13
+#file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat" # WFI2033
+if zgroup == 0.3097: file = '/Users/cerusu/Dropbox/Davis_work/code/PG1115/PG1115.cat'
+#data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
+if zgroup == 0.3097:
+    data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
 ra = 0
 dec = 1
 i = 2

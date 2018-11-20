@@ -76,7 +76,7 @@ if lensID == "PG1115":
     brightmag = 15.3
     pixnr = 1011
     pixlens = 0.237388724 * u.arcsec
-    boosterr = 0.07
+    boosterr = 0.10
 
 #dist = distances.Distance()
 #dist.OMEGA_M = 0.25 # change to the cosmology used by the Millennium Simulation
