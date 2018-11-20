@@ -23,14 +23,14 @@ if zgroup == 0.6588:
     center_groupx = '308.43557011'; center_groupy = '-47.37411275'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
     err_group = 60 # converted to arcsec
-    virrad = 220 # actually R_200 in arcsec
-    virrad_err = 27
+    virrad = 130 # actually R_200 in arcsec
+    virrad_err = 30
 if zgroup == 0.4956:
     center_groupx = '308.46337200'; center_groupy = '-47.36336725'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
     err_group = 26
-    virrad = 270
-    virrad_err = 65
+    virrad = 170
+    virrad_err = 30
 if zgroup == 0.3097: # PG1115
     center_groupx = '169.5681'; center_groupy = '7.7648'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
