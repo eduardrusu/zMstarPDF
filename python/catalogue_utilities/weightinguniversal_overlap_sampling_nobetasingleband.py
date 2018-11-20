@@ -102,9 +102,9 @@ print "Initializing the lens catalogue..."
 if lensID == "PG1115":
     center_lens = SkyCoord('11:18:16.900 +07:45:59.00', frame='fk5', unit=(u.hourangle, u.deg))
 
-lensbpz = np.loadtxt('%s.cat' % rootlenscat, unpack=True)
+lensbpz = np.loadtxt('%s/%s.cat' % (rootlenscat,lensID), unpack=True)
 
-msk_lens = fits.open('%s/msk%sarcsecrad%sarcsecgap.fits' % (rootlens,radius,inner))
+msk_lens = fits.open('%s/%s/msk%sarcsecrad%sarcsecgap.fits' % (rootlens,lensID,radius,inner))
 # defining the columns:
 x_lens = 0
 y_lens = 1
@@ -130,7 +130,7 @@ def lensprep(lenscat):
     #print np.shape(lenscat)
     #print lenscat[RA_lens],lenscat[DEC_lens],SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5').separation(center_lens).arcsec,lenscat[classify]
     if remove != 'no':
-        removecat = np.loadtxt('%s/%s.cat' % (rootlens,remove))
+        removecat = np.loadtxt('%s/%s/%s.cat' % (rootlens,lensID,remove))
         for i in range(len(removecat)):
             coord_lensinit = SkyCoord(ra=lenscat[RA_lens]*u.degree, dec=lenscat[DEC_lens]*u.degree, frame='fk5') # redefine this whenever I remove rows
             coordremove = SkyCoord('%s %s' %(removecat[i][0],removecat[i][1]), frame='fk5', unit=(u.deg, u.deg))
