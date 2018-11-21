@@ -5,8 +5,8 @@
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-mode = "poisson"
-#mode = "mcmc"
+#mode = "poisson"
+mode = "mcmc"
 samples = 20
 photoztolerance = 1.5 # number of sigmas
 #zgroup = 0.6588 # WFI2033lens
@@ -15,7 +15,7 @@ zgroup = 0.3097 # PG1115
 limmag = 22.5 # WFI2033
 limmag = 22.5 # PG1115, slightly fainter than faintest in Momcheva
 faintmagspec = 22.5 # WFI2033
-faintmagspec = 22.0 # PG1115, less than a mag fainter then the faintest in Wilson
+faintmagspec = 22.5 # PG1115, slightly fainter than faintest in Momcheva
 #center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00' # WFI2033
 center_lensx = '11:18:16.90'; center_lensy = '+07:45:59.00' # PG1115
 center_lens = SkyCoord(center_lensx + ' ' + center_lensy, frame='fk5', unit=(u.hourangle, u.deg))
@@ -72,8 +72,8 @@ sep = coord.separation(center_lens).arcsec
 all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,flux_rad] >= 1.25)])
 print "gals: ",all
 #specs = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
-#specs = 11 # PG1115 mcmc
-specs = 33 # PG1115 poisson
+specs = 11 # PG1115 mcmc
+#specs = 33 # PG1115 poisson
 print "specs: ",specs
 #observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
 #print 'members',len(observed120_membersID)
@@ -102,6 +102,7 @@ if mode == "mcmc":
             if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
             if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
             if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6
+            if zgroup == 0.3097: med = 13; stdinf = 8.5; stdsup = 8.5
             rand = np.random.uniform(0,1,1)[0]
             if rand <= 0.5: x = med - np.abs(np.random.normal(med, stdinf, 1).astype(int)[0] - med) # based on the velocity dispersion - concentration relation above
             else: x = med + np.abs(np.random.normal(med, stdsup, 1).astype(int)[0] - med)
@@ -127,10 +128,11 @@ if mode == "mcmc":
             #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
             #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
             #veldisp0.31 = 390+50-60 -> Fig 5 Andreon 2010 [median range: 5-(8)-12; 68% range around central '()' median 6-12, in quadrature 8-4+6] galaxies inside R_200
-
+            #veldisp0.31 = 440+90-80 -> Fig 5 Andreon 2010 [median range: 6-(13)-20; 68% range around central '()' median 8-18, in quadrature 13+/-8.5] galaxies inside R_200
             if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
             if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
             if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6
+            if zgroup == 0.3097: med = 13; stdinf = 8.5; stdsup = 8.5
             rand = np.random.uniform(0,1,1)[0]
             if rand <= 0.5: x = med - np.abs(np.random.normal(med, stdinf, 1).astype(int)[0] - med) # based on the velocity dispersion - concentration relation above
             else: x = med + np.abs(np.random.normal(med, stdsup, 1).astype(int)[0] - med)
@@ -192,4 +194,4 @@ plt.xlabel(r'Expected number of missing members', fontsize=20)
 plt.ylabel(r'normalized counts', fontsize=20)
 plt.legend(loc="upper left")
 plt.show()
-print np.percentile(pdz,[16,50,84]) # I ran the code several times untill the two distributions match fairly well
+print np.percentile(pdz-11,[16,50,84]) # I ran the code several times untill the two distributions match fairly well
