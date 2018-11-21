@@ -5,15 +5,15 @@
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-#mode = "poisson"
-mode = "mcmc"
+mode = "poisson"
+#mode = "mcmc"
 samples = 20
 photoztolerance = 1.5 # number of sigmas
 #zgroup = 0.6588 # WFI2033lens
 #zgroup = 0.4956 # WFI2033
 zgroup = 0.3097 # PG1115
 limmag = 22.5 # WFI2033
-limmag = 22.0 # PG1115, less than a mag fainter then the faintest in Wilson
+limmag = 22.5 # PG1115, slightly fainter than faintest in Momcheva
 faintmagspec = 22.5 # WFI2033
 faintmagspec = 22.0 # PG1115, less than a mag fainter then the faintest in Wilson
 #center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00' # WFI2033
@@ -72,7 +72,8 @@ sep = coord.separation(center_lens).arcsec
 all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,flux_rad] >= 1.25)])
 print "gals: ",all
 #specs = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
-specs = 11 # PG1115
+#specs = 11 # PG1115 mcmc
+specs = 33 # PG1115 poisson
 print "specs: ",specs
 #observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
 #print 'members',len(observed120_membersID)
@@ -108,11 +109,47 @@ if mode == "mcmc":
             #if (x > observed_members) and (frac * x > len(observed120_membersID)): break
             if (x > observed_members) and (frac * x > specs): break # PG1115
         return x
+if mode == "mcmc":
+    def expected_members_noprior():
+        # sample uniformly a cube of size 2 x unit radius
+        x = np.random.uniform(-1,1,10000)
+        y = np.random.uniform(-1,1,10000)
+        z = np.random.uniform(-1,1,10000)
+        sep_group = np.sqrt(np.random.normal(sep_groupx, err_group, 1)**2 + np.random.normal(sep_groupy, err_group, 1)**2)
+        virrad_sample = np.max([10,sep_group,np.abs(np.random.normal(virrad, virrad_err, 1))]) # using lower limit to avoid numerical problems
+        cx = 1.0 * sep_group / virrad_sample
+        cy = 0
+        rad = 120.0 / virrad_sample
+        # fraction of volume of the virial sphere which contains the 120"-radius cylinder centered on the lens
+        global frac
+        frac = 1.0*len(x[(x**2 + y**2 + z**2 <= 1) & ((x-cx)**2 + (y-cy)**2 <=rad**2)]) / len(x[x**2 + y**2 + z**2 <= 1])
+        while True:
+            #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
+            #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
+            #veldisp0.31 = 390+50-60 -> Fig 5 Andreon 2010 [median range: 5-(8)-12; 68% range around central '()' median 6-12, in quadrature 8-4+6] galaxies inside R_200
+
+            if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
+            if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
+            if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6
+            rand = np.random.uniform(0,1,1)[0]
+            if rand <= 0.5: x = med - np.abs(np.random.normal(med, stdinf, 1).astype(int)[0] - med) # based on the velocity dispersion - concentration relation above
+            else: x = med + np.abs(np.random.normal(med, stdsup, 1).astype(int)[0] - med)
+            break
+        return x
 if mode == "poisson":
     def expected_members():
         while True:
-            x = np.random.poisson(1.0 * all * len(observed120_membersID)/specs, 1)
-            if x > len(observed120_membersID): break
+            #x = np.random.poisson(1.0 * all * len(observed120_membersID)/specs, 1)
+            x = np.random.poisson(1.0 * all * 11/specs, 1) #PG1115
+            #if x >= len(observed120_membersID): break
+            if x >= 11: break # PG1115
+        return x
+if mode == "poisson":
+    def expected_members_noprior():
+        while True:
+            #x = np.random.poisson(1.0 * all * len(observed120_membersID)/specs, 1)
+            x = np.random.poisson(1.0 * all * 11/specs, 1) #PG1115
+            break
         return x
 
 pdz = np.array([])
@@ -122,6 +159,13 @@ for i in range(10000):
     expected = expected_members()
     if mode == "mcmc": pdz = np.append(pdz,frac * expected)
     if mode == "poisson": pdz = np.append(pdz,expected)
+pdznoprior = np.array([])
+for i in range(10000):
+    if i % 10 == 0: print i,'/10000'
+    #print i
+    expected = expected_members_noprior()
+    if mode == "mcmc": pdznoprior = np.append(pdznoprior,frac * expected)
+    if mode == "poisson": pdznoprior = np.append(pdznoprior,expected)
 
 pdzselect = np.array([])
 for i in range(samples):
@@ -141,7 +185,11 @@ for i in range(samples):
     #if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
 import pylab as plt
 plt.clf()
-plt.hist(pdz,normed=True)
-plt.hist(pdzselect,normed=True,alpha = 0.5)
+plt.hist(pdz-11,bins=50,normed=True,label='w/ observed number prior')
+plt.hist(pdznoprior-11,bins=50,normed=True,label='w/o observed number prior')
+#plt.hist(pdzselect,normed=True,alpha = 0.5)
+plt.xlabel(r'Expected number of missing members', fontsize=20)
+plt.ylabel(r'normalized counts', fontsize=20)
+plt.legend(loc="upper left")
 plt.show()
 print np.percentile(pdz,[16,50,84]) # I ran the code several times untill the two distributions match fairly well
