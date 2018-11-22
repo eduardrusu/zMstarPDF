@@ -75,11 +75,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
-increment2 = 2
-increment3 = 2
-increment4 = 2
-increment5 = 2
+increment1 = 1# refers to the E interval from Greene et al. 2014
+increment2 = 1
+increment3 = 1
+increment4 = 1
+increment5 = 1
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
