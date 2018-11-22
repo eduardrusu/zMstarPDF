@@ -90,26 +90,51 @@ rad = degree / 3600
 
 # define the shear constraints
 if lens == "PG1115":
-    if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.081
-        constrwidth_gamma_inf = 0.065# 0.109 #
-        constrwidth_gamma_sup = 0.097# 0.129 #
-    if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.062
-        constrwidth_gamma_inf = 0.047# 0.109 #
-        constrwidth_gamma_sup = 0.075# 0.129 #
-    if other == 'fiducial' and handpicked == 'removehandpickedG1' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.070
-        constrwidth_gamma_inf = 0.054# 0.097 #
-        constrwidth_gamma_sup = 0.086# 0.117 #
-    if other == 'composite' and handpicked == 'removehandpickedG1' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.075
-        constrwidth_gamma_inf = 0.062# .101 #
-        constrwidth_gamma_sup = 0.088# 0.121 #
-    if other == 'fiducial' and handpicked == 'nohandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.074
-        constrwidth_gamma_inf = 0.124# 0.120 #
-        constrwidth_gamma_sup = 0.130# 0.140 #
+    if other == 'powerlawNFWWMAP1' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.042
+        constrwidth_gamma_inf = 0.032
+        constrwidth_gamma_sup = 0.052
+    if other == 'powerlawNFWWMAP3' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.031
+        constrwidth_gamma_inf = 0.020# 0.109 #
+        constrwidth_gamma_sup = 0.042# 0.129 #
+    if other == 'powerlawNFWWMAP5' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.027
+        constrwidth_gamma_inf = 0.018# 0.109 #
+        constrwidth_gamma_sup = 0.036# 0.129 #
+    if other == 'powerlawSIS' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.061
+        constrwidth_gamma_inf = 0.052# 0.109 #
+        constrwidth_gamma_sup = 0.070# 0.129 #
+    if other == 'powerlawNFW' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.054
+        constrwidth_gamma_inf = 0.045# 0.109 #
+        constrwidth_gamma_sup = 0.063# 0.129 #
+    if other == 'powerlawNFW' and handpicked == 'removegroupG1G2handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.058
+        constrwidth_gamma_inf = 0.046# 0.109 #
+        constrwidth_gamma_sup = 0.070# 0.129 #
+
+    if other == 'compositeNFWWMAP1' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.043
+        constrwidth_gamma_inf = 0.035# 0.109 #
+        constrwidth_gamma_sup = 0.051# 0.129 #
+    if other == 'compositeNFWWMAP3' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.050
+        constrwidth_gamma_inf = 0.038# 0.109 #
+        constrwidth_gamma_sup = 0.062# 0.129 #
+    if other == 'compositeNFWWMAP5' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.048
+        constrwidth_gamma_inf = 0.039# 0.109 #
+        constrwidth_gamma_sup = 0.057# 0.129 #
+    if other == 'compositeSISorNFW' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.072
+        constrwidth_gamma_inf = 0.064# 0.109 #
+        constrwidth_gamma_sup = 0.080# 0.129 #
+    if other == 'compositeNFW' and handpicked == 'removegroupG1G2handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.060
+        constrwidth_gamma_inf = 0.052# 0.109 #
+        constrwidth_gamma_sup = 0.068# 0.129 #
     filters = "ugrizJHK"
     plane = 34
     print 'shear: ',constr_gamma
