@@ -88,17 +88,36 @@ L_pix = L_field / N_pix_per_dim
 rad = degree / 3600
 
 # define the shear constraints
+# OLD VALUES
+#if lens == "HE0435":
+#    if other == 'fiducial' and innermask == '5':
+#        constr_gamma = 0.030
+#        constrwidth_gamma_inf = 0.027
+#        constrwidth_gamma_sup = 0.033
+#    if other == 'composite' and innermask == '5':
+#        constr_gamma = 0.004
+#        constrwidth_gamma_inf = 0.001
+#        constrwidth_gamma_sup = 0.007
+#    filters = "ugriJHK"
+#    print 'shear: ',constr_gamma
+
 if lens == "HE0435":
-    if other == 'fiducial' and innermask == '5':
-        constr_gamma = 0.030
-        constrwidth_gamma_inf = 0.027
-        constrwidth_gamma_sup = 0.033
-    if other == 'composite' and innermask == '5':
-        constr_gamma = 0.004
-        constrwidth_gamma_inf = 0.001
-        constrwidth_gamma_sup = 0.007
+    if other == 'powerlawG1' and innermask == '5':
+        constr_gamma = 0.047
+        constrwidth_gamma_inf = 0.036
+        constrwidth_gamma_sup = 0.058
+    if other == 'powerlaw5pert' and innermask == '5':
+        constr_gamma = 0.052
+        constrwidth_gamma_inf = 0.041
+        constrwidth_gamma_sup = 0.063
+    if other == 'compositeG1' and innermask == '5':
+        constr_gamma = 0.029
+        constrwidth_gamma_inf = 0.004
+        constrwidth_gamma_sup = 0.053
     filters = "ugriJHK"
     print 'shear: ',constr_gamma
+
+
 
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile

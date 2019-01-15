@@ -75,11 +75,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
-increment2 = 2
-increment3 = 2
-increment4 = 1
-increment5 = 2
+increment1 = 3# refers to the E interval from Greene et al. 2014
+increment2 = 8
+increment3 = 3
+increment4 = 2
+increment5 = 3
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -90,23 +90,23 @@ rad = degree / 3600
 
 # define the shear constraints
 if lens == "PG1115":
-    if other == 'powerlawNFWWMAP1' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'powerlawNFWWMAP1' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.042
         constrwidth_gamma_inf = 0.032
         constrwidth_gamma_sup = 0.052
-    if other == 'powerlawNFWWMAP3' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'powerlawNFWWMAP3' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.031
         constrwidth_gamma_inf = 0.020# 0.109 #
         constrwidth_gamma_sup = 0.042# 0.129 #
-    if other == 'powerlawNFWWMAP5' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'powerlawNFWWMAP5' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.027
         constrwidth_gamma_inf = 0.018# 0.109 #
         constrwidth_gamma_sup = 0.036# 0.129 #
-    if other == 'powerlawSIS' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'powerlawSIS' and (handpicked == 'removegroupG1handpicked' or handpicked == 'removelensgrouppoissonignoreG2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.061
         constrwidth_gamma_inf = 0.052# 0.109 #
         constrwidth_gamma_sup = 0.070# 0.129 #
-    if other == 'powerlawNFW' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'powerlawNFW' and (handpicked == 'removegroupG1handpicked' or handpicked == 'removelensgrouppoissonignoreG2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.054
         constrwidth_gamma_inf = 0.045# 0.109 #
         constrwidth_gamma_sup = 0.063# 0.129 #
@@ -115,19 +115,19 @@ if lens == "PG1115":
         constrwidth_gamma_inf = 0.046# 0.109 #
         constrwidth_gamma_sup = 0.070# 0.129 #
 
-    if other == 'compositeNFWWMAP1' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'compositeNFWWMAP1' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.043
         constrwidth_gamma_inf = 0.035# 0.109 #
         constrwidth_gamma_sup = 0.051# 0.129 #
-    if other == 'compositeNFWWMAP3' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'compositeNFWWMAP3' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.050
         constrwidth_gamma_inf = 0.038# 0.109 #
         constrwidth_gamma_sup = 0.062# 0.129 #
-    if other == 'compositeNFWWMAP5' and handpicked == 'removegrouphandpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'compositeNFWWMAP5' and (handpicked == 'removegrouphandpicked' or handpicked == 'removelensgrouppoissonignoreG1G2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.048
         constrwidth_gamma_inf = 0.039# 0.109 #
         constrwidth_gamma_sup = 0.057# 0.129 #
-    if other == 'compositeSISorNFW' and handpicked == 'removegroupG1handpicked' and float(zsup) < 0 and innermask == '5':
+    if other == 'compositeSISorNFW' and (handpicked == 'removegroupG1handpicked' or handpicked == 'removelensgrouppoissonignoreG2handpicked') and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.072
         constrwidth_gamma_inf = 0.064# 0.109 #
         constrwidth_gamma_sup = 0.080# 0.129 #
