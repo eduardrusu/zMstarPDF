@@ -22,7 +22,8 @@ if search == "Gaia":
         #print 'dist           ra             dec            G       astrom_exc_noise parallax/err pmra/err    pmdec/err'
         for j in range(len(r)):
             #print r[j]['dist']*3600,r[j]['ra'],r[j]['dec'],r[j]['phot_g_mean_mag'],r[j]['astrometric_excess_noise'],abs(r[j]['parallax_over_error']),np.sqrt((r[j]['pmra']/r[j]['pmra_error'])**2+(r[j]['pmdec']/r[j]['pmdec_error'])**2)
-            if j ==1: print cat[0][i], cat[1][i], r[j]['phot_g_mean_mag'],r[j]['phot_bp_mean_mag'],r[j]['phot_rp_mean_mag']
+            #if j ==1:
+            print cat[0][i], cat[1][i], SkyCoord(cat[0][i], cat[1][i], unit='deg').separation(SkyCoord(r[j]['ra'], r[j]['dec'], unit='deg')).arcsec, r[j]['phot_g_mean_mag'],r[j]['phot_bp_mean_mag'],r[j]['phot_rp_mean_mag']
 
 def panstarrs_query(ra_deg, dec_deg, rad_asec, maxmag=23,
                     maxsources=1): # from https://michaelmommert.wordpress.com/2017/02/13/accessing-the-gaia-and-pan-starrs-catalogs-using-python/
