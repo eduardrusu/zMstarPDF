@@ -75,11 +75,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 4# refers to the E interval from Greene et al. 2014
+increment1 = 2# refers to the E interval from Greene et al. 2014
 increment2 = 4
-increment3 = 4
-increment4 = 4
-increment5 = 4
+increment3 = 2
+increment4 = 2
+increment5 = 2
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -91,29 +91,46 @@ rad = degree / 3600
 # define the shear constraints
 if lens == "WFI2033":
     if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.116
+        constr_gamma = 0.115
         constrwidth_gamma_inf = 0.111# 0.109 #
         constrwidth_gamma_sup = 0.120# 0.129 #
-    if other == 'WFIdelays' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.111
-        constrwidth_gamma_inf = 0.109# 0.109 #
-        constrwidth_gamma_sup = 0.114# 0.129 #
+    if other == 'AGNmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.123
+        constrwidth_gamma_inf = 0.120# 0.109 #
+        constrwidth_gamma_sup = 0.127# 0.129 #
     if other == 'fiducial' and handpicked == 'removelensgrouphandpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.137
-        constrwidth_gamma_inf = 0.130# 0.097 #
-        constrwidth_gamma_sup = 0.142# 0.117 #
+        constr_gamma = 0.118
+        constrwidth_gamma_inf = 0.114# 0.097 #
+        constrwidth_gamma_sup = 0.121# 0.117 #
     if other == 'fiducial' and handpicked == 'removelensgrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.125
-        constrwidth_gamma_inf = 0.120# .101 #
-        constrwidth_gamma_sup = 0.129# 0.121 #
+        constr_gamma = 0.111
+        constrwidth_gamma_inf = 0.106# .101 #
+        constrwidth_gamma_sup = 0.115# 0.121 #
     if other == 'chameleon' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.124# 0.120 #
-        constrwidth_gamma_sup = 0.130# 0.140 #
+        constr_gamma = 0.127
+        constrwidth_gamma_inf = 0.123# 0.120 #
+        constrwidth_gamma_sup = 0.131# 0.140 #
     if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.126# 0.142 #
-        constrwidth_gamma_sup = 0.131# 0.162 #
+        constr_gamma = 0.162
+        constrwidth_gamma_inf = 0.158# 0.142 #
+        constrwidth_gamma_sup = 0.166# 0.162 #
+    if other == 'compositeAGNmask+0' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.156
+        constrwidth_gamma_inf = 0.153# 0.142 #
+        constrwidth_gamma_sup = 0.161# 0.162 #
+    if other == 'compositesrc+10arcmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.145# 0.142 #
+        constrwidth_gamma_sup = 0.155# 0.162 #
+    if other == 'composite' and handpicked == 'removelensgrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.146# 0.142 #
+        constrwidth_gamma_sup = 0.152# 0.162 #
+    if other == 'composite' and handpicked == 'removelensgrouplens049handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.155
+        constrwidth_gamma_inf = 0.152# 0.142 #
+        constrwidth_gamma_sup = 0.158# 0.162 #
+
     filters = "ugrizJHK"
     plane = 35
     print 'shear: ',constr_gamma
