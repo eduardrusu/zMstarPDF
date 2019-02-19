@@ -11,7 +11,7 @@ import glob
 os.system('/Applications/ds9.darwinsierra.7.5/ds9 &')
 path = str(sys.argv[1])
 #target = str(sys.argv[2])
-target = '1510'
+target = '1435'
 try: os.mkdir(path+target)
 except: pass
 os.chdir(path+target)
