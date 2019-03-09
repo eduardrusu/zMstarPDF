@@ -103,17 +103,17 @@ rad = degree / 3600
 
 if lens == "HE0435":
     if other == 'powerlawG1' and innermask == '5':
-        constr_gamma = 0.047
-        constrwidth_gamma_inf = 0.036
-        constrwidth_gamma_sup = 0.058
-    if other == 'powerlaw5pert' and innermask == '5':
-        constr_gamma = 0.052
-        constrwidth_gamma_inf = 0.041
-        constrwidth_gamma_sup = 0.063
+        constr_gamma = 0.041
+        constrwidth_gamma_inf = 0.023
+        constrwidth_gamma_sup = 0.059
+    if other == 'powerlaw5pert' and innermask == '12':
+        constr_gamma = 0.056
+        constrwidth_gamma_inf = 0.030
+        constrwidth_gamma_sup = 0.082
     if other == 'compositeG1' and innermask == '5':
-        constr_gamma = 0.029
-        constrwidth_gamma_inf = 0.004
-        constrwidth_gamma_sup = 0.053
+        constr_gamma = 0.026
+        constrwidth_gamma_inf = 0.000
+        constrwidth_gamma_sup = 0.052
     filters = "ugriJHK"
     print 'shear: ',constr_gamma
 
