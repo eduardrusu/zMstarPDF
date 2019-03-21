@@ -4,14 +4,15 @@ import astropy.units as u
 
 search = "Gaia"
 #search = "PS1"
-#file = "/Volumes/LaCieSubaru/Ciprian_candidates/candidatesJan2019.cat"
-file = "/Users/cerusu/OneDrive - Subaru Telescope/Ciprian/candidatesJan2019.cat"
+file = "/Volumes/LaCieSubaru/Ciprian_candidates/candidatesJan2019.cat"
+#file = "/Users/cerusu/OneDrive - Subaru Telescope/candidates.cat"
 cat = np.loadtxt(file, usecols = [0,1], unpack=True)
 
 if search == "Gaia":
     from astropy.coordinates import SkyCoord
     from astroquery.gaia import Gaia
-    rad = 9.0 # arcsec
+    #rad = 9.0 # arcsec # used for Gaia
+    rad = 3.0 # arcsec
     radius = u.Quantity(rad, u.arcsec)
     #for i in range(1):
     for i in range(len(cat[0])):
