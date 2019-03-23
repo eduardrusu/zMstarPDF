@@ -1737,7 +1737,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight2_index) != int) & (shearwithoutprior == False):
+    if (type(weight2_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
@@ -1774,7 +1774,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight3_index) != int) & (shearwithoutprior == False):
+    if (type(weight3_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
@@ -1811,7 +1811,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight4_index) != int) & (shearwithoutprior == False):
+    if (type(weight4_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
@@ -1848,7 +1848,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight5_index) != int) & (shearwithoutprior == False):
+    if (type(weight5_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
