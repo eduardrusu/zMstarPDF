@@ -5,19 +5,20 @@
 import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+
+selectpdz = False # whether or not to actually select a number of desired samples, not just compute the theoretical distributions
+if selectpdz == True: samples = 10 # define any number of desired samples
 mode = "poisson"
 #mode = "mcmc"
-samples = 10
-photoztolerance = 1.5 # number of sigmas
-#lens = 'PG1115'
-lens = 'WFI2033'
-zgroup = 0.6588 # WFI2033lens
+photoztolerance = 1.5 # number of sigmas; doesn't apply to PG1115
+lens = 'PG1115'
+#lens = 'WFI2033'
+#zgroup = 0.6588 # WFI2033lens
 #zgroup = 0.4956 # WFI2033
 if lens == 'PG1115': zgroup = 0.3097
 if lens == 'WFI2033': limmag = 22.5
 if lens == 'PG1115': limmag = 22.5 # slightly fainter than faintest in Momcheva
 if lens == 'WFI2033': faintmagspec = 22.5
-if lens == 'PG1115': faintmagspec = 22.5
 if lens == 'PG1115': faintmagspec = 22.5 # PG1115, slightly fainter than faintest in Momcheva
 if lens == 'WFI2033': center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00' # WFI2033
 if lens == 'PG1115': center_lensx = '11:18:16.90'; center_lensy = '+07:45:59.00' # PG1115
@@ -43,7 +44,7 @@ if zgroup == 0.3097:
 
 sep_groupx = center_lens.separation(SkyCoord(center_groupx + ' ' + center_lensy, frame='fk5', unit=(u.deg, u.deg))).arcsec
 sep_groupy = center_lens.separation(SkyCoord(center_lensx + ' ' + center_groupy, frame='fk5', unit=(u.hourangle, u.deg))).arcsec
-# arcsec # using R_200, which is robust agains Dominique's and is used in the reference papers
+# arcsec # using R_200, which is robust against Dominique's and is used in the reference papers
 # Each of the 2 groups in WFI2033 have 3 galaxies outside R_200 so I should not count these
 if zgroup == 0.6588: observed_members = 19 # inside virial radius
 if zgroup == 0.4956: observed_members = 10
@@ -188,43 +189,72 @@ for i in range(theorysamples):
     if mode == "mcmc": pdznoprior = np.append(pdznoprior,int(round(expected[1] * expected[0])))
     if mode == "poisson": pdznoprior = np.append(pdznoprior,expected[0])
 
-pdzselect = np.array([])
-for i in range(samples):
-    expected = expected_members()
-    if mode == "mcmc":
-        if (lens == 'PG1115') or (zgroup == 0.6588): missing120_membersID = np.random.choice(a=pool, size=int(round(expected[1] * expected[0] - len(observed120_membersID) - 1)), replace=False)
-        else: missing120_membersID = np.random.choice(a=pool, size=int(round(expected[1] * expected[0] - len(observed120_membersID))), replace=False)
-    if mode == "poisson":
-        if (lens == 'PG1115') or (zgroup == 0.6588):  missing120_membersID = np.random.choice(a=pool, size=int(round(expected[0] - len(observed120_membersID) - 1)), replace=False)
-        else: missing120_membersID = np.random.choice(a=pool, size=int(round(expected[0] - len(observed120_membersID))), replace=False)
-    missing120_membersra = np.array([])
-    missing120_membersdec = np.array([])
-    #pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID))
-    if (lens == 'PG1115') or (zgroup == 0.6588): pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID) + 1)
-    else: pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID))
-    for j in range(len(missing120_membersID)):
-        missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==missing120_membersID[j]][0])
-        missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==missing120_membersID[j]][0])
-    for k in range(len(observed120_membersID)):
-        # removing also the known group members
-        missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==observed120_membersID[k]][0])
-        missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==observed120_membersID[k]][0])
-    #if zgroup == 0.6588: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
-    #if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
-    #if zgroup == 0.3097: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/PG1115/removelensgroup"+mode+"handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+if selectpdz == True:
+    pdzselect = np.array([])
+    for i in range(samples):
+        expected = expected_members()
+        if mode == "mcmc":
+            if (lens == 'PG1115') or (zgroup == 0.6588): missing120_membersID = np.random.choice(a=pool, size=int(round(expected[1] * expected[0] - len(observed120_membersID) - 1)), replace=False)
+            else: missing120_membersID = np.random.choice(a=pool, size=int(round(expected[1] * expected[0] - len(observed120_membersID))), replace=False)
+        if mode == "poisson":
+            if (lens == 'PG1115') or (zgroup == 0.6588):  missing120_membersID = np.random.choice(a=pool, size=int(round(expected[0] - len(observed120_membersID) - 1)), replace=False)
+            else: missing120_membersID = np.random.choice(a=pool, size=int(round(expected[0] - len(observed120_membersID))), replace=False)
+        missing120_membersra = np.array([])
+        missing120_membersdec = np.array([])
+        #pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID))
+        if (lens == 'PG1115') or (zgroup == 0.6588): pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID) + 1)
+        else: pdzselect = np.append(pdzselect,len(missing120_membersID)+len(observed120_membersID))
+        for j in range(len(missing120_membersID)):
+            missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==missing120_membersID[j]][0])
+            missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==missing120_membersID[j]][0])
+        for k in range(len(observed120_membersID)):
+            # removing also the known group members
+            missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==observed120_membersID[k]][0])
+            missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==observed120_membersID[k]][0])
+        #if zgroup == 0.6588: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+        #if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+        #if zgroup == 0.3097: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/PG1115/removelensgroup"+mode+"handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
+
 import pylab as plt
 plt.clf()
 if (lens == 'PG1115') or (zgroup == 0.6588):
     plt.hist(pdz - len(observed120_membersID) - 1,bins=50,normed=True,label='w/ observed number prior')
     plt.hist(pdznoprior - len(observed120_membersID) - 1,bins=50,normed=True,label='w/o observed number prior',alpha = 0.5)
-    plt.hist(pdzselect - len(observed120_membersID) - 1,bins=50,normed=True,alpha = 0.5)
+    if selectpdz == True: plt.hist(pdzselect - len(observed120_membersID) - 1,bins=50,normed=True,alpha = 0.5)
 else:
     plt.hist(pdz - len(observed120_membersID),bins=50,normed=True,label='w/ observed number prior')
     plt.hist(pdznoprior - len(observed120_membersID),bins=50,normed=True,label='w/o observed number prior',alpha = 0.5)
-    plt.hist(pdzselect - len(observed120_membersID),bins=50,normed=True,alpha = 0.5)
+    if selectpdz == True: plt.hist(pdzselect - len(observed120_membersID),bins=50,normed=True,alpha = 0.5)
 plt.xlabel(r'Expected number of missing members', fontsize=20)
 plt.ylabel(r'normalized counts', fontsize=20)
 plt.legend(loc="upper left")
 plt.show()
 if (lens == 'PG1115') or (zgroup == 0.6588): print np.percentile(pdz - len(observed120_membersID) - 1,[16,50,84]) # I ran the code several times untill the two distributions match fairly well
 else: print np.percentile(pdz - len(observed120_membersID),[16,50,84])
+
+## comment out the following lines. In case I want to produce a paper plot, I need to run the following lines in iPython so I can run for mcmc and poisson in turn.
+## first run with poisson
+#pdz_poisson = pdz
+#pdznoprior_poisson = pdznoprior
+## next run with mcmc
+#pdz_mcmc = pdz
+#pdznoprior_mcmc = pdznoprior
+#plt.clf()
+#bin = 50
+#if (lens == 'PG1115') or (zgroup == 0.6588):
+#    plt.hist(pdz_mcmc - len(observed120_membersID) - 1,bins=bin,normed=True,label='Volume-based; w/ observed number prior',color='r')
+#    plt.hist(pdznoprior_mcmc - len(observed120_membersID) - 1,bins=bin,normed=True,label='Volume-based; w/o observed number prior',alpha = 0.5,color='r')
+#    plt.hist(pdz_poisson - len(observed120_membersID) - 1,bins=bin,normed=True,label='Poisson-based; w/ observed number prior',color='k')
+#    plt.hist(pdznoprior_poisson - len(observed120_membersID) - 1,bins=bin,normed=True,label='Poisson-based; w/o observed number prior',alpha = 0.5,color='k')
+#else:
+#    plt.hist(pdz_mcmc - len(observed120_membersID),bins=bin,normed=True,label='Volume-based; w/ observed number prior',color='r')
+#    plt.hist(pdznoprior_mcmc - len(observed120_membersID),bins=bin,normed=True,label='Volume-based; w/o observed number prior',alpha = 0.5,color='r')
+#    plt.hist(pdz_poisson - len(observed120_membersID),bins=bin,normed=True,label='Poisson-based; w/ observed number prior',color='k')
+#    plt.hist(pdznoprior_poisson - len(observed120_membersID),bins=bin,normed=True,label='Poisson-based; w/o observed number prior',alpha = 0.5,color='k')
+#plt.xlabel(r'Expected number of missing group members', fontsize=16)
+#plt.ylabel(r'normalized counts', fontsize=16)
+#plt.legend(loc="upper left")
+#plt.title(r'PG1115+080', fontsize=20)
+#if (lens == 'PG1115') or (zgroup == 0.6588): print np.percentile(pdz - len(observed120_membersID) - 1,[16,50,84]) # I ran the code several times untill the two distributions match fairly well
+#else: print np.percentile(pdz - len(observed120_membersID),[16,50,84])
+#plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/PG1115/estimatinggroupmembersPG1115.png', dpi=250, bbox_inches='tight')
