@@ -697,8 +697,8 @@ if conjoined == 1:
                     if data.size > 0:
                         if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf) # for asymmetric limits, implement a gaussian on each side
                         else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
-                        if (type(weight1_index) != int) & (shearwithoutprior == True): kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 / data.shape[0]
-                        else: kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1
+                        if (type(weight1_index) != int) & (shearwithoutprior == True): kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1
+                        else: kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 / data.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:

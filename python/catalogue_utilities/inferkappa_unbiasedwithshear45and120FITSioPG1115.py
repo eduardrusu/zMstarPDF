@@ -76,11 +76,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 3# refers to the E interval from Greene et al. 2014
-increment2 = 8
-increment3 = 3
+increment1 = 2# refers to the E interval from Greene et al. 2014
+increment2 = 16
+increment3 = 2
 increment4 = 2
-increment5 = 3
+increment5 = 2
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -1549,7 +1549,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight2_index) != int) & (shearwithoutprior == False):
+    if (type(weight2_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
@@ -1586,7 +1586,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight3_index) != int) & (shearwithoutprior == False):
+    if (type(weight3_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
@@ -1623,7 +1623,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight4_index) != int) & (shearwithoutprior == False):
+    if (type(weight4_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
@@ -1660,7 +1660,7 @@ if conjoined == 5:
                                     unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                             LOS = LOS + data.size
 
-    if (type(weight5_index) != int) & (shearwithoutprior == False):
+    if (type(weight5_index) != int) & (shearwithoutprior == True):
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                 for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
@@ -1943,7 +1943,7 @@ if conjoined == 2:
                         else:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
-                    
+
 if conjoined == 1:
         for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
                     print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
