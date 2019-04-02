@@ -16,7 +16,7 @@ max_kappa = 1
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
-root = "/Users/cerusu/Desktop/kappa/"
+root = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappa/"
 list = glob.glob(root+'kappahist*.cat')
 
 def statistics(kappa_all_,bin_stat_,min_kappa_,max_kappa_):
@@ -128,6 +128,6 @@ for i in range(len(list)):
     #smooth(kappa_3,winlen,'blackman')
     median_smooth,stddev_smooth,kappa_values_smooth = statistics(smooth(kappa,winlen,'flat')[(winlen/2-1):-(winlen/2)],bin_stat,min_kappa,max_kappa)
     str = "%s %.3f %.3f %.3f %.3f \n" % (list[i],median,stddev,median_smooth,stddev_smooth)
-    file =open(fout,'a')
-    file.write(str)
-file.close()
+    fileout = open(fout,'a')
+    fileout.write(str)
+fileout.close()

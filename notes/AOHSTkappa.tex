@@ -1,0 +1,45 @@
+
+\documentclass[12pt]{amsart}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+\usepackage{amsmath}
+
+\title{Combining convergence from HST and AO}
+\author{CER}
+\date{} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+\maketitle
+%\tableofcontents
+
+Let's start with the likelihood in equation 5 from H0licow IV, rewritten to include the AO dataset:
+
+\begin{equation}
+P(d_{HST},d_{AO},\Delta t,\sigma,d_{LOS}|\eta,A) = P(d_{HST}|\eta,A)P(d_{AO}|\eta,A)P(\Delta t|\eta,A)P(\sigma |\eta,A)P(d_{LOS}|\eta,A).
+\end{equation}
+
+Writing down the dependency on the shears from the HST, AO data and the number counts constraint (which we may or may not want to use), we get 
+
+\begin{equation}
+P(d_{LOS}|\eta,A) \to P(d_{LOS}|\eta,A,\gamma_{HST},\gamma_{AO}(,\zeta)).
+\end{equation}
+
+Let's transform this using Bayes' Theorem:
+
+\begin{multline}
+P(d_{LOS}|\eta,A,\gamma_{HST},\gamma_{AO}(,\zeta)) = \frac{P(\gamma_{HST},\gamma_{AO} | d_{LOS},\eta,A(,\zeta)) P(d_{LOS},\eta,A(,\zeta))}{P(\gamma_{HST},\gamma_{AO} | \eta,A(,\zeta))} = \\ \frac{P(\gamma_{HST}| d_{LOS},\eta,A(,\zeta)) P(\gamma_{AO} | d_{LOS},\eta,A(,\zeta)) P(d_{LOS},\eta,A(,\zeta))}{P(\gamma_{HST} | \eta,A(,\zeta)) P(\gamma_{AO} | \eta,A(,\zeta))} = \\ \frac{P(d_{LOS} | \gamma_{HST},\eta,A(,\zeta)) P(\gamma_{HST} | \eta,A(,\zeta))}{P(d_{LOS}|\eta,A(,\zeta))} \frac{P(d_{LOS} | \gamma_{AO},\eta,A(,\zeta)) P(\gamma_{AO} | \eta,A(,\zeta))}{P(d_{LOS}|\eta,A(,\zeta))} \times \\ \frac{P(d_{LOS},\eta,A(,\zeta))}{P(\gamma_{HST} | \eta,A(,\zeta)) P(\gamma_{AO} | \eta,A(,\zeta))} = \frac{P(d_{LOS} | \gamma_{HST},\eta,A(,\zeta)) P(d_{LOS} | \gamma_{AO},\eta,A(,\zeta))}{P(d_{LOS}|\eta,A(,\zeta))}.
+\end{multline}
+
+The final three factors can each be computed from the Millennium Simulation within the weighted counts framework. These distributions are expected to be similar whether or not constraints from shear are used in addition to number counts. Thus, the last equation becomes 
+
+\begin{equation}
+P(d_{LOS}|\eta,A,\gamma_{HST},\gamma_{AO}(,\zeta)) \sim P(d_{LOS}|\eta,A(,\zeta,\gamma)),
+\end{equation}
+
+\noindent and we are not double-counting information.
+
+%\section{}
+%\subsection{}
+
+\end{document}

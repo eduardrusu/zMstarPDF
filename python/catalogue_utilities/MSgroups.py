@@ -5,7 +5,7 @@ from stellarpop import distances
 
 mingroup = 5 # I would normally use minimum number of members of any group spectroscopically identified by Dominique in the real data, but that is problematic due tot different sigma_8
 mingrouplimmag = 5
-magmingroup = 22.5
+magmingroup = 25.5
 h = 0.73 # MS
 omegaL = 0.75
 omega0 = 0.25

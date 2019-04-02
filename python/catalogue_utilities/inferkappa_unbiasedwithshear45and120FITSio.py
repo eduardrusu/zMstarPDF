@@ -20,6 +20,7 @@ import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
 only8 = False # in this case run only 8/64 MS fields
+shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
 
 lens = str(sys.argv[1])
 zinf = str(sys.argv[2])
@@ -75,11 +76,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 4 # refers to the E interval from Greene et al. 2014
+increment1 = 2# refers to the E interval from Greene et al. 2014
 increment2 = 4
-increment3 = 4
-increment4 = 4
-increment5 = 4
+increment3 = 2
+increment4 = 2
+increment5 = 2
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -91,29 +92,46 @@ rad = degree / 3600
 # define the shear constraints
 if lens == "WFI2033":
     if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.116
+        constr_gamma = 0.115
         constrwidth_gamma_inf = 0.111# 0.109 #
         constrwidth_gamma_sup = 0.120# 0.129 #
-    if other == 'WFIdelays' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.111
-        constrwidth_gamma_inf = 0.109# 0.109 #
-        constrwidth_gamma_sup = 0.114# 0.129 #
+    if other == 'AGNmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.123
+        constrwidth_gamma_inf = 0.120# 0.109 #
+        constrwidth_gamma_sup = 0.127# 0.129 #
     if other == 'fiducial' and handpicked == 'removelensgrouphandpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.137
-        constrwidth_gamma_inf = 0.130# 0.097 #
-        constrwidth_gamma_sup = 0.142# 0.117 #
+        constr_gamma = 0.118
+        constrwidth_gamma_inf = 0.114# 0.097 #
+        constrwidth_gamma_sup = 0.121# 0.117 #
     if other == 'fiducial' and handpicked == 'removelensgrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.125
-        constrwidth_gamma_inf = 0.120# .101 #
-        constrwidth_gamma_sup = 0.129# 0.121 #
+        constr_gamma = 0.111
+        constrwidth_gamma_inf = 0.106# .101 #
+        constrwidth_gamma_sup = 0.115# 0.121 #
     if other == 'chameleon' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.124# 0.120 #
-        constrwidth_gamma_sup = 0.130# 0.140 #
+        constr_gamma = 0.127
+        constrwidth_gamma_inf = 0.123# 0.120 #
+        constrwidth_gamma_sup = 0.131# 0.140 #
     if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.128
-        constrwidth_gamma_inf = 0.126# 0.142 #
-        constrwidth_gamma_sup = 0.131# 0.162 #
+        constr_gamma = 0.162
+        constrwidth_gamma_inf = 0.158# 0.142 #
+        constrwidth_gamma_sup = 0.166# 0.162 #
+    if other == 'compositeAGNmask+0' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.156
+        constrwidth_gamma_inf = 0.153# 0.142 #
+        constrwidth_gamma_sup = 0.161# 0.162 #
+    if other == 'compositesrc+10arcmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.145# 0.142 #
+        constrwidth_gamma_sup = 0.155# 0.162 #
+    if other == 'composite' and handpicked == 'removelensgrouphandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.146# 0.142 #
+        constrwidth_gamma_sup = 0.152# 0.162 #
+    if other == 'composite' and handpicked == 'removelensgrouplens049handpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.155
+        constrwidth_gamma_inf = 0.152# 0.142 #
+        constrwidth_gamma_sup = 0.158# 0.162 #
+
     filters = "ugrizJHK"
     plane = 35
     print 'shear: ',constr_gamma
@@ -375,13 +393,21 @@ else: emptystr = ''
 if removegroups == 'removegroups': groupsstr = '_removegroups'
 else: groupsstr = ''
 if conjoined == 5:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr)
+    if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int) | (type(weight5_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
+    else: stringshearprior = ''
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,stringshearprior)
 if conjoined == 4:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr)
+    if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
+    else: stringshearprior = ''
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,stringshearprior)
 if conjoined == 3:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr)
+    if ((type(weight2_index) != int) | (type(weight3_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
+    else: stringshearprior = ''
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,stringshearprior)
 if conjoined == 2:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr)
+    if (type(weight2_index) != int) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
+    else: stringshearprior = ''
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,stringshearprior)
 if conjoined == 1:
     output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr)
 
@@ -939,6 +965,24 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
                 kappa = np.append(kappa,kappa_)
                 weight1 = np.append(weight1,weight1_)
             #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1
 
 def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,constr_weight2,increment1,increment2,med_weight1,med_weight2,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup):
@@ -1000,6 +1044,25 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
             #print j,i
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2
 
 def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,constr_weight1,constr_weight2,constr_weight3,increment1,increment2,increment3,med_weight1,med_weight2,med_weight3,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup):
@@ -1076,6 +1139,26 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight3 = weight3[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2,weight3
 
 def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,weight4_index,constr_weight1,constr_weight2,constr_weight3,constr_weight4,increment1,increment2,increment3,increment4,med_weight1,med_weight2,med_weight3,med_weight4,E_w1_inf,E_w1_sup,E_w2_inf,E_w2_sup,E_w3_inf,E_w3_sup,E_w4_inf,E_w4_sup):
@@ -1171,6 +1254,28 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
             #print j,i
+
+      if removegroups == 'removegroups':
+          idposx = -0.5 * L_field  + (1 + (id / 4096) + 0.5) * L_pix
+          idposy = -0.5 * L_field  + (1 + (id % 4096) + 0.5) * L_pix
+          idposx = idposx[ind1 == 0]
+          idposy = idposy[ind1 == 0]
+          print "K: ", np.shape(id)
+          for k in range(len(groupsfile[0])):
+              print k,len(id)
+              id = id[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind1 = ind1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              ind2 = ind2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              kappa = kappa[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight1 = weight1[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight2 = weight2[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight3 = weight3[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              weight4 = weight4[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx_ = idposx[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposy_ = idposy[(idposx - groupsfile[0][k])**2 + (idposy - groupsfile[1][k])**2 > (groupsfile[2][k]*rad)**2]
+              idposx = idposx_
+              idposy = idposy_
+          print "K: ", np.shape(kappa)
     return id,ind1,ind2,kappa,weight1,weight2,weight3,weight4
 
 if conjoined == 1:
@@ -1599,20 +1704,203 @@ LOS = 0
 print np.shape(kappa)
 
 if conjoined == 5:
-    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
-        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+    if ((type(weight2_index) == int) & (type(weight3_index) == int) & (type(weight4_index) == int) & (type(weight5_index) == int)) | (shearwithoutprior == False):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                        for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                            print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                            if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                            if data.size > 0:
+                                if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                                else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                                if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                                else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                                if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                                else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                                if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                                else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                                if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                                else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
+                                if LOS == 0:
+                                    unbiased_kappa_constrained = kappa_constrained
+                                else:
+                                    unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                            LOS = LOS + data.size
+
+    if (type(weight2_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
                     for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
-                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
-                        if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
                         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
                         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                            print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                            if data.size > 0:
+                                if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                                else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                                if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                                else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                                if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                                else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                                if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                                else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                                if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                                else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                if LOS == 0:
+                                    unbiased_kappa_constrained = kappa_constrained
+                                else:
+                                    unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                            LOS = LOS + data.size
+
+    if (type(weight3_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                    for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                        if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                        for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                            print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                            if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                            if data.size > 0:
+                                if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                                else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                                if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                                else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                                if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                                else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                                if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                                else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                                if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                                else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                if LOS == 0:
+                                    unbiased_kappa_constrained = kappa_constrained
+                                else:
+                                    unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                            LOS = LOS + data.size
+
+    if (type(weight4_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                        if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                        for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                            print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] != weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0) & (weight5 * med_weight5 >= round(constr_weight5 * med_weight5) + E5 - increment5/2.0) & (weight5 * med_weight5 < round(constr_weight5 * med_weight5) + E5 + increment5/2.0)] # this is equation 3 in Greene et al.
+                            if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                            if data.size > 0:
+                                if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                                else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                                if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                                else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                                if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                                else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                                if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                                else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                                if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                                else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                if LOS == 0:
+                                    unbiased_kappa_constrained = kappa_constrained
+                                else:
+                                    unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                            LOS = LOS + data.size
+
+    if (type(weight5_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                        if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
+                        for E5 in np.arange(-limsigma * E_w5_inf, limsigma * E_w5_sup + 1, increment5):
+                            print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, "E5 = ", E5, "in (", -limsigma * E_w5_inf, ",", limsigma * E_w5_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                            if (weightin1.split('_')[0] != weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0) & (weight5 * med_weight2 >= round(constr_weight5 * med_weight2) + E5 - increment5/2.0) & (weight5 * med_weight2 < round(constr_weight5 * med_weight2) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] != weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0) & (weight5 * med_weight4 >= round(constr_weight5 * med_weight4) + E5 - increment5/2.0) & (weight5 * med_weight4 < round(constr_weight5 * med_weight4) + E5 + increment5/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] != weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]) and (weightin4.split('_')[0] == weightin5.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0) & (weight5 * med_weight3 >= round(constr_weight5 * med_weight3) + E5 - increment5/2.0) & (weight5 * med_weight3 < round(constr_weight5 * med_weight3) + E5 + increment5/2.0)]
+                            if data.size > 0:
+                                if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                                else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                                if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                                else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                                if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                                else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                                if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                                else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                                if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
+                                else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
+                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                if LOS == 0:
+                                    unbiased_kappa_constrained = kappa_constrained
+                                else:
+                                    unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                            LOS = LOS + data.size
+
+if conjoined == 4:
+    if ((type(weight2_index) == int) & (type(weight3_index) == int) & (type(weight4_index) == int)) | (shearwithoutprior == False):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                        else:
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                            if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
                         if data.size > 0:
                             if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
                             else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
@@ -1622,50 +1910,124 @@ if conjoined == 5:
                             else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
                             if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
                             else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                            if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
-                            else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / data.shape[0]
                             if LOS == 0:
                                 unbiased_kappa_constrained = kappa_constrained
                             else:
                                 unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                         LOS = LOS + data.size
 
-if conjoined == 4:
-    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
-        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+    if (type(weight2_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
             for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
                 for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
-                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
-                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                        datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
                     else:
                         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
-                        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
                         if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
-                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
-                    if data.size > 0:
-                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
-                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
-                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
-                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
-                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
-                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
-                        if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
-                        else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / data.shape[0]
-                        if LOS == 0:
-                            unbiased_kappa_constrained = kappa_constrained
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
+                    for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
                         else:
-                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
-                    LOS = LOS + data.size
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0) & (weight4 * med_weight3 >= round(constr_weight4 * med_weight3) + E4 - increment4/2.0) & (weight4 * med_weight3 < round(constr_weight4 * med_weight3) + E4 + increment4/2.0)]
+                        if data.size > 0:
+                            if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                            else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                            if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                            else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                            if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                            else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                            if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                            else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            if LOS == 0:
+                                unbiased_kappa_constrained = kappa_constrained
+                            else:
+                                unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                        LOS = LOS + data.size
+
+    if (type(weight3_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                        datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                    for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                        else:
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight4 >= round(constr_weight4 * med_weight4) + E4 - increment4/2.0) & (weight4 * med_weight4 < round(constr_weight4 * med_weight4) + E4 + increment4/2.0)]
+                            if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                        if data.size > 0:
+                            if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                            else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                            if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                            else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                            if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                            else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                            if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                            else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            if LOS == 0:
+                                unbiased_kappa_constrained = kappa_constrained
+                            else:
+                                unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                        LOS = LOS + data.size
+
+    if (type(weight4_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1): # use as specific value
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                        datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight4 * med_weight2 >= round(constr_weight4 * med_weight2) + E4 - increment4/2.0) & (weight4 * med_weight2 < round(constr_weight4 * med_weight2) + E4 + increment4/2.0)]
+                    for E4 in np.arange(-limsigma * E_w4_inf, limsigma * E_w4_sup + 1, increment4):
+                        print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") ", "E4 = ", E4, "in (", -limsigma * E_w4_inf, ",", limsigma * E_w4_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                        if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0) & (weight4 * med_weight1 >= round(constr_weight4 * med_weight1) + E4 - increment4/2.0) & (weight4 * med_weight1 < round(constr_weight4 * med_weight1) + E4 + increment4/2.0)] # this is equation 3 in Greene et al.
+                        else:
+                            if (weightin2.split('_')[0] == weightin3.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0)]
+                            if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin3.split('_')[0] == weightin4.split('_')[0]):
+                                datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0)]
+                        if data.size > 0:
+                            if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                            else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                            if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                            else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                            if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                            else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                            if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
+                            else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            if LOS == 0:
+                                unbiased_kappa_constrained = kappa_constrained
+                            else:
+                                unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                        LOS = LOS + data.size
 
 if conjoined == 3:
-    for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
-        for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
-            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+    if ((type(weight2_index) == int) & (type(weight3_index) == int)) | (shearwithoutprior == False):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
                     print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") "#, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                     if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
                         data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
@@ -1688,8 +2050,68 @@ if conjoined == 3:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
                     LOS = LOS + data.size
 
+    if (type(weight2_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+            for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)]
+                else:
+                    if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                        datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0)]
+                for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") "#, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if weightin1.split('_')[0] == weightin2.split('_')[0]:
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight3 >= round(constr_weight3 * med_weight3) + E3 - increment3/2.0) & (weight3 * med_weight3 < round(constr_weight3 * med_weight3) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
+
+    if (type(weight3_index) != int) & (shearwithoutprior == True):
+        for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+            for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
+                if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                    datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0)]
+                else:
+                    if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                        datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0)]
+                for E3 in np.arange(-limsigma * E_w3_inf, limsigma * E_w3_sup + 1, increment3):
+                    print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") ", "E3 = ", E3, "in (", -limsigma * E_w3_inf, ",", limsigma * E_w3_sup, ") "#, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
+                    if (weightin1.split('_')[0] == weightin2.split('_')[0]) and (weightin2.split('_')[0] == weightin3.split('_')[0]):
+                        data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight1 >= round(constr_weight2 * med_weight1) + E2 - increment2/2.0) & (weight2 * med_weight1 < round(constr_weight2 * med_weight1) + E2 + increment2/2.0) & (weight3 * med_weight1 >= round(constr_weight3 * med_weight1) + E3 - increment3/2.0) & (weight3 * med_weight1 < round(constr_weight3 * med_weight1) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    else:
+                        if weightin2.split('_')[0] == weightin3.split('_')[0]:
+                            data = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0) & (weight2 * med_weight2 >= round(constr_weight2 * med_weight2) + E2 - increment2/2.0) & (weight2 * med_weight2 < round(constr_weight2 * med_weight2) + E2 + increment2/2.0) & (weight3 * med_weight2 >= round(constr_weight3 * med_weight2) + E3 - increment3/2.0) & (weight3 * med_weight2 < round(constr_weight3 * med_weight2) + E3 + increment3/2.0)] # this is equation 3 in Greene et al.
+                    if data.size > 0:
+                        if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf)
+                        else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
+                        if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
+                        else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
+                        if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
+                        else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
+                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
+                        if LOS == 0:
+                            unbiased_kappa_constrained = kappa_constrained
+                        else:
+                            unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained
+                    LOS = LOS + data.size
+
 if conjoined == 2:
     for E1 in np.arange(-limsigma * E_w1_inf, limsigma * E_w1_sup + 1, increment1):
+        if (type(weight2_index) != int) & (shearwithoutprior == True):
+            datamarginalizedshear = kappa[(weight1 * med_weight1 >= round(constr_weight1 * med_weight1) + E1 - increment1/2.0) & (weight1 * med_weight1 < round(constr_weight1 * med_weight1) + E1 + increment1/2.0)]
         for E2 in np.arange(-limsigma * E_w2_inf, limsigma * E_w2_sup + 1, increment2):
                     print "E1 = ", E1, "in (", -limsigma * E_w1_inf, ",", limsigma * E_w1_sup, ") ", "E2 = ", E2, "in (", -limsigma * E_w2_inf, ",", limsigma * E_w2_sup, ") " #, "gauss_weight4 = ", gauss.pdf(float(E4)/E_w4)
                     if weightin1.split('_')[0] == weightin2.split('_')[0]:
@@ -1701,7 +2123,9 @@ if conjoined == 2:
                         else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
                         if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
                         else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
+                        if (type(weight2_index) != int) & (shearwithoutprior == True) & (weightin1.split('_')[0] == weightin2.split('_')[0]):
+                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / datamarginalizedshear.shape[0]
+                        else: kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
@@ -1722,7 +2146,8 @@ if conjoined == 1:
                             unbiased_kappa_constrained = unbiased_kappa_constrained + kappa_constrained # I tested that this addition works correctly
                     LOS = LOS + data.size
 
-head = 'LOS: %d' % np.array([LOS])
+#head = 'LOS: %d' % np.array([LOS])
+head = 'LOS: %d' % np.array([len(kappa)])
 np.savetxt(output,unbiased_kappa_constrained,header=head,fmt='%s',delimiter='\t',newline='\n')
 print(" time for computing kappa %s seconds" % (time.time() - start1))
 

@@ -60,12 +60,12 @@ rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 1 # sigma limits on either side of the assumed gaussians
 
-increment1 = 4 # refers to the E interval from Greene et al. 2014
-increment2 = 4
-increment3 = 4
-increment4 = 4
-increment5 = 4
-samples = 5000
+increment1 = 1 # refers to the E interval from Greene et al. 2014
+increment2 = 1
+increment3 = 1
+increment4 = 1
+increment5 = 1
+samples = 10000
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -131,9 +131,9 @@ if lens == "WFI2033":
     filters = "ugrizJHK"
 
 # read weight constraints
-constr_gamma = 0.119
-constrwidth_gamma_inf = 0.116# 0.109 #
-constrwidth_gamma_sup = 0.121# 0.129 #
+constr_gamma = 0.11
+constrwidth_gamma_inf = 0.105# 0.109 #
+constrwidth_gamma_sup = 0.115# 0.129 #
 
 constr_gal_meds45 = 0.6
 constr_gal_meds_inf45 = 0.5
@@ -353,7 +353,7 @@ if conjoined == 4:
 if conjoined == 3:
     output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,weightin3,mag,mode,constr_weight1,constr_weight2,constr_weight3)
 if conjoined == 2:
-    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
+    output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s_%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,weightin2,mag,mode,constr_weight1,constr_weight2)
 if conjoined == 1:
     output = '%skappasim_%s_%s_%sinnermask_nobeta_zgap%s_%s_%s_%s_%s_%s_overdensities%s.cat' % (rootout,lens,compmeas,innermask,zinf,zsup,weightin1,mag,mode,constr_weight1,constr_weight1)
 

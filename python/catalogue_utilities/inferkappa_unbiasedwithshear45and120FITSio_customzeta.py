@@ -171,11 +171,11 @@ if conjoined >= 2:
                 weight5_index = declareweight(weightin5)
 
 # read weight constraints
-constr_gal_meds45 = 3.0
+constr_gal_meds45 = 0.5
 constrwidth_gal_meds_inf45 = constr_gal_meds45 - 0.05
 constrwidth_gal_meds_sup45 = constr_gal_meds45 + 0.05
 
-constr_gal_meds120 = 2.0
+constr_gal_meds120 = 0.5
 constrwidth_gal_meds_inf120 = constr_gal_meds120 - 0.05
 constrwidth_gal_meds_sup120 = constr_gal_meds120 + 0.05
 

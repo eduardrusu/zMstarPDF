@@ -18,15 +18,21 @@ mass_best = 43
 mass_inf = 44
 mass_med = 45
 mass_sup = 46
+abs_K = 25
 
-data = np.loadtxt(file,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup),unpack=True)
-data_noobs = np.loadtxt(file_noobs,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup),unpack=True)
+#data = np.loadtxt(file,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup),unpack=True)
+data = np.loadtxt(file,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup,abs_K),unpack=True)
+#data_noobs = np.loadtxt(file_noobs,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup),unpack=True)
+data_noobs = np.loadtxt(file_noobs,usecols=(id,z,chi_best,chi_star,mass_best,mass_inf,mass_med,mass_sup,abs_K),unpack=True)
 
 for i in range(len(data[id])):
     if data[:,i][z] == -99.0:
         data[:,i] = data_noobs[:,i]
 
 fileout = file[:-28] + "_combined.cat.MAG_BC03_I09.lephareout"
-str = "ID \t z \t chi_best \t chi_star \t mass_best \t mass_inf \t mass_med \t mass_sup"
-dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]]
-np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.3f \t %.3f \t %.3f \t %.3f ')
+#str = "ID \t z \t chi_best \t chi_star \t mass_best \t mass_inf \t mass_med \t mass_sup"
+str = "ID \t z \t chi_best \t chi_star \t mass_best \t mass_inf \t mass_med \t mass_sup \t abs_K"
+#dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]]
+dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8]]
+#np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.3f \t %.3f \t %.3f \t %.3f ')
+np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.3f \t %.3f \t %.3f \t %.3f \t %.3f ')
