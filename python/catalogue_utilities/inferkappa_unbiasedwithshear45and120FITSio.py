@@ -19,7 +19,7 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
-only8 = False # in this case run only 8/64 MS fields
+only8 = True # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
 
 lens = str(sys.argv[1])
@@ -76,11 +76,11 @@ bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
+increment1 = 4# refers to the E interval from Greene et al. 2014
 increment2 = 4
-increment3 = 2
-increment4 = 2
-increment5 = 2
+increment3 = 4
+increment4 = 4
+increment5 = 4
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
