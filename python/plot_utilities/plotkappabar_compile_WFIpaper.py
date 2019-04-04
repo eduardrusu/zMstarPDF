@@ -155,12 +155,12 @@ kappastat_45_conjointgaloneoverrgalgamma = np.c_[   kappastat.T[kappastat[0]=='f
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIS_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIShalo_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
 
-kappastat_120_conjointgaloneoverrgalgamma = np.c_[  kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_45_gal_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
+kappastat_120_conjointgaloneoverrgalgamma = np.c_[  kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_gamma_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_z_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_45_gal_45_oneoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_zoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_massoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2overr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
