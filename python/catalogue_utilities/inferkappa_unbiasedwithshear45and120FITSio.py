@@ -95,6 +95,10 @@ if lens == "WFI2033":
         constr_gamma = 0.115
         constrwidth_gamma_inf = 0.111# 0.109 #
         constrwidth_gamma_sup = 0.120# 0.129 #
+    if other == 'fiducialsrc+10arcmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.112
+        constrwidth_gamma_inf = 0.109# 0.109 #
+        constrwidth_gamma_sup = 0.115# 0.129 #
     if other == 'AGNmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
         constr_gamma = 0.123
         constrwidth_gamma_inf = 0.120# 0.109 #
