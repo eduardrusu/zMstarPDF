@@ -2,7 +2,7 @@
 
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/scaledstdchoiceplot.dat"
@@ -23,9 +23,9 @@ width = 0.9      # the width of the bars
 ax = plt.subplot(2,1,1)
 col1 = los
 rects1 = ax.bar(ind + width, col1, width)
-ax.set_ylim([0,7])
-ax.set_xlim([0,72])
-ax.set_ylabel('log(No. of LOS)',fontsize=6)
+#ax.set_ylim([0,7])
+ax.set_xlim([0.5,N+0.5])
+ax.set_ylabel('log(No. of LOS)',fontsize=10)
 ax.set_xticks(ind + width)
 ax.set_xticklabels([])
 
@@ -33,12 +33,12 @@ ax = plt.subplot(2,1,2)
 col2 = medofstd
 col2err = rmsofstd
 rects2 = ax.bar(ind + width, col2, width, yerr=rmsofstd)
-ax.set_ylim([0,1.3])
-ax.set_xlim([0,72])
-ax.set_ylabel('scaled std($\kappa_{med} - \kappa_{true}$)',fontsize=6)
+#ax.set_ylim([0,1.3])
+ax.set_xlim([0.5,N+0.5])
+ax.set_ylabel('scaled std($\kappa_{med} - \kappa_{true}$)',fontsize=10)
 #ax.set_ylabel('$\sigma_{\kappa_\mathrm{med} - \kappa_\mathrm{true}}$')
 ax.set_xticks(ind + width)
-ax.set_xticklabels(names, fontsize=5, rotation='vertical')
+ax.set_xticklabels(names, fontsize=8, rotation='vertical')
 #ax.set_aspect(.0)
 #w, h = figaspect(2.)
 #fig = Figure(figsize=(w, h))

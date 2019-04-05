@@ -1,7 +1,7 @@
 # The code uses the output statistics produced by plotkappacompletestatistics.py/plotkappabiascompletestatistics.py in order to plot bars. Run without arguments. Make sure the uncomment the appropriate ax.set_ylim, ylabel and savefig lines
 
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy as sp
 from scipy.stats import norm
@@ -60,43 +60,43 @@ kappastat_120_disjointgaloneoverr = np.c_[  kappastat.T[kappastat[0]=='fiducial_
                         kappastat.T[kappastat[0]=='fiducial_120_gal_120_oneoverr_120_SIS_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
                         kappastat.T[kappastat[0]=='fiducial_120_gal_120_oneoverr_120_SIShalo_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
 
-kappastat_45_disjointgalgammaoneoverr = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_22.5_med_increments4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_z_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_zoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_massoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2rms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3rms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2overrrms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3overrrms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_flexion_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # flexion
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_tidal_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # tidal
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_SIS_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_SIShalo_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
+kappastat_45_disjointgalgammaoneoverr = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_22.5_med_increments4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1-1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_z_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_22.5_med_increments4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_zoverr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_massoverr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # massoverr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2overr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3overr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2rms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3rms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass2overrrms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_mass3overrrms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_flexion_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # flexion
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_tidal_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # tidal
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_SIS_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # SIS
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_gamma_45_oneoverr_45_SIShalo_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float)] # SIShalo
 
-kappastat_120_disjointgalgammaoneoverr = np.c_[  kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_22.5_med_increments4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_z_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_zoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_massoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3overr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overr
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2rms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2rms
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3rms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3rms
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2overrrms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overrrms
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3overrrms_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overrrms
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_flexion_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # flexion
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_tidal_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # tidal
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_SIS_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
-                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_SIShalo_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
+kappastat_120_disjointgalgammaoneoverr = np.c_[  kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_22.5_med_increments4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1-1/r
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_z_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_22.5_med_increments4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_zoverr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z/r
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_massoverr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # massoverr
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2overr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overr
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3overr_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overr
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2rms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2rms
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3rms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3rms
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass2overrrms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overrrms
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_mass3overrrms_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overrrms
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_flexion_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # flexion
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_tidal_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # tidal
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_SIS_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # SIS
+                        kappastat.T[kappastat[0]=='fiducial_120_gal_120_gamma_120_oneoverr_120_SIShalo_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float)] # SIShalo
 
 kappastat_45_conjointgaloneoverrgaloneoverr_and_galzoverrgalzoverr = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_oneoverr_22.5_med_increments1_1_1_emptymsk.cat'][0][1:].astype(float), # 1-1/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_z_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
@@ -104,7 +104,7 @@ kappastat_45_conjointgaloneoverrgaloneoverr_and_galzoverrgalzoverr = np.c_[   ka
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_mass2_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_mass3_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_zoverr_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_zoverr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_massoverr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_mass2overr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_oneoverr_120_mass3overr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overr
@@ -136,43 +136,43 @@ kappastat_120_conjointgaloneoverrgaloneoverr_and_galzoverrgalzoverr = np.c_[  ka
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_zoverr_120_gal_120_zoverr_120_SIS_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
                         kappastat.T[kappastat[0]=='fiducial_45_gal_45_zoverr_120_gal_120_zoverr_120_SIShalo_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
 
-kappastat_45_conjointgaloneoverrgalgamma = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_z_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_oneoverr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_zoverr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_massoverr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2overr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3overr_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2rms_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3rms_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2overrrms_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3overrrms_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_flexion_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # flexion
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_tidal_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # tidal
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIS_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIShalo_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
+kappastat_45_conjointgaloneoverrgalgamma = np.c_[   kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1-1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_z_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_oneoverr_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_zoverr_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_massoverr_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # massoverr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2overr_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3overr_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2rms_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3rms_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass2overrrms_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_mass3overrrms_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_flexion_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # flexion
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_tidal_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # tidal
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIS_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # SIS
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_120_SIShalo_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float)] # SIShalo
 
-kappastat_120_conjointgaloneoverrgalgamma = np.c_[  kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_gamma_22.5_med_increments4_4_4_emptymsk.cat'][0][1:].astype(float), # 1-1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_z_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_emptymsk.cat'][0][1:].astype(float), # 1/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_zoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # z/r
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_massoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # massoverr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2overr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3overr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overr
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2rms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3rms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3rms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2overrrms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass2overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3overrrms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # mass3overrrms
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_flexion_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # flexion
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_tidal_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # tidal
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_SIS_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float), # SIS
-                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_SIShalo_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk.cat'][0][1:].astype(float)] # SIShalo
+kappastat_120_conjointgaloneoverrgalgamma = np.c_[  kappastat.T[kappastat[0]=='fiducial_45_gal_120_gal_120_gamma_22.5_med_increments4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1-1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_z_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # 1/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_zoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # z/r
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_massoverr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # massoverr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2overr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3overr_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overr
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2rms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3rms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3rms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass2overrrms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass2overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_mass3overrrms_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # mass3overrrms
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_flexion_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # flexion
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_tidal_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # tidal
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_SIS_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float), # SIS
+                        kappastat.T[kappastat[0]=='fiducial_45_gal_45_oneoverr_45_SIShalo_120_gal_120_gamma_22.5_med_increments4_4_4_4_4_emptymsk_shearwithoutprior.cat'][0][1:].astype(float)] # SIShalo
 
 N = 18
 ind = 2.5 * np.arange(N)  # the x locations for the groups
@@ -236,14 +236,11 @@ axs[1,1].set_xticklabels(('$1-1/r$', '$z$',  '$M_\star$', '$M^2_\star$', '$M^3_\
 axs[1,1].legend((rects1[0], rects2[0]), ('$P(\kappa_\mathrm{ext}|\zeta^{45\'\'}_{1},\zeta^{45\'\'}_{1/r},\gamma,\zeta^{45\'\'}_{q})$', '$P(\kappa_\mathrm{ext}|\zeta^{120\'\'}_{1},\zeta^{120\'\'}_{1/r},\gamma,\zeta^{120\'\'}_{q})$'), bbox_to_anchor=(1, 1), loc=1, fontsize=12)
 axs[1,1].set_yticklabels((), fontsize=10, rotation='vertical')
 
-N = 17
-ind = 2.5 * np.arange(N)  # the x locations for the groups
-width = 0.8       # the width of the bars
-
 col9 = (kappastat_45_conjointgaloneoverrgaloneoverr_and_galzoverrgalzoverr[0])
 rects9 = axs[2,0].bar(ind + width, col9, width, color='gray')
 col10 = (kappastat_120_conjointgaloneoverrgaloneoverr_and_galzoverrgalzoverr[0])
 rects10 = axs[2,0].bar(ind + 2*width, col10, width, color='k')
+
 
 #ax.set_ylim([0.00,0.05])
 axs[2,0].set_ylim([-0.01,0.08])
@@ -265,10 +262,6 @@ axs[3,0].set_xticks(ind + width)
 axs[3,0].set_xticklabels(('$1-(1/r,z/r)$', '$z$',  '$M_\star$', '$M^2_\star$', '$M^3_\star$', '$1/r$', '$z/r$', '$M_\star/r$', '$M^2_\star/r$', '$M^3_\star/r$', '$M^2_{\star\mathrm{rms}}$', '$M^3_{\star\mathrm{rms}}$', '$M^2_\star/r_\mathrm{,rms}$', '$M^3_\star/r_\mathrm{,rms}$', '$M_\star/r^3$', '$M_\star/r^2$', '$\sqrt{M_\star}/r$', '$\sqrt{M_h}/r$'), fontsize=10, rotation='vertical')
 axs[3,0].legend((rects1[0], rects2[0]), ('$P(\kappa_\mathrm{ext}|\zeta^{45\'\'}_{1},\zeta^{45\'\'}_{1/r},\zeta^{120\'\'}_{1},\zeta^{120\'\'}_{1/r},\zeta^{120\'\'}_{q})$', '$P(\kappa_\mathrm{ext}|\zeta^{45\'\'}_{1},\zeta^{45\'\'}_{z/r}$,$\zeta^{120\'\'}_{1},\zeta^{120\'\'}_{z/r},\zeta^{120\'\'}_{q})$'), bbox_to_anchor=(1.0, 1.0), loc=1, fontsize=12)
 axs[3,0].set_yticks(np.arange(0.00, 0.08, 0.01))
-
-N = 16
-ind = 2.5 * np.arange(N)  # the x locations for the groups
-width = 0.8       # the width of the bars
 
 col13 = (kappastat_45_conjointgaloneoverrgalgamma[0])
 rects13 = axs[2,1].bar(ind + width, col13, width, color='gray')
