@@ -1,3 +1,4 @@
+# This test version is only used when I wish to use as constraints custom overdensities
 # CE Rusu July 21 2018
 # NEED MAKE CHANGES WHEN RUNNING ALL BUT J1206 BECAUSE I WILL HAVE DIFFERENT INPUT FILES AND COLUMNS FOR 23 and 24
 # Compared to inferkappa_unbiasedwithshear45and120.py, this code takes another argument ('empty' or != 'empty'); in case of 'empty', it only considers (after propoerly computing statistics using all LOS) only LOS without galaxies inside the inner mask. It requires that the input weight files have a final column which shows the number of galaxies inside the inner mask
@@ -19,7 +20,7 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
-only8 = False # in this case run only 8/64 MS fields
+only8 = True # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
 
 lens = str(sys.argv[1])
@@ -69,18 +70,18 @@ rootcode = "/lfs08/rusucs/code/"
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/MSkapparesults/" % lens
-weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local_test.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.10
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
+increment1 = 4# refers to the E interval from Greene et al. 2014
 increment2 = 4
-increment3 = 2
-increment4 = 2
-increment5 = 2
+increment3 = 4
+increment4 = 4
+increment5 = 4
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -92,57 +93,49 @@ rad = degree / 3600
 # define the shear constraints
 if lens == "WFI2033":
     if other == 'fiducial' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.117
-        constrwidth_gamma_inf = 0.113# ok
-        constrwidth_gamma_sup = 0.120#
+        constr_gamma = 0.115
+        constrwidth_gamma_inf = 0.111# 0.109 #
+        constrwidth_gamma_sup = 0.120# 0.129 #
     if other == 'fiducialsrc+10arcmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.111
-        constrwidth_gamma_inf = 0.108# ok
-        constrwidth_gamma_sup = 0.114#
+        constr_gamma = 0.112
+        constrwidth_gamma_inf = 0.109# 0.109 #
+        constrwidth_gamma_sup = 0.115# 0.129 #
     if other == 'AGNmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.120
-        constrwidth_gamma_inf = 0.116# ok
-        constrwidth_gamma_sup = 0.123#
-    if other == 'AGNmaskwht0' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.126
-        constrwidth_gamma_inf = 0.122# ok
-        constrwidth_gamma_sup = 0.130#
+        constr_gamma = 0.123
+        constrwidth_gamma_inf = 0.120# 0.109 #
+        constrwidth_gamma_sup = 0.127# 0.129 #
     if other == 'fiducial' and handpicked == 'removelensgrouphandpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.108
-        constrwidth_gamma_inf = 0.103# ok
-        constrwidth_gamma_sup = 0.112#
+        constr_gamma = 0.118
+        constrwidth_gamma_inf = 0.114# 0.097 #
+        constrwidth_gamma_sup = 0.121# 0.117 #
     if other == 'fiducial' and handpicked == 'removelensgrouplens049handpicked' and innermask == '5' and float(zsup) < 0:
-        constr_gamma = 0.110
-        constrwidth_gamma_inf = 0.107# ok
-        constrwidth_gamma_sup = 0.113#
+        constr_gamma = 0.111
+        constrwidth_gamma_inf = 0.106# .101 #
+        constrwidth_gamma_sup = 0.115# 0.121 #
     if other == 'chameleon' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.126
-        constrwidth_gamma_inf = 0.122# ok
-        constrwidth_gamma_sup = 0.129#
+        constr_gamma = 0.127
+        constrwidth_gamma_inf = 0.123# 0.120 #
+        constrwidth_gamma_sup = 0.131# 0.140 #
     if other == 'composite' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.140
-        constrwidth_gamma_inf = 0.138# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.142#
-    if other == 'compositeAGNmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.137
-        constrwidth_gamma_inf = 0.135# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.139#
-    if other == 'compositeAGNmaskwht0' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.135
-        constrwidth_gamma_inf = 0.133# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.137#
+        constr_gamma = 0.162
+        constrwidth_gamma_inf = 0.158# 0.142 #
+        constrwidth_gamma_sup = 0.166# 0.162 #
+    if other == 'compositeAGNmask+0' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
+        constr_gamma = 0.156
+        constrwidth_gamma_inf = 0.153# 0.142 #
+        constrwidth_gamma_sup = 0.161# 0.162 #
     if other == 'compositesrc+10arcmask+1' and handpicked == 'removehandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.139
-        constrwidth_gamma_inf = 0.137# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.141#
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.145# 0.142 #
+        constrwidth_gamma_sup = 0.155# 0.162 #
     if other == 'composite' and handpicked == 'removelensgrouphandpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.134
-        constrwidth_gamma_inf = 0.132# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.137#
+        constr_gamma = 0.149
+        constrwidth_gamma_inf = 0.146# 0.142 #
+        constrwidth_gamma_sup = 0.152# 0.162 #
     if other == 'composite' and handpicked == 'removelensgrouplens049handpicked' and float(zsup) < 0 and innermask == '5':
-        constr_gamma = 0.133
-        constrwidth_gamma_inf = 0.131# ok; doubling the uncertainty from Ken
-        constrwidth_gamma_sup = 0.136#
+        constr_gamma = 0.155
+        constrwidth_gamma_inf = 0.152# 0.142 #
+        constrwidth_gamma_sup = 0.158# 0.162 #
 
     filters = "ugrizJHK"
     plane = 35
@@ -407,21 +400,21 @@ else: groupsstr = ''
 if conjoined == 5:
     if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int) | (type(weight5_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s%s_test.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,stringshearprior)
 if conjoined == 4:
     if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s%s_test.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,stringshearprior)
 if conjoined == 3:
     if ((type(weight2_index) != int) | (type(weight3_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s%s_test.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,stringshearprior)
 if conjoined == 2:
     if (type(weight2_index) != int) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s%s_test.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,stringshearprior)
 if conjoined == 1:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s_test.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr)
 
 def readfile(file,usecols):
     f = fitsio.FITS(file)
