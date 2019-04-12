@@ -32,10 +32,10 @@ if file == "3": x, y = np.loadtxt(file3, usecols=(0, 1), unpack=True)
 if file == "4": x, y = np.loadtxt(file4, usecols=(0, 1), unpack=True)
 if file == "5": x, y = np.loadtxt(file5, usecols=(0, 1), unpack=True)
 if file == "6": x, y = np.loadtxt(file6, usecols=(0, 1), unpack=True)
-xlim = 0.15
-xlim_ = 0.04
-ylim = 0.15
-ylim_ = 0.08
+xlim = 0.10
+xlim_ = -0.05
+ylim = 0.05
+ylim_ = 0.03
 x_ = x[(x >= xlim_) & (x <= xlim) & (y >= ylim_) & (y <= ylim)]
 y_ = y[(x >= xlim_) & (x <= xlim) & (y >= ylim_) & (y <= ylim)]
 x = x_
@@ -45,7 +45,7 @@ y = y_
 #plt.yticks(size = ticksize)
 #colorbar()
 
-figure = corner.corner(np.c_[x,y], labels=np.linspace(1,5,5).astype(int).tolist(),quantiles=[0.16, 0.5, 0.84, 0.955, 0.997],show_titles=True, title_kwargs={"fontsize": 12})
+figure = corner.corner(np.c_[x,y], labels=["$\kappa$","$\gamma$"],quantiles=[0.16, 0.5, 0.84],show_titles=True, title_kwargs={"fontsize": 12})
 
 #plt.xlabel('$\kappa$', fontsize=font)
 #plt.ylabel('$\gamma$', fontsize=font)
