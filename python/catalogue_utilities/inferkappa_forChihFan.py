@@ -10,9 +10,9 @@ start_time=time.time()
 #models = ['noshear','powNFWG1G2','powNFWG1','powNFW','compNFW','powSISG1']
 #shear = [0,0.047,0.038,0.041,0.050,0.011]
 #shearerr = [10,0.0062,0.0095,0.0099,0.0075,0.0070]
-models = ['powSISG1']
-shear = [0.011]
-shearerr = [0.0070]
+#models = ['powSISG1']
+#shear = [0.011]
+#shearerr = [0.0070]
 
 root = "/lfs08/rusucs/kappaplanes/"
 
@@ -21,24 +21,30 @@ print "Reading..."
 for j in range(8):
     for i in range(8):
         print j,i
-        kappa_,gamma_ = np.loadtxt("%skappagamma_values_GGL_los_8_%s_%s_N_4096_ang_4_rays_to_plane_34_f.dat" % (root,str(j),str(i)), unpack=True)
+        #kappa_,gamma_ = np.loadtxt("%skappagamma_values_GGL_los_8_%s_%s_N_4096_ang_4_rays_to_plane_34_f.dat" % (root,str(j),str(i)), unpack=True)
+        kappa_ = np.loadtxt("%skappagamma_values_GGL_los_8_%s_%s_N_4096_ang_4_rays_to_plane_34_f.dat" % (root,str(j),str(i)), usecols=[0], unpack=True)
         if i == 0 and j == 0:
             kappa = kappa_
-            gamma = gamma_
+            #gamma = gamma_
         else:
             kappa = np.append(kappa,kappa_)
-            gamma = np.append(gamma,gamma_)
+            #gamma = np.append(gamma,gamma_)
 
 bin_stat = 3000
 min_kappa = -0.50
 max_kappa = 1
 
-for i in range(len(models)):
-    output = '%skappagamma_values_GGL_los_8_N_4096_ang_4_rays_to_plane_34_f_%s.dat' % (root,models[i])
-    kappafinal = kappa[(gamma > shear[i] - shearerr[i]) & (gamma < shear[i] + shearerr[i])]
-    kappahist = np.histogram(kappafinal, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float)
-    kappaindex = np.histogram(kappafinal, bins = bin_stat, range=(min_kappa,max_kappa))[1].astype(float)
-    np.savetxt(output,np.c_[kappaindex[:-1],kappahist],fmt='%s',delimiter='\t',newline='\n',header="%s" % len(kappafinal))
+#for i in range(len(models)):
+#    output = '%skappagamma_values_GGL_los_8_N_4096_ang_4_rays_to_plane_34_f_%s.dat' % (root,models[i])
+#    kappafinal = kappa[(gamma > shear[i] - shearerr[i]) & (gamma < shear[i] + shearerr[i])]
+#    kappahist = np.histogram(kappafinal, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float)
+#    kappaindex = np.histogram(kappafinal, bins = bin_stat, range=(min_kappa,max_kappa))[1].astype(float)
+#    np.savetxt(output,np.c_[kappaindex[:-1],kappahist],fmt='%s',delimiter='\t',newline='\n',header="%s" % len(kappafinal))
+
+output = '%skappagamma_values_GGL_los_8_N_4096_ang_4_rays_to_plane_34_f_kappahist.dat' % root
+kappahist = np.histogram(kappa, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float)
+kappaindex = np.histogram(kappa, bins = bin_stat, range=(min_kappa,max_kappa))[1].astype(float)
+np.savetxt(output,np.c_[kappaindex[:-1],kappahist],fmt='%s',delimiter='\t',newline='\n',header="%s" % len(kappa))
 
 print(" Total time --- %s seconds ---" % (time.time() - start_time))
 

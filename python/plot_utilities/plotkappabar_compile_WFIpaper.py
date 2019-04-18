@@ -206,7 +206,7 @@ axs[1,0].set_ylabel('$\sigma_\kappa$')
 #ax.set_ylabel('$\sigma_{\kappa_\mathrm{med} - \kappa_\mathrm{true}}$')
 axs[1,0].set_xticks(ind + width)
 axs[1,0].set_xticklabels(('$1-1/r$', '$z$',  '$M_\star$', '$M^2_\star$', '$M^3_\star$', '$1/r$', '$z/r$', '$M_\star/r$', '$M^2_\star/r$', '$M^3_\star/r$', '$M^2_{\star\mathrm{rms}}$', '$M^3_{\star\mathrm{rms}}$', '$M^2_\star/r_\mathrm{,rms}$', '$M^3_\star/r_\mathrm{,rms}$', '$M_\star/r^3$', '$M_\star/r^2$', '$\sqrt{M_\star}/r$', '$\sqrt{M_h}/r$'), fontsize=10, rotation='vertical')
-axs[1,0].legend((rects1[0], rects2[0]), ('$P(\kappa_\mathrm{ext}|\zeta^{45\'\'}_{1},\zeta^{45\'\'}_{1/r},\zeta^{120\'\'}_{q})$', '$P(\kappa_\mathrm{ext}|\zeta^{120\'\'}_{1},\zeta^{120\'\'}_{1/r},\zeta^{120\'\'}_{q})$'), bbox_to_anchor=(1.0, 1.0), fontsize=12)
+axs[1,0].legend((rects1[0], rects2[0]), ('$P(\kappa_\mathrm{ext}|\zeta^{45\'\'}_{1},\zeta^{45\'\'}_{1/r},\zeta^{45\'\'}_{q})$', '$P(\kappa_\mathrm{ext}|\zeta^{120\'\'}_{1},\zeta^{120\'\'}_{1/r},\zeta^{120\'\'}_{q})$'), bbox_to_anchor=(1.0, 1.0), fontsize=12)
 axs[1,0].set_yticks(np.arange(0.00, 0.08, 0.01))
 
 
