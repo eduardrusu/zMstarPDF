@@ -293,6 +293,6 @@ axs[3,1].set_yticklabels((), fontsize=10, rotation='vertical')
 #ax.legend((rects1[0], rects2[0]), ('45 22.5 gal+1/r+$\gamma$+', '120 22.5 gal+1/r+$\gamma$+'), bbox_to_anchor=(0.3, 0.97), fontsize=10)
 #plt.subplots_adjust(left=0.15, bottom=0.15, right=0.95, top=0.95, wspace=0.7, hspace=0.7)
 plt.subplots_adjust(bottom=0.15,top=0.95)
-plt.savefig('%skappashistbar.png' % root, dpi=250)
+plt.savefig('%skappashistbar_small.png' % root, dpi=150)
 
 plt.clf()

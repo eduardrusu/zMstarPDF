@@ -5,7 +5,7 @@ import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/scaledstdchoiceplot.dat"
+file = "/Users/cerusu/OneDrive - Subaru Telescope/WFI2033kappasims/scaledstdchoiceplot.dat"
 names = np.genfromtxt(file,usecols=[0],dtype='S200')
 data = np.loadtxt(file,usecols=[1,2,3,4,5,6,19,20],dtype='d,d,d,d,d,d,f,f',unpack=True)
 medofstd,rmsofstd = data[6],data[7]
@@ -102,5 +102,5 @@ ax.annotate('9', xy=(1./(1*N)-0.0025+13.0/(1*N)+5.0/(1*N)+1.0/(1*N)+11.0/(1*N)+6
             ,arrowprops=dict(arrowstyle='-[, widthB=%f, lengthB=13.2' %width, lw=1.0)
             )
 plt.subplots_adjust(left=0.08, bottom=0.3, right=0.99, top=0.95, wspace=0.7, hspace=0)
-plt.savefig('/Users/cerusu/Dropbox/Davis_work/code/WFI2033/kappasim/scaledstdchoiceplot.png', dpi=250)
+plt.savefig('/Users/cerusu/OneDrive - Subaru Telescope/WFI2033kappasims/scaledstdchoiceplot.png', dpi=250)
 plt.clf()
