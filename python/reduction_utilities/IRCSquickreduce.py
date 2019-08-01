@@ -1,4 +1,4 @@
-# run as: source activate iraf27; python /Users/cerusu/GITHUB/zMstarPDF/python/reduction_utilities/IRCSquickreduce.py /Volumes/LaCieSubaru/J1152AO/1152_H/
+# run as: source activate iraf27; python /Users/cerusu/GITHUB/zMstarPDF/python/reduction_utilities/IRCSquickreduce.py /Volumes/LaCieSubaru/J1640+1932/H/
 
 import os
 import numpy as np
@@ -11,7 +11,7 @@ import glob
 os.system('/Applications/ds9.darwinsierra.7.5/ds9 &')
 path = str(sys.argv[1])
 #target = str(sys.argv[2])
-target = '1152_H'
+target = 'reduced'
 try: os.mkdir(path+target)
 except: pass
 os.chdir(path+target)
@@ -29,5 +29,5 @@ if createflat == True:
     os.system('python /Users/cerusu/GITHUB/pyircs_imgred/imgred_all.py %s %s.fits --combine=median --skyflat --flat=%sflat.fits --bpm=/Users/cerusu/GITHUB/pyircs_imgred/DATA/ircs_bpmask.fits --start=0 --end=1' %(target+'.cat',target,target))
     os.system('cp %sflat.fits ../../' % target)
 else:
-    os.system('python /Users/cerusu/GITHUB/pyircs_imgred/imgred_all.py %s %s.fits --combine=median --flat=../../flatonHflat.fits --bpm=/Users/cerusu/GITHUB/pyircs_imgred/DATA/ircs_bpmask.fits --start=0 --end=8 --nsigma=10 --minpix=1000' %(target+'.cat',target))
-#  !!!!!!!!!!!!! When the pipeline says Select Object --> type a , Quit --> type q on the ds9 image I need to press first a than q on the same frame
+    os.system('python /Users/cerusu/GITHUB/pyircs_imgred/imgred_all.py %s %s.fits --combine=median --flat=../../J2354_flat.fits --bpm=/Users/cerusu/GITHUB/pyircs_imgred/DATA/ircs_bpmask.fits --start=0 --end=8 --nsigma=10 --minpix=1000' %(target+'.cat',target))
+#  !!!!!!!!!!!!! When the pipeline says Select Object --> type a , Quit --> type q on the ds9 image: I need to press first a than q on the same frame
