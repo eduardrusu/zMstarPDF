@@ -122,7 +122,8 @@ filter_number_for_WFPC2_F300W      = 38
 filter_number_for_WFPC2_F450W      = 39
 
 
-data_main_dir = '/afs/mpa/temp/hilbert1/Millennium/lensing/maps/GGL_maps/'
+#data_main_dir = '/afs/mpa/temp/hilbert1/Millennium/lensing/maps/GGL_maps/'
+data_main_dir = '/lfs08/rusucs/0408/'
 
 source_plane_number = 30
 image_plane_number = 60
@@ -131,7 +132,7 @@ n_pix = 4096
 field_number_0, field_number_1 = 0,0
 data_file_name_prefix = 'GGL_los_8_' + str(field_number_0) + '_' + str(field_number_1) + '_N_' + str(n_pix) + '_ang_4_'
 
-image_plane_number = 29
+image_plane_number = 60
 
 image_plane_file_name = data_main_dir + data_file_name_prefix + 'Henriques2014_galaxies_on_plane_' + str(image_plane_number) + '_f.images'
 
@@ -158,6 +159,14 @@ with open(image_plane_file_name, mode = 'rb') as file: # b is important -> binar
     # print(n_cells)
 
     galaxy = np.fromfile(file, galaxy_struct, n_galaxies)
-    # print(galaxy[0]['mag_dust'][filter_number_for_i_band_trans])
+    print(galaxy[0]['mag_dust'][filter_number_for_i_band_trans])
+    #print(galaxy['mag_dust'][:,filter_number_for_i_band_trans]) # this is how to correctly read a column
+
+# below is what I would do to read from a specific location without saving the preceeding locations
+#    galaxy = np.fromfile(file, galaxy_struct, 100)
+#    print(galaxy[0]['mag_dust'][filter_number_for_i_band_trans])
+
+#    galaxy = np.fromfile(file, galaxy_struct, -1)
+#    print(galaxy[100]['mag_dust'][filter_number_for_i_band_trans])
 
 print(n_galaxies)
