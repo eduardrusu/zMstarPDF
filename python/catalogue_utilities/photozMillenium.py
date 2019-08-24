@@ -11,12 +11,12 @@ start_timefield = time.time()
 
 # grep -v 99.00 GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206.images.txt > GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206noupperlimits.images.txt # this is for the case when I am calibrating the zpt, so I should not use upper limits
 root_bpz = "/Users/cerusu/bpz-1.99.3/test/"
-root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/"
+root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
 file = str(sys.argv[1])
 file1 = root_bpz+file[:-4]+'.cat'
 os.system("cp %s %s" % (root_original+file,file1))
-if "griK" in file:
-    os.system("cp %smillennium_griK.columns %s" % (root_bpz,file1[:-4]+'.columns'))
+if "griK" in file: os.system("cp %smillennium_griK.columns %s" % (root_bpz,file1[:-4]+'.columns'))
+if "griz" in file: os.system("cp %smillennium_griz.columns %s" % (root_bpz,file1[:-4]+'.columns'))
 
 os.system("python $BPZPATH/bpz.py %s -INTERP 2" % file1)
 #os.system("python $BPZPATH/bpz.py %s -INTERP 2 -ONLY_TYPE yes" % file1)
@@ -31,14 +31,14 @@ r = 3
 r_err = 4
 i = 5
 i_err = 6
-#z = 9
-#z_err = 10
+z = 7
+z_err = 8
 #J = 11
 #J_err = 12
 #H = 13
 #H_err = 14
-K = 7
-K_err = 8
+#K = 7
+#K_err = 8
 
 if "griK" in file:
     data = np.loadtxt(root_original+file,usecols=[0,7,8,9,10,11,12,13,14],unpack=True) # ID + mags
@@ -93,13 +93,17 @@ if "griK" in file:
     dataout = np.c_[data[id],data[g],data[g_err],data[r],data[r_err],data[i],data[i_err],data[K],data[K_err],data_bpz[0],data_bpz[1]]
     #np.savetxt(fileout,dataout,header=str,fmt='%d \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.3f \t %.2f')
 
-# Only for J1206, where I don't require to use Lephare
-data = np.loadtxt(root_original+file,usecols=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],unpack=True) # ID + mags
+# If I don't require to use Lephare
+#data = np.loadtxt(root_original+file,usecols=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],unpack=True) # ID + mags
+data = np.loadtxt(root_original+file,usecols=[0,1,2,3,8],unpack=True) # ID + mags
 data_bpz = np.loadtxt(file1[:-4]+"_bpz.cat",usecols=[1],unpack=True)
 fileout = root_original + file[:-4] + "_forNAOJ.txt"
-str = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t mag_SDSS_i \t photoz"
-dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[11],data_bpz]
-np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f')
+#str = "GalID \t z_spec \t pos0 \t pos_1 \t M_Halo \t M_Stellar \t mag_SDSS_iorig \t mag_SDSS_i \t photoz"
+str = "GalID \t z_spec \t pos0 \t pos_1 \t mag_SDSS_i \t photoz"
+#dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[11],data_bpz]
+#np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f')
+dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data_bpz]
+np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.2f %.2f')
 
 os.system("rm %s" % (file1[:-4]+".bpz"))
 os.system("rm %s" % (file1[:-4]+".bpz.bak"))
@@ -107,10 +111,8 @@ os.system("rm %s" % (file1[:-4]+"_bpz.cat"))
 os.system("rm %s" % (file1[:-4]+".flux_comparison"))
 os.system("rm %s" % (file1[:-4]+".probs"))
 os.system("rm %s" % file1)
-if "griK" in file:
-    os.system("rm %s" % (file1[:-4]+'.columns'))
+if "gri" in file: os.system("rm %s" % (file1[:-4]+'.columns'))
 
 print("Total time for field: --- %s seconds ---" % (time.time() - start_timefield))
 
 print 'Done!'
-
