@@ -1,5 +1,6 @@
 # The code calculates realistic BPZ photoz for galaxies in the Millenium Simulation. It then creates the necessary files to run LePhare on SLAC. The code expects input files created by extractMillenium.py
-# run as: python photozMillenium.py GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206.images.txt
+# run as: python photozMillennium.py GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206.images.txt
+# or python photozMillennium.py GGL_los_8_0_0_N_4096_ang_4_Henriques2014_galaxi_griz.images.txt
 
 import numpy as np
 import sys
@@ -11,11 +12,12 @@ start_timefield = time.time()
 
 # grep -v 99.00 GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206.images.txt > GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206noupperlimits.images.txt # this is for the case when I am calibrating the zpt, so I should not use upper limits
 root_bpz = "/Users/cerusu/bpz-1.99.3/test/"
-root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
+#root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
+root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_Henriques_gal_sampledphot/"
 file = str(sys.argv[1])
 file1 = root_bpz+file[:-4]+'.cat'
 os.system("cp %s %s" % (root_original+file,file1))
-if "griK" in file: os.system("cp %smillennium_griK.columns %s" % (root_bpz,file1[:-4]+'.columns'))
+#if "griK" in file: os.system("cp %smillennium_griK.columns %s" % (root_bpz,file1[:-4]+'.columns'))
 if "griz" in file: os.system("cp %smillennium_griz.columns %s" % (root_bpz,file1[:-4]+'.columns'))
 
 os.system("python $BPZPATH/bpz.py %s -INTERP 2" % file1)
@@ -103,7 +105,7 @@ str = "GalID \t z_spec \t pos0 \t pos_1 \t mag_SDSS_i \t photoz"
 #dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[11],data_bpz]
 #np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.3e \t %.3e \t %.2f \t %.2f \t %.2f')
 dataout = np.c_[data[0],data[1],data[2],data[3],data[4],data_bpz]
-np.savetxt(fileout,dataout,header=str,fmt='%d \t %.3f \t %.7f \t %.7f \t %.2f %.2f')
+np.savetxt(fileout,dataout,header=str,fmt='%d \t %.7f \t %.7f \t %.7f \t %.2f %.2f')
 
 os.system("rm %s" % (file1[:-4]+".bpz"))
 os.system("rm %s" % (file1[:-4]+".bpz.bak"))

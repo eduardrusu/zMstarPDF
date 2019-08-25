@@ -1,0 +1,4 @@
+python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/photozMillennium.py GGL_los_8_3_0_N_4096_ang_4_Henriques2014_galaxi_griz.images.txt
+python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/photozMillennium.py GGL_los_8_3_1_N_4096_ang_4_Henriques2014_galaxi_griz.images.txt
+python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/photozMillennium.py GGL_los_8_3_2_N_4096_ang_4_Henriques2014_galaxi_griz.images.txt
+python /Users/cerusu/GITHUB/zMstarPDF/python/catalogue_utilities/photozMillennium.py GGL_los_8_3_3_N_4096_ang_4_Henriques2014_galaxi_griz.images.txt
