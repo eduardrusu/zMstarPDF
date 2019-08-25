@@ -15,6 +15,14 @@ root_bpz = "/Users/cerusu/bpz-1.99.3/test/"
 #root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
 root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_Henriques_gal_sampledphot/"
 file = str(sys.argv[1])
+
+if "Henriques" in root_original: # this is because when I created the files the first line was filled with zeros
+    file1 = root_original+file
+    file1_ = root_original+file+"_"
+    os.system("sed \'2d\' %s > %s" %(file1,file1_))
+    os.system("mv %s %s" %(file1_,file1))
+    os.system("rm %s" %file1_)
+
 file1 = root_bpz+file[:-4]+'.cat'
 os.system("cp %s %s" % (root_original+file,file1))
 #if "griK" in file: os.system("cp %smillennium_griK.columns %s" % (root_bpz,file1[:-4]+'.columns'))
