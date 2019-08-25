@@ -114,6 +114,7 @@ if filters == "griz":
     dataout[zerr_o][dataout[zerr_o] <= 0.01] = 0.01
 
     dataout = np.delete(dataout,np.where(dataout[i_o] > ilim),axis=1)
+    dataout = np.delete(dataout,np.where(dataout[i_o] < 0),axis=1) # because there are some -inf in 8_7_7 and 8_3_7
 
     head = "GalID \t z_spec \t pos0 \t pos1 \t mag_SDSS_g \t mag_SDSS_gerr \t mag_SDSS_r \t mag_SDSS_rerr \t mag_SDSS_i \t mag_SDSS_ierr \t mag_SDSS_z \t mag_SDSS_zerr"
     np.savetxt(fileout,np.c_[dataout[id_o],dataout[zspec_o],dataout[posx_o],dataout[posy_o],dataout[g_o],dataout[gerr_o],dataout[r_o],dataout[rerr_o],dataout[i_o],dataout[ierr_o],dataout[z_o],dataout[zerr_o]],header=head,fmt='%d \t %.7f \t %.7f \t %.7f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f \t %.2f')

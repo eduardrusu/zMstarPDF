@@ -72,5 +72,6 @@ if sam == "Henriques":
                     ind_imag = 4
                     gal = np.delete(gal,np.where(gal[ind_z] > z_s),axis=1)
                     gal = np.delete(gal,np.where(gal[ind_imag] > lim_i),axis=1)
+                    gal = np.delete(gal,np.where(gal[ind_imag] < 0),axis=1) # because there are some -inf in 8_7_7 and 8_3_7
                 out = np.c_[out,gal]
             np.savetxt("%sGGL_los_8_%d_%d_N_4096_ang_4_Henriques2014_galaxies.txt" % (dirout,i,j),out.T,fmt='%d %1.7f %1.7f %1.7f %1.2f', header = 'galaxy_id redshift	pos_0	pos_1	i')
