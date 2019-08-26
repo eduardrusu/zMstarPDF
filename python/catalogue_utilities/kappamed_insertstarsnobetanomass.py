@@ -1,6 +1,6 @@
 # CE Rusu, Feb 12 2018
 # This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights.
-# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_34_f 23 45 measured 5 -1.0 -1.0
+# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices) SA/Henriques (the final one is only used for 0408 where I compare both); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_34_f 23 45 measured 5 -1.0 -1.0
 # the code can oly be used for limmag 22.5, 23, 23.5 or 24 currently
 
 import numpy as np
@@ -113,7 +113,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
             if initialized != 0:
                 cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],float(limmag),radius,innermsk,gap)
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],float(limmag),radius,innermsk,gap,sam)
                 os.system('rm -f %s' % f)
                 cellkappagammafinal = cellkappagammastyle
                 initialized = 1
@@ -138,6 +138,11 @@ innermsk = int(str(sys.argv[6])) # inner mask in arcsec
 zinf = float(str(sys.argv[7]))
 zsup = float(str(sys.argv[8]))
 gap = 'gap_%s_%s' % (zinf,zsup)
+sam = ""
+try:
+    sam = str(sys.argv[9])
+    if sam != "Henriques": sys.exit('Only SA and Henriques galaxy models are available. Defaulting to SA!!!')
+except: pass
 
 if lens == "0408":
     z_s = 2.375
@@ -152,6 +157,8 @@ if lens == "0408":
         fracspec21 = 0.5
         fracspec22 = 1
         fracspec225 = 0.33
+        fracspec23 = 0.
+        fracspec24 = 0.
     if (radiusstr == "120"):
         hstcoverage = 0.575
         radius = 120
@@ -159,6 +166,8 @@ if lens == "0408":
         fracspec21 = 0.77
         fracspec22 = 1
         fracspec225 = 0.05
+        fracspec23 = 0.
+        fracspec24 = 0.
 
 if lens == "B1608":
     z_s = 1.39
@@ -283,7 +292,7 @@ rootstars = "/lfs08/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
-if lens != "0408" # use CFHTLenS
+if lens != "0408": # use CFHTLenS
     cont_h12_18 = 0.00
     cont_h12_185 = 0.12
     cont_h12_19 = 0.08
@@ -312,7 +321,7 @@ if lens != "0408" # use CFHTLenS
     inc_h12_235 = 0.02
     inc_h12_24 = 0.01
 
-if lens == "0408" # use DES the MOF (worst case for the 3 lines) plot of Y3 from https://cdcvs.fnal.gov/redmine/projects/des-y3/wiki/Y3_Extended_Classifier_v2
+if lens == "0408": # use DES the MOF (worst case for the 3 lines) plot of Y3 from https://cdcvs.fnal.gov/redmine/projects/des-y3/wiki/Y3_Extended_Classifier_v2
     cont_h12_18 = 0.01
     cont_h12_185 = 0.01
     cont_h12_19 = 0.01
@@ -434,15 +443,30 @@ star_imag_24, star_z_24 = np.loadtxt("%sstar23524zcut_catpdzmstar_magrepaired.ca
 start_readkappa = time.time()
 
 if str(pln) in plane:
-    os.chdir(rootkappaplanes)
-    readbinary(".kappa")
-    pos1D,kappa = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), unpack=True)
-    readbinary(".gamma_1")
-    gamma1 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
-    readbinary(".gamma_2")
-    gamma2 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
-    kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
-    os.system("rm -f kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap))
+    if pln != 30 and pln != 44:
+        os.chdir(rootkappaplanes)
+        readbinary(".kappa")
+        pos1D,kappa = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), unpack=True)
+        readbinary(".gamma_1")
+        gamma1 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
+        readbinary(".gamma_2")
+        gamma2 = np.loadtxt("kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap), usecols = [1], unpack=True)
+        kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
+        os.system("rm -f kappa_values_%s_%s_%s_%s_%s_%sinner_%s.dat" % (lens,type,plane,float(limmag),radius,innermsk,gap))
+    else:
+        distortfile = rootkappaplanes + plane + ".Phi"
+        N_pix_per_dim = 4096
+        with open(distortfile, mode = 'rb') as file:
+            Phi = np.fromfile(file, 'f4', N_pix_per_dim * N_pix_per_dim * 4)
+            Phi = Phi.reshape((N_pix_per_dim, N_pix_per_dim, 2, 2))
+            kappa = 1. - 0.5 * (Phi[:,:,0,0] + Phi[:,:,1,1])
+            gamma1 = -0.5 * (Phi[:,:,0,0] - Phi[:,:,1,1])
+            gamma2 = -0.5 * (Phi[:,:,0,1] + Phi[:,:,1,0])
+        kappa  = kappa.flatten()
+        gamma1  = gamma1.flatten()
+        gamma2  = gamma2.flatten()
+        pos1D = np.linspace(0,len(kappa)-1,len(kappa))
+        kappagamma = np.c_[pos1D,kappa,gamma1,gamma2]
 else: sys.exit('Wrong MS plane for this lens!!!')
 
 ############################
@@ -462,20 +486,36 @@ posy_ugriz = np.array([])
 imag_ugriz = np.array([])
 
 root = plane[0:13]
+if sam == "": sam_index = 4
+if sam == "Henriques": sam_index = 1
 
-for i in range(4):
-    for j in range(4):
-        file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
-        #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
-        #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
-        #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
-        file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
+for i in range(sam_index):
+    for j in range(sam_index):
+        if sam == "":
+            file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+            file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+        if sam == "Henriques":
+            file_ugrizJHK = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
+            file_ugriz = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
+            #file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+            #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
+            #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+            #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+            #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
         if "measured" in type:
-            posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
-            posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
-        elif "computed" in type:
-            posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, mstar__ugrizJHK, mhalo__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1,5,4), unpack=True)
-            posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz, mstar__ugriz, mhalo__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1,5,4), unpack=True)
+            if lens == "0408":
+                posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,4,5,1), unpack=True)
+                posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,4,5), unpack=True)
+            else:
+                posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
+                posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
+        elif "computed" in type: # actually do not use this right now, because the files are located somewhere else
+            if lens == "0408":
+                posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1), unpack=True)
+                posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1), unpack=True)
+            else:
+                posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1), unpack=True)
+                posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1), unpack=True)
         else: sys.exit('Only \"measured\" and \"computed\" are accepted as the fourth argument of the code. Execution stopped.')
 
         if "measured" in type:
@@ -658,9 +698,6 @@ del imag__ugriz
 index_z = 0
 index_posx = 1
 index_posy = 2
-index_mstar = 3
-index_imag = 4
-index_Mhalo = 5
 index_sep = -1
 index_index = -2
 
@@ -687,11 +724,11 @@ cells = np.linspace(0,cells_on_a_side**2 - 1,cells_on_a_side**2)
 start_radius = time.time()
 
 cat = cat_ugrizJHK
-bands = "griK"
+bands = "griz_lens"
 weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 cat = cat_ugriz
-bands = "ugriz"
+bands = "griz_calib"
 weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 print "Computed weights in ", time.time() - start_weights, "seconds"

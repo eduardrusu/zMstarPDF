@@ -1,10 +1,8 @@
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_mass3overr
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_mass2rms
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_mass3rms
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_mass2overrrms
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_mass3overrrms
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_flexion
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_tidal
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_SIS
-python /lfs08/rusucs/code/inferkappa_unbiasedwithshear45and120FITSio.py WFI2033 -1.0 -1.0 removehandpicked fiducial empty notremovegroups 5 22.5 measured med 45_gal 45_gamma 45_oneoverr 45_SIShalo
-
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_0_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_1_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_2_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_3_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_4_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_5_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_6_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques
+python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py 0408 GGL_los_8_1_7_N_4096_ang_4_rays_to_plane_30_f 22.5 45 measured 5 -1.0 -1.0 Henriques

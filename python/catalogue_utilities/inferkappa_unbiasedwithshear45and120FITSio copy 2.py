@@ -147,7 +147,6 @@ if lens == "WFI2033":
     filters = "ugrizJHK"
     plane = 35
     print 'shear: ',constr_gamma
-
 if lens == "J1206":
     filters = "griK"
     plane = 34
@@ -155,18 +154,6 @@ if lens == "J1206":
         constr_gamma = 0.04
         constrwidth_gamma_inf = 0.03
         constrwidth_gamma_sup = 0.05
-
-if lens == "0408":
-    filters = "griz"
-    plane = 30
-    if other == 'powerlaw':
-        constr_gamma = 0.0468
-        constrwidth_gamma_inf = 0.0462
-        constrwidth_gamma_sup = 0.0472
-    if other == 'composite':
-        constr_gamma = 0.0260
-        constrwidth_gamma_inf = 0.0257
-        constrwidth_gamma_sup = 0.0265
 
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile
@@ -199,14 +186,6 @@ if lens != "J1206":
         if weightin.split('_')[1] == "gamma": weight_index = None
         return weight_index
 if lens == "J1206":
-    def declareweight(weightin):
-        if weightin.split('_')[1] == "gal": weight_index = 4
-        if weightin.split('_')[1] == "z": weight_index = 5
-        if weightin.split('_')[1] == "oneoverr": weight_index = 6
-        if weightin.split('_')[1] == "zoverr": weight_index = 7
-        if weightin.split('_')[1] == "gamma": weight_index = None
-        return weight_index
-if lens == "0408":
     def declareweight(weightin):
         if weightin.split('_')[1] == "gal": weight_index = 4
         if weightin.split('_')[1] == "z": weight_index = 5
