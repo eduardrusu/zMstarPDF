@@ -12,8 +12,8 @@ start_timefield = time.time()
 
 # grep -v 99.00 GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206.images.txt > GGL_los_8_0_0_0_0_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_J1206noupperlimits.images.txt # this is for the case when I am calibrating the zpt, so I should not use upper limits
 root_bpz = "/Users/cerusu/bpz-1.99.3/test/"
-#root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
-root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_Henriques_gal_sampledphot/"
+root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_SA_gal_sampledphot/"
+#root_original = "/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/0408_Henriques_gal_sampledphot/"
 file = str(sys.argv[1])
 
 if "Henriques" in root_original: # this is because when I created the files the first line was filled with zeros
@@ -117,7 +117,7 @@ np.savetxt(fileout,dataout,header=str,fmt='%d \t %.7f \t %.7f \t %.7f \t %.2f %.
 
 os.system("rm %s" % (file1[:-4]+".bpz"))
 os.system("rm %s" % (file1[:-4]+".bpz.bak"))
-os.system("rm %s" % (file1[:-4]+"_bpz.cat"))
+#os.system("rm %s" % (file1[:-4]+"_bpz.cat"))
 os.system("rm %s" % (file1[:-4]+".flux_comparison"))
 os.system("rm %s" % (file1[:-4]+".probs"))
 os.system("rm %s" % file1)

@@ -1,7 +1,7 @@
 # CE Rusu, Feb 12 2018
 # This code uses the Millenium Sumilation convergence and shear maps as well as the associated SA catalogue of galaxies, in order to compute the weighted counts for fields centered around each kappa and gamma point. This is done for a variety of limiting magnitudes, aperture radii, and weights.
-# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobeta.py WFI2033 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_35_f 22.5 45 measured 15 0.61 0.71
-# the code can oly be used for limmag 23 or 24 currently
+# run with the following arguments: lens name, field name, limiting mag, outer mask radius, type, inner mask radius, zinf, zsup (in case I remove redshift slices); e.g.: python /lfs08/rusucs/code/kappamed_insertstarsnobetanomass.py J1206 GGL_los_8_0_0_N_4096_ang_4_rays_to_plane_34_f 23 45 measured 5 -1.0 -1.0
+# the code can oly be used for limmag 22.5, 23, 23.5 or 24 currently
 
 import numpy as np
 import scipy
@@ -33,61 +33,18 @@ def readbinary(replacestr):
     os.system("rm -f readKappaBinary_%s_%s_%s_%s_%s_%sinner_%s.c" % (lens,type,plane,float(limmag),radius,innermsk,gap))
     os.system("rm -f compiled_%s_%s_%s_%s_%s_%sinner_%s.out" % (lens,type,plane,float(limmag),radius,innermsk,gap))
 
-def contaminants(count,cont_ugr,posxmin,posxmax,posymin,posymax,star_imag,star_z,star_mstar):
+def contaminants(count,cont_ugr,posxmin,posxmax,posymin,posymax,star_imag,star_z):
     cont = np.random.random_integers(0,499,int(count * cont_ugr)) # randomly select from the star catalogues which contain 500 stars each
     cont_posx = np.random.uniform(posxmin,posxmax,int(count * cont_ugr))
     cont_posy = np.random.uniform(posymin,posymax,int(count * cont_ugr))
     cont_imag = star_imag[cont]
     cont_z = star_z[cont]
-    cont_mstar = star_mstar[cont]
     cont = cont[((cont_z >= zsup) | (cont_z <= zinf))] # remove the redshift gap
     cont_posx = cont_posx[((cont_z >= zsup) | (cont_z <= zinf))]
     cont_posy = cont_posy[((cont_z >= zsup) | (cont_z <= zinf))]
     cont_imag = cont_imag[((cont_z >= zsup) | (cont_z <= zinf))]
-    cont_mstar = cont_mstar[((cont_z >= zsup) | (cont_z <= zinf))]
     cont_z = cont_z[((cont_z >= zsup) | (cont_z <= zinf))]
-    cont_mhalo = np.copy(cont_mstar)
-    # Behroozi et al 2010 parameters for z < 1:
-    M10_ = 12.35
-    M1a_ = 0.28
-    Ms00_ = 10.72
-    Ms0a_ = 0.55
-    b0_ = 0.44
-    ba_ = 0.18
-    d0_ = 0.57
-    da_ = 0.17
-    g0_ = 1.56
-    ga_ = 2.51
-    # z >= 1:
-    M10 = 12.27
-    M1a = -0.84
-    Ms00 = 11.09
-    Ms0a = 0.56
-    b0 = 0.65
-    ba = 0.31
-    d0 = 0.55
-    da = -0.12
-    g0 = 1.12
-    ga = -0.53
-    # compute halo masses for the stellar contaminants:
-    a = 1 / (1 + cont_z[cont_z <= 1])
-    logM1a = M10_ + M1a_ * (a - 1)
-    logMs0a = Ms00_ + Ms0a_ * (a-1)
-    notlogMs0a = 10 ** logMs0a
-    b = b0_ + ba_ * (a-1)
-    d = d0_ + da_ * (a-1)
-    g = g0_ + ga_ * (a-1)
-    cont_mhalo[cont_z <= 1] = logM1a + b * (cont_mstar[cont_z <= 1] - logMs0a) + ((10 ** cont_mstar[cont_z <= 1]/notlogMs0a)**d)/(1+(10 ** cont_mstar[cont_z <= 1]/notlogMs0a)**(-g)) - 1/2
-    a = 1 / (1 + cont_z[cont_z > 1])
-    logM1a = M10 + M1a * (a-1)
-    logMs0a = Ms00 + Ms0a * (a-1)
-    notlogMs0a = 10 ** logMs0a
-    b = b0 + ba * (a-1)
-    d = d0 + da * (a-1)
-    g = g0 + ga * (a-1)
-    cont_mhalo[cont_z > 1] = logM1a + b * (cont_mstar[cont_z > 1] - logMs0a) + ((10 ** cont_mstar[cont_z > 1]/notlogMs0a)**d)/(1+(10 ** cont_mstar[cont_z > 1]/notlogMs0a)**(-g)) - 1/2
-    #if len(cont_mhalo) > 0: print np.max(cont_mhalo)
-    return cont, cont_posx, cont_posy, cont_imag, cont_z, cont_mstar, cont_mhalo
+    return cont, cont_posx, cont_posy, cont_imag, cont_z
 
 def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands):
     initialized = 0
@@ -123,7 +80,7 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 for k in range(len(missing)):
                     insert = np.copy(cat_msk[0]) # any entry would do
                     insert[index_index] = missing[k]
-                    cat_msk = np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                    cat_msk = np.append(cat_msk,insert.reshape(1,6),axis = 0)
                 index_all = np.append(index_all,missing)
                 w_gal_2X = np.append(w_gal_2X,np.zeros(len(index_all)-len(w_gal_2X)))
                 galinner = np.append(galinner,np.zeros(len(index_all)-len(galinner)))
@@ -132,7 +89,6 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
                 w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X # this might fail for radius=45, where there are the larger fluctuations in the number of galaxies, and as I remove galaxies from cat_msk there might be an index for which all cells contain zero galaxies. In that case the index is removed from cat_msk, but _zweight.groupby(['cell']).median().values[:,0] needs all indices to be present. The solution is to insert a ghost line into cat_msk for each missing index
             except:
-                #print len(w_gal_2X[w_gal_2X==0])
                 missing = np.array([])
                 cat_msk_unique = np.unique(cat_msk[:,index_index]).astype(int) # to speed up the search
                 for k in range(int(np.max(index_all))):
@@ -141,53 +97,28 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                 for k in range(len(missing)):
                     insert = np.copy(cat_msk[0]) # any entry would do
                     insert[index_index] = missing[k]
-                    cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
+                    cat_msk=np.append(cat_msk,insert.reshape(1,6),axis = 0)
 
             p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
             p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
             p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
-            p_mass = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass':1.0 * cat_msk[:,index_mstar]})
-            p_mass2 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2':1.0 * (cat_msk[:,index_mstar]) ** 2})
-            p_mass3 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3':1.0 * (cat_msk[:,index_mstar]) ** 3})
-            p_massoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'massoverr':1.0 * cat_msk[:,index_mstar] / cat_msk[:,index_sep]})
-            p_mass2overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2overr':1.0 * (cat_msk[:,index_mstar] ** 2) / cat_msk[:,index_sep]})
-            p_mass3overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3overr':1.0 * (cat_msk[:,index_mstar] ** 3) / cat_msk[:,index_sep]})
-            p_flexion = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'flexion':cat_msk[:,index_mstar]  / (cat_msk[:,index_sep] ** 3)})
-            p_tidal = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'tidal':cat_msk[:,index_mstar] / (cat_msk[:,index_sep] ** 2)})
-            p_SIS = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIS':np.sqrt(cat_msk[:,index_mstar]) / cat_msk[:,index_sep]})
-            p_SIShalo = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIShalo':np.sqrt(cat_msk[:,index_Mhalo]) / cat_msk[:,index_sep]})
-            #for k in range(len(missing)):
-                #cat_msk = np.delete(cat_msk,-1,axis = 0) # delete the last line I inserted above; actually this is not necessary because cat_msk is no longer used
 
             w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass_2X = p_mass.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2_2X = p_mass2.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass3_2X = p_mass3.groupby(['cell']).median().values[:,0] * w_gal_2X
             w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
             w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_massoverr_2X = p_massoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2overr_2X = p_mass2overr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass3overr_2X = p_mass3overr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_flexion_2X = p_flexion.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_tidal_2X = p_tidal.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_SIS_2X = p_SIS.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_SIShalo_2X = p_SIShalo.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2rms_2X = np.sqrt(w_mass2_2X)
-            w_mass3rms_2X = scipy.special.cbrt(w_mass3_2X)
-            w_mass2overrms_2X = np.sqrt(w_mass2overr_2X)
-            w_mass3overrms_2X = scipy.special.cbrt(w_mass3overr_2X)
 
-            cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X,galinner]
-            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),np.around(cellkappagamma[:,9],decimals=4),np.around(cellkappagamma[:,10],decimals=4),np.around(cellkappagamma[:,11],decimals=4),np.around(cellkappagamma[:,12],decimals=4),np.around(cellkappagamma[:,13],decimals=4),np.around(cellkappagamma[:,14],decimals=4),np.around(cellkappagamma[:,15],decimals=4),np.around(cellkappagamma[:,16],decimals=4),np.around(cellkappagamma[:,17],decimals=4),np.around(cellkappagamma[:,18],decimals=4),np.around(cellkappagamma[:,19],decimals=4),np.around(cellkappagamma[:,20],decimals=4),np.around(cellkappagamma[:,21],decimals=4),np.around(cellkappagamma[:,22],decimals=4),cellkappagamma[:,23].astype(int)]
+            #print np.shape(cellkappagamma), np.shape(w_gal_2X), np.shape(galinner)
+            cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
+            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),cellkappagamma[:,9].astype(int)]
             if initialized != 0:
-            	cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
+                cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
             else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
+                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],float(limmag),radius,innermsk,gap)
                 os.system('rm -f %s' % f)
                 cellkappagammafinal = cellkappagammastyle
                 initialized = 1
             if (i == spacing - 1) and (j == spacing - 1):
-                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_mass_%s' % limmag, 'w_mass2_%s' % limmag, 'w_mass3_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'w_massoverr_%s' % limmag, 'w_mass2overr_%s' % limmag, 'w_mass3overr_%s' % limmag, 'w_mass2rms_%s' % limmag, 'w_mass3rms_%s' % limmag, 'w_mass2overrms_%s' % limmag, 'w_mass3overrms_%s' % limmag, 'w_flexion_%s' % limmag, 'w_tidal_%s' % limmag, 'w_SIS_%s' % limmag, 'w_SIShalo_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.int32))
+                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.int32))
                 #fits.append(f, tableout.as_array())
                 tableout.write(f)
                 del tableout
@@ -218,7 +149,7 @@ if lens == "HE0435":
     #pln = 34 & 35
     if (radiusstr == "45"):
         radius = 45
-        fracspec20 = 1 # I need to check all lenses before 0408, because this fraction should be only for galaxies, not counting stars; 
+        fracspec20 = 1 # gal+stars
         fracspec21 = 0.75 # this means 20 < mag < 21
         fracspec22 = 0.83
         fracspec23 = 0.11
@@ -248,7 +179,7 @@ if lens == "WFI2033":
     z_s = 1.66
     z_l = 0.66
     brightmag = 16.90
-    #limmag = 22.5
+    limmag = 23
     pln = 35
     if (radiusstr == "45"):
         hstcoverage = 1
@@ -256,6 +187,7 @@ if lens == "WFI2033":
         fracspec20 = 1 # gal+stars
         fracspec21 = 1
         fracspec22 = 0.73
+        #fracspec225 = 0.20
         fracspec23 = 0.15
         fracspec24 = 0.00
     if (radiusstr == "120"):
@@ -264,6 +196,7 @@ if lens == "WFI2033":
         fracspec20 = 0.69
         fracspec21 = 0.81
         fracspec22 = 0.52
+        #fracspec225 = 0.05
         fracspec23 = 0.07
         fracspec24 = 0.00
     if (radiusstr == "60"):
@@ -429,19 +362,19 @@ inc_ugriz_24 = inc_h12_24
 
 # read the stellar contaminants I will insert
 
-star_imag_18, star_z_18, star_mstar_18 = np.loadtxt("%sstar018zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_185, star_z_185, star_mstar_185 = np.loadtxt("%sstar18185zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_19, star_z_19, star_mstar_19 = np.loadtxt("%sstar18519zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_195, star_z_195, star_mstar_195 = np.loadtxt("%sstar19195zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_20, star_z_20, star_mstar_20 = np.loadtxt("%sstar19520zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_205, star_z_205, star_mstar_205 = np.loadtxt("%sstar20205zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_21, star_z_21, star_mstar_21 = np.loadtxt("%sstar20521zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_215, star_z_215, star_mstar_215 = np.loadtxt("%sstar21215zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_22, star_z_22, star_mstar_22 = np.loadtxt("%sstar21522zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_225, star_z_225, star_mstar_225 = np.loadtxt("%sstar22225zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_23, star_z_23, star_mstar_23 = np.loadtxt("%sstar22523zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_235, star_z_235, star_mstar_235 = np.loadtxt("%sstar23235zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
-star_imag_24, star_z_24, star_mstar_24 = np.loadtxt("%sstar23524zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2,3], unpack=True)
+star_imag_18, star_z_18 = np.loadtxt("%sstar018zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_185, star_z_185 = np.loadtxt("%sstar18185zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_19, star_z_19 = np.loadtxt("%sstar18519zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_195, star_z_195 = np.loadtxt("%sstar19195zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_20, star_z_20 = np.loadtxt("%sstar19520zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_205, star_z_205 = np.loadtxt("%sstar20205zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_21, star_z_21 = np.loadtxt("%sstar20521zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_215, star_z_215 = np.loadtxt("%sstar21215zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_22, star_z_22 = np.loadtxt("%sstar21522zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_225, star_z_225 = np.loadtxt("%sstar22225zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_23, star_z_23 = np.loadtxt("%sstar22523zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_235, star_z_235 = np.loadtxt("%sstar23235zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
+star_imag_24, star_z_24 = np.loadtxt("%sstar23524zcut_catpdzmstar_magrepaired.cat" % rootstars, usecols = [0,2], unpack=True)
 
 ############################
 # read the binary kappa file
@@ -470,26 +403,25 @@ start_readcat = time.time()
 z_ugrizJHK = np.array([])
 posx_ugrizJHK = np.array([])
 posy_ugrizJHK = np.array([])
-mstar_ugrizJHK = np.array([])
 imag_ugrizJHK = np.array([])
-Mhalo_ugrizJHK = np.array([])
 
 z_ugriz = np.array([])
 posx_ugriz = np.array([])
 posy_ugriz = np.array([])
-mstar_ugriz = np.array([])
 imag_ugriz = np.array([])
-Mhalo_ugriz = np.array([])
 
 root = plane[0:13]
 
 for i in range(4):
     for j in range(4):
-        file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugrizJHK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+        file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+        #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
+        #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+        #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
         file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
         if "measured" in type:
-            posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK, mstar__ugrizJHK, mstarspec__ugrizJHK, mhalo__ugrizJHK, mhalospec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1,10,9,12,11), unpack=True)
-            posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz, mstar__ugriz, mhalo__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8,9,10), unpack=True)
+            posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
+            posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
         elif "computed" in type:
             posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, mstar__ugrizJHK, mhalo__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1,5,4), unpack=True)
             posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz, mstar__ugriz, mhalo__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1,5,4), unpack=True)
@@ -502,18 +434,6 @@ for i in range(4):
             z__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = zspec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
             z__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = zspec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
             z__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = zspec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
-
-            mstar__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] = mstarspec__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] # use the corresponding stellar masses for the "spectroscopic" redshifts objects
-            mstar__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mstarspec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
-            mstar__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mstarspec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
-            mstar__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mstarspec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
-            mstar__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = mstarspec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
-
-            mhalo__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)] = mhalospec__ugrizJHK[(spec < fracspec20) & (imag__ugrizJHK <= 20)]
-            mhalo__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)] = mhalospec__ugrizJHK[(spec < fracspec21) & (imag__ugrizJHK > 20) & (imag__ugrizJHK <= 21)]
-            mhalo__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)] = mhalospec__ugrizJHK[(spec < fracspec22) & (imag__ugrizJHK > 21) & (imag__ugrizJHK <= 22)]
-            mhalo__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)] = mhalospec__ugrizJHK[(spec < fracspec23) & (imag__ugrizJHK > 22) & (imag__ugrizJHK <= 23)]
-            mhalo__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)] = mhalospec__ugrizJHK[(spec < fracspec24) & (imag__ugrizJHK > 23) & (imag__ugrizJHK <= 24)]
 
             # count the galaxies in order to implement the fraction of stars; counting without the redshift gap, which I implement inside the function
             count18 = z__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (z__ugrizJHK <= z_s)].size
@@ -537,19 +457,19 @@ for i in range(4):
             posymax = np.max(posy__ugrizJHK)
 
             # generate the stellar contaminants
-            cont_18,cont_posx_18,cont_posy_18,cont_imag_18,cont_z_18,cont_mstar_18,cont_mhalo_18 = contaminants(count18,cont_ugrizJHK_18,posxmin,posxmax,posymin,posymax,star_imag_18,star_z_18,star_mstar_18)
-            cont_185,cont_posx_185,cont_posy_185,cont_imag_185,cont_z_185,cont_mstar_185,cont_mhalo_185 = contaminants(count185,cont_ugrizJHK_185,posxmin,posxmax,posymin,posymax,star_imag_185,star_z_185,star_mstar_185)
-            cont_19,cont_posx_19,cont_posy_19,cont_imag_19,cont_z_19,cont_mstar_19,cont_mhalo_19 = contaminants(count19,cont_ugrizJHK_19,posxmin,posxmax,posymin,posymax,star_imag_19,star_z_19,star_mstar_19)
-            cont_195,cont_posx_195,cont_posy_195,cont_imag_195,cont_z_195,cont_mstar_195,cont_mhalo_195 = contaminants(count195,cont_ugrizJHK_195,posxmin,posxmax,posymin,posymax,star_imag_195,star_z_195,star_mstar_195)
-            cont_20,cont_posx_20,cont_posy_20,cont_imag_20,cont_z_20,cont_mstar_20,cont_mhalo_20 = contaminants(count20,cont_ugrizJHK_20,posxmin,posxmax,posymin,posymax,star_imag_20,star_z_20,star_mstar_20)
-            cont_205,cont_posx_205,cont_posy_205,cont_imag_205,cont_z_205,cont_mstar_205,cont_mhalo_205 = contaminants(count205,cont_ugrizJHK_205,posxmin,posxmax,posymin,posymax,star_imag_205,star_z_205,star_mstar_205)
-            cont_21,cont_posx_21,cont_posy_21,cont_imag_21,cont_z_21,cont_mstar_21,cont_mhalo_21 = contaminants(count21,cont_ugrizJHK_21,posxmin,posxmax,posymin,posymax,star_imag_21,star_z_21,star_mstar_21)
-            cont_215,cont_posx_215,cont_posy_215,cont_imag_215,cont_z_215,cont_mstar_215,cont_mhalo_215 = contaminants(count215,cont_ugrizJHK_215,posxmin,posxmax,posymin,posymax,star_imag_215,star_z_215,star_mstar_215)
-            cont_22,cont_posx_22,cont_posy_22,cont_imag_22,cont_z_22,cont_mstar_22,cont_mhalo_22 = contaminants(count22,cont_ugrizJHK_22,posxmin,posxmax,posymin,posymax,star_imag_22,star_z_22,star_mstar_22)
-            cont_225,cont_posx_225,cont_posy_225,cont_imag_225,cont_z_225,cont_mstar_225,cont_mhalo_225 = contaminants(count225,cont_ugrizJHK_225,posxmin,posxmax,posymin,posymax,star_imag_225,star_z_225,star_mstar_225)
-            cont_23,cont_posx_23,cont_posy_23,cont_imag_23,cont_z_23,cont_mstar_23,cont_mhalo_23 = contaminants(count23,cont_ugrizJHK_23,posxmin,posxmax,posymin,posymax,star_imag_23,star_z_23,star_mstar_23)
-            cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235,cont_mstar_235,cont_mhalo_235 = contaminants(count235,cont_ugrizJHK_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235,star_mstar_235)
-            cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24,cont_mstar_24,cont_mhalo_24 = contaminants(count24,cont_ugrizJHK_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24,star_mstar_24)
+            cont_18,cont_posx_18,cont_posy_18,cont_imag_18,cont_z_18 = contaminants(count18,cont_ugrizJHK_18,posxmin,posxmax,posymin,posymax,star_imag_18,star_z_18)
+            cont_185,cont_posx_185,cont_posy_185,cont_imag_185,cont_z_185 = contaminants(count185,cont_ugrizJHK_185,posxmin,posxmax,posymin,posymax,star_imag_185,star_z_185)
+            cont_19,cont_posx_19,cont_posy_19,cont_imag_19,cont_z_19 = contaminants(count19,cont_ugrizJHK_19,posxmin,posxmax,posymin,posymax,star_imag_19,star_z_19)
+            cont_195,cont_posx_195,cont_posy_195,cont_imag_195,cont_z_195 = contaminants(count195,cont_ugrizJHK_195,posxmin,posxmax,posymin,posymax,star_imag_195,star_z_195)
+            cont_20,cont_posx_20,cont_posy_20,cont_imag_20,cont_z_20 = contaminants(count20,cont_ugrizJHK_20,posxmin,posxmax,posymin,posymax,star_imag_20,star_z_20)
+            cont_205,cont_posx_205,cont_posy_205,cont_imag_205,cont_z_205 = contaminants(count205,cont_ugrizJHK_205,posxmin,posxmax,posymin,posymax,star_imag_205,star_z_205)
+            cont_21,cont_posx_21,cont_posy_21,cont_imag_21,cont_z_21 = contaminants(count21,cont_ugrizJHK_21,posxmin,posxmax,posymin,posymax,star_imag_21,star_z_21)
+            cont_215,cont_posx_215,cont_posy_215,cont_imag_215,cont_z_215 = contaminants(count215,cont_ugrizJHK_215,posxmin,posxmax,posymin,posymax,star_imag_215,star_z_215)
+            cont_22,cont_posx_22,cont_posy_22,cont_imag_22,cont_z_22 = contaminants(count22,cont_ugrizJHK_22,posxmin,posxmax,posymin,posymax,star_imag_22,star_z_22)
+            cont_225,cont_posx_225,cont_posy_225,cont_imag_225,cont_z_225 = contaminants(count225,cont_ugrizJHK_225,posxmin,posxmax,posymin,posymax,star_imag_225,star_z_225)
+            cont_23,cont_posx_23,cont_posy_23,cont_imag_23,cont_z_23 = contaminants(count23,cont_ugrizJHK_23,posxmin,posxmax,posymin,posymax,star_imag_23,star_z_23)
+            cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235 = contaminants(count235,cont_ugrizJHK_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235)
+            cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24 = contaminants(count24,cont_ugrizJHK_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24)
             #print cont_18.size,cont_185.size,cont_19.size,cont_195.size,cont_20.size,cont_205.size,cont_21.size,cont_215.size,cont_22.size,cont_225.size,cont_23.size,cont_235.size,cont_24.size
 
             # masking the fraction of galaxies expected to not be detected as galaxies, due to incompleteness; here also apply the brightmag, limmag, z_s and z gap cuts
@@ -557,8 +477,6 @@ for i in range(4):
             z__ugrizJHK = z___ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
             posx__ugrizJHK = posx__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
             posy__ugrizJHK = posy__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
-            mstar__ugrizJHK = mstar__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
-            mhalo__ugrizJHK = mhalo__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
             imag__ugrizJHK = imag__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf)) & (((imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= 18) & (spec < 1 - inc_ugrizJHK_18)) | ((imag__ugrizJHK > 18) & (imag__ugrizJHK <= 18.5) & (spec < 1 - inc_ugrizJHK_185)) | ((imag__ugrizJHK > 18.5) & (imag__ugrizJHK <= 19) & (spec < 1 - inc_ugrizJHK_19)) | ((imag__ugrizJHK > 19) & (imag__ugrizJHK <= 19.5) & (spec < 1 - inc_ugrizJHK_195)) | ((imag__ugrizJHK > 19.5) & (imag__ugrizJHK <= 20) & (spec < 1 - inc_ugrizJHK_20)) | ((imag__ugrizJHK > 20) & (imag__ugrizJHK <= 20.5) & (spec < 1 - inc_ugrizJHK_205)) | ((imag__ugrizJHK > 20.5) & (imag__ugrizJHK <= 21) & (spec < 1 - inc_ugrizJHK_21)) | ((imag__ugrizJHK > 21) & (imag__ugrizJHK <= 21.5) & (spec < 1 - inc_ugrizJHK_215)) | ((imag__ugrizJHK > 21.5) & (imag__ugrizJHK <= 22) & (spec < 1 - inc_ugrizJHK_22)) | ((imag__ugrizJHK > 22) & (imag__ugrizJHK <= 22.5) & (spec < 1 - inc_ugrizJHK_225)) | ((imag__ugrizJHK > 22.5) & (imag__ugrizJHK <= 23) & (spec < 1 - inc_ugrizJHK_23)) | ((imag__ugrizJHK > 23) & (imag__ugrizJHK <= 23.5) & (spec < 1 - inc_ugrizJHK_235)) | ((imag__ugrizJHK > 23.5) & (imag__ugrizJHK <= 24) & (spec < 1 - inc_ugrizJHK_24)))]
 
             # inserting the stellar contaminants
@@ -566,29 +484,21 @@ for i in range(4):
                 z_ugrizJHK = np.concatenate((z_ugrizJHK,z__ugrizJHK,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225))
                 posx_ugrizJHK = np.concatenate((posx_ugrizJHK,posx__ugrizJHK,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225))
                 posy_ugrizJHK = np.concatenate((posy_ugrizJHK,posy__ugrizJHK,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225))
-                mstar_ugrizJHK = np.concatenate((mstar_ugrizJHK,mstar__ugrizJHK,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225))
-                Mhalo_ugrizJHK = np.concatenate((Mhalo_ugrizJHK,mhalo__ugrizJHK,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225))
                 imag_ugrizJHK = np.concatenate((imag_ugrizJHK,imag__ugrizJHK,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225))
             if limmag == 23:
                 z_ugrizJHK = np.concatenate((z_ugrizJHK,z__ugrizJHK,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23))
                 posx_ugrizJHK = np.concatenate((posx_ugrizJHK,posx__ugrizJHK,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23))
                 posy_ugrizJHK = np.concatenate((posy_ugrizJHK,posy__ugrizJHK,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23))
-                mstar_ugrizJHK = np.concatenate((mstar_ugrizJHK,mstar__ugrizJHK,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23))
-                Mhalo_ugrizJHK = np.concatenate((Mhalo_ugrizJHK,mhalo__ugrizJHK,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23))
                 imag_ugrizJHK = np.concatenate((imag_ugrizJHK,imag__ugrizJHK,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23))
             if limmag == 23.5:
                 z_ugrizJHK = np.concatenate((z_ugrizJHK,z__ugrizJHK,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23,cont_z_235))
                 posx_ugrizJHK = np.concatenate((posx_ugrizJHK,posx__ugrizJHK,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23,cont_posx_235))
                 posy_ugrizJHK = np.concatenate((posy_ugrizJHK,posy__ugrizJHK,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23,cont_posy_235))
-                mstar_ugrizJHK = np.concatenate((mstar_ugrizJHK,mstar__ugrizJHK,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23,cont_mstar_235))
-                Mhalo_ugrizJHK = np.concatenate((Mhalo_ugrizJHK,mhalo__ugrizJHK,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23,cont_mhalo_235))
                 imag_ugrizJHK = np.concatenate((imag_ugrizJHK,imag__ugrizJHK,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23,cont_imag_235))
             if limmag == 24:
                 z_ugrizJHK = np.concatenate((z_ugrizJHK,z__ugrizJHK,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23,cont_z_235,cont_z_24))
                 posx_ugrizJHK = np.concatenate((posx_ugrizJHK,posx__ugrizJHK,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23,cont_posx_235,cont_posx_24))
                 posy_ugrizJHK = np.concatenate((posy_ugrizJHK,posy__ugrizJHK,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23,cont_posy_235,cont_posy_24))
-                mstar_ugrizJHK = np.concatenate((mstar_ugrizJHK,mstar__ugrizJHK,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23,cont_mstar_235,cont_mstar_24))
-                Mhalo_ugrizJHK = np.concatenate((Mhalo_ugrizJHK,mhalo__ugrizJHK,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23,cont_mhalo_235,cont_mhalo_24))
                 imag_ugrizJHK = np.concatenate((imag_ugrizJHK,imag__ugrizJHK,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23,cont_imag_235,cont_imag_24))
             #if len(imag_ugrizJHK) > 0: print np.max(imag_ugrizJHK)
 
@@ -609,56 +519,46 @@ for i in range(4):
             count24 = z__ugriz[(imag__ugriz > 23.5) & (imag__ugriz <= 24) & (z__ugriz <= z_s)].size
 
             # generate the stellar contaminants
-            cont_18,cont_posx_18,cont_posy_18,cont_imag_18,cont_z_18,cont_mstar_18,cont_mhalo_18 = contaminants(count18,cont_ugriz_18,posxmin,posxmax,posymin,posymax,star_imag_18,star_z_18,star_mstar_18)
-            cont_185,cont_posx_185,cont_posy_185,cont_imag_185,cont_z_185,cont_mstar_185,cont_mhalo_185 = contaminants(count185,cont_ugriz_185,posxmin,posxmax,posymin,posymax,star_imag_185,star_z_185,star_mstar_185)
-            cont_19,cont_posx_19,cont_posy_19,cont_imag_19,cont_z_19,cont_mstar_19,cont_mhalo_19 = contaminants(count19,cont_ugriz_19,posxmin,posxmax,posymin,posymax,star_imag_19,star_z_19,star_mstar_19)
-            cont_195,cont_posx_195,cont_posy_195,cont_imag_195,cont_z_195,cont_mstar_195,cont_mhalo_195 = contaminants(count195,cont_ugriz_195,posxmin,posxmax,posymin,posymax,star_imag_195,star_z_195,star_mstar_195)
-            cont_20,cont_posx_20,cont_posy_20,cont_imag_20,cont_z_20,cont_mstar_20,cont_mhalo_20 = contaminants(count20,cont_ugriz_20,posxmin,posxmax,posymin,posymax,star_imag_20,star_z_20,star_mstar_20)
-            cont_205,cont_posx_205,cont_posy_205,cont_imag_205,cont_z_205,cont_mstar_205,cont_mhalo_205 = contaminants(count205,cont_ugriz_205,posxmin,posxmax,posymin,posymax,star_imag_205,star_z_205,star_mstar_205)
-            cont_21,cont_posx_21,cont_posy_21,cont_imag_21,cont_z_21,cont_mstar_21,cont_mhalo_21 = contaminants(count21,cont_ugriz_21,posxmin,posxmax,posymin,posymax,star_imag_21,star_z_21,star_mstar_21)
-            cont_215,cont_posx_215,cont_posy_215,cont_imag_215,cont_z_215,cont_mstar_215,cont_mhalo_215 = contaminants(count215,cont_ugriz_215,posxmin,posxmax,posymin,posymax,star_imag_215,star_z_215,star_mstar_215)
-            cont_22,cont_posx_22,cont_posy_22,cont_imag_22,cont_z_22,cont_mstar_22,cont_mhalo_22 = contaminants(count22,cont_ugriz_22,posxmin,posxmax,posymin,posymax,star_imag_22,star_z_22,star_mstar_22)
-            cont_225,cont_posx_225,cont_posy_225,cont_imag_225,cont_z_225,cont_mstar_225,cont_mhalo_225 = contaminants(count225,cont_ugriz_225,posxmin,posxmax,posymin,posymax,star_imag_225,star_z_225,star_mstar_225)
-            cont_23,cont_posx_23,cont_posy_23,cont_imag_23,cont_z_23,cont_mstar_23,cont_mhalo_23 = contaminants(count23,cont_ugriz_23,posxmin,posxmax,posymin,posymax,star_imag_23,star_z_23,star_mstar_23)
-            cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235,cont_mstar_235,cont_mhalo_235 = contaminants(count235,cont_ugriz_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235,star_mstar_235)
-            cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24,cont_mstar_24,cont_mhalo_24 = contaminants(count24,cont_ugriz_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24,star_mstar_24)
+            cont_18,cont_posx_18,cont_posy_18,cont_imag_18,cont_z_18 = contaminants(count18,cont_ugriz_18,posxmin,posxmax,posymin,posymax,star_imag_18,star_z_18)
+            cont_185,cont_posx_185,cont_posy_185,cont_imag_185,cont_z_185 = contaminants(count185,cont_ugriz_185,posxmin,posxmax,posymin,posymax,star_imag_185,star_z_185)
+            cont_19,cont_posx_19,cont_posy_19,cont_imag_19,cont_z_19 = contaminants(count19,cont_ugriz_19,posxmin,posxmax,posymin,posymax,star_imag_19,star_z_19)
+            cont_195,cont_posx_195,cont_posy_195,cont_imag_195,cont_z_195 = contaminants(count195,cont_ugriz_195,posxmin,posxmax,posymin,posymax,star_imag_195,star_z_195)
+            cont_20,cont_posx_20,cont_posy_20,cont_imag_20,cont_z_20 = contaminants(count20,cont_ugriz_20,posxmin,posxmax,posymin,posymax,star_imag_20,star_z_20)
+            cont_205,cont_posx_205,cont_posy_205,cont_imag_205,cont_z_205 = contaminants(count205,cont_ugriz_205,posxmin,posxmax,posymin,posymax,star_imag_205,star_z_205)
+            cont_21,cont_posx_21,cont_posy_21,cont_imag_21,cont_z_21 = contaminants(count21,cont_ugriz_21,posxmin,posxmax,posymin,posymax,star_imag_21,star_z_21)
+            cont_215,cont_posx_215,cont_posy_215,cont_imag_215,cont_z_215 = contaminants(count215,cont_ugriz_215,posxmin,posxmax,posymin,posymax,star_imag_215,star_z_215)
+            cont_22,cont_posx_22,cont_posy_22,cont_imag_22,cont_z_22 = contaminants(count22,cont_ugriz_22,posxmin,posxmax,posymin,posymax,star_imag_22,star_z_22)
+            cont_225,cont_posx_225,cont_posy_225,cont_imag_225,cont_z_225 = contaminants(count225,cont_ugriz_225,posxmin,posxmax,posymin,posymax,star_imag_225,star_z_225)
+            cont_23,cont_posx_23,cont_posy_23,cont_imag_23,cont_z_23 = contaminants(count23,cont_ugriz_23,posxmin,posxmax,posymin,posymax,star_imag_23,star_z_23)
+            cont_235,cont_posx_235,cont_posy_235,cont_imag_235,cont_z_235 = contaminants(count235,cont_ugriz_235,posxmin,posxmax,posymin,posymax,star_imag_235,star_z_235)
+            cont_24,cont_posx_24,cont_posy_24,cont_imag_24,cont_z_24 = contaminants(count24,cont_ugriz_24,posxmin,posxmax,posymin,posymax,star_imag_24,star_z_24)
 
             spec = np.random.uniform(0,1,len(z__ugriz))
             z___ugriz = z__ugriz
             z__ugriz = z___ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
             posx__ugriz = posx__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
             posy__ugriz = posy__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
-            mstar__ugriz = mstar__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
-            mhalo__ugriz = mhalo__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
             imag__ugriz = imag__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf)) & (((imag__ugriz > brightmag) & (imag__ugriz <= 18) & (spec < 1 - inc_ugriz_18)) | ((imag__ugriz > 18) & (imag__ugriz <= 18.5) & (spec < 1 - inc_ugriz_185)) | ((imag__ugriz > 18.5) & (imag__ugriz <= 19) & (spec < 1 - inc_ugriz_19)) | ((imag__ugriz > 19) & (imag__ugriz <= 19.5) & (spec < 1 - inc_ugriz_195)) | ((imag__ugriz > 19.5) & (imag__ugriz <= 20) & (spec < 1 - inc_ugriz_20)) | ((imag__ugriz > 20) & (imag__ugriz <= 20.5) & (spec < 1 - inc_ugriz_205)) | ((imag__ugriz > 20.5) & (imag__ugriz <= 21) & (spec < 1 - inc_ugriz_21)) | ((imag__ugriz > 21) & (imag__ugriz <= 21.5) & (spec < 1 - inc_ugriz_215)) | ((imag__ugriz > 21.5) & (imag__ugriz <= 22) & (spec < 1 - inc_ugriz_22)) | ((imag__ugriz > 22) & (imag__ugriz <= 22.5) & (spec < 1 - inc_ugriz_225)) | ((imag__ugriz > 22.5) & (imag__ugriz <= 23) & (spec < 1 - inc_ugriz_23)) | ((imag__ugriz > 23) & (imag__ugriz <= 23.5) & (spec < 1 - inc_ugriz_235)) | ((imag__ugriz > 23.5) & (imag__ugriz <= 24) & (spec < 1 - inc_ugriz_24)))]
 
             if limmag == 22.5:
                 z_ugriz = np.concatenate((z_ugriz,z__ugriz,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225))
                 posx_ugriz = np.concatenate((posx_ugriz,posx__ugriz,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225))
                 posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225))
-                mstar_ugriz = np.concatenate((mstar_ugriz,mstar__ugriz,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225))
-                Mhalo_ugriz = np.concatenate((Mhalo_ugriz,mhalo__ugriz,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225))
                 imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225))
             if limmag == 23:
                 z_ugriz = np.concatenate((z_ugriz,z__ugriz,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23))
                 posx_ugriz = np.concatenate((posx_ugriz,posx__ugriz,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23))
                 posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23))
-                mstar_ugriz = np.concatenate((mstar_ugriz,mstar__ugriz,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23))
-                Mhalo_ugriz = np.concatenate((Mhalo_ugriz,mhalo__ugriz,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23))
                 imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23))
             if limmag == 23.5:
                 z_ugriz = np.concatenate((z_ugriz,z__ugriz,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23,cont_z_235))
                 posx_ugriz = np.concatenate((posx_ugriz,posx__ugriz,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23,cont_posx_235))
                 posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23,cont_posy_235))
-                mstar_ugriz = np.concatenate((mstar_ugriz,mstar__ugriz,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23,cont_mstar_235))
-                Mhalo_ugriz = np.concatenate((Mhalo_ugriz,mhalo__ugriz,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23,cont_mhalo_235))
                 imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23,cont_imag_235))
             if limmag == 24:
                 z_ugriz = np.concatenate((z_ugriz,z__ugriz,cont_z_18,cont_z_185,cont_z_19,cont_z_195,cont_z_20,cont_z_205,cont_z_21,cont_z_215,cont_z_22,cont_z_225,cont_z_23,cont_z_235,cont_z_24))
                 posx_ugriz = np.concatenate((posx_ugriz,posx__ugriz,cont_posx_18,cont_posx_185,cont_posx_19,cont_posx_195,cont_posx_20,cont_posx_205,cont_posx_21,cont_posx_215,cont_posx_22,cont_posx_225,cont_posx_23,cont_posx_235,cont_posx_24))
                 posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz,cont_posy_18,cont_posy_185,cont_posy_19,cont_posy_195,cont_posy_20,cont_posy_205,cont_posy_21,cont_posy_215,cont_posy_22,cont_posy_225,cont_posy_23,cont_posy_235,cont_posy_24))
-                mstar_ugriz = np.concatenate((mstar_ugriz,mstar__ugriz,cont_mstar_18,cont_mstar_185,cont_mstar_19,cont_mstar_195,cont_mstar_20,cont_mstar_205,cont_mstar_21,cont_mstar_215,cont_mstar_22,cont_mstar_225,cont_mstar_23,cont_mstar_235,cont_mstar_24))
-                Mhalo_ugriz = np.concatenate((Mhalo_ugriz,mhalo__ugriz,cont_mhalo_18,cont_mhalo_185,cont_mhalo_19,cont_mhalo_195,cont_mhalo_20,cont_mhalo_205,cont_mhalo_21,cont_mhalo_215,cont_mhalo_22,cont_mhalo_225,cont_mhalo_23,cont_mhalo_235,cont_mhalo_24))
                 imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz,cont_imag_18,cont_imag_185,cont_imag_19,cont_imag_195,cont_imag_20,cont_imag_205,cont_imag_21,cont_imag_215,cont_imag_22,cont_imag_225,cont_imag_23,cont_imag_235,cont_imag_24))
             #if len(imag_ugriz) > 0: print np.max(imag_ugriz)
 
@@ -667,61 +567,41 @@ for i in range(4):
             z__ugrizJHK = z___ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s) & ((z___ugrizJHK >= zsup) | (z___ugrizJHK <= zinf))]
             posx__ugrizJHK = posx__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s)]
             posy__ugrizJHK = posy__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s)]
-            mstar__ugrizJHK = mstar__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s)]
-            mhalo__ugrizJHK = mhalo__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s)]
             imag__ugrizJHK = imag__ugrizJHK[(imag__ugrizJHK > brightmag) & (imag__ugrizJHK <= limmag) & (z___ugrizJHK <= z_s)]
             z_ugrizJHK = np.concatenate((z_ugrizJHK,z__ugrizJHK))
             posx_ugrizJHK = np.concatenate((posx_ugrizJHK,posx__ugrizJHK))
             posy_ugrizJHK = np.concatenate((posy_ugrizJHK,posy__ugrizJHK))
-            mstar_ugrizJHK = np.concatenate((mstar_ugrizJHK,mstar__ugrizJHK))
-            Mhalo_ugrizJHK = np.concatenate((Mhalo_ugrizJHK,mhalo__ugrizJHK))
             imag_ugrizJHK = np.concatenate((imag_ugrizJHK,imag__ugrizJHK))
 
             z___ugriz = z__ugriz
             z__ugriz = z___ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
             posx__ugriz = posx__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
             posy__ugriz = posy__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
-            mstar__ugriz = mstar__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
-            mhalo__ugriz = mhalo__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
             imag__ugriz = imag__ugriz[(imag__ugriz > brightmag) & (imag__ugriz <= limmag) & (z___ugriz <= z_s) & ((z___ugriz >= zsup) | (z___ugriz <= zinf))]
             z_ugriz = np.concatenate((z_ugriz,z__ugriz))
             posx_ugriz = np.concatenate((posx_ugriz,posx__ugriz))
             posy_ugriz = np.concatenate((posy_ugriz,posy__ugriz))
-            mstar_ugriz = np.concatenate((mstar_ugriz,mstar__ugriz))
-            Mhalo_ugriz = np.concatenate((Mhalo_ugriz,mhalo__ugriz))
             imag_ugriz = np.concatenate((imag_ugriz,imag__ugriz))
 
-if "measured" in type:
-    mstar_ugrizJHK = 10 ** mstar_ugrizJHK
-    Mhalo_ugrizJHK = 10 ** Mhalo_ugrizJHK
-    mstar_ugriz = 10 ** mstar_ugriz
-    Mhalo_ugriz = 10 ** Mhalo_ugriz
-
-cat_ugrizJHK = np.c_[z_ugrizJHK,posx_ugrizJHK,posy_ugrizJHK,mstar_ugrizJHK,imag_ugrizJHK,Mhalo_ugrizJHK]
+cat_ugrizJHK = np.c_[z_ugrizJHK,posx_ugrizJHK,posy_ugrizJHK,imag_ugrizJHK]
 del z___ugrizJHK
 del z_ugrizJHK
 del posx_ugrizJHK
 del posy_ugrizJHK
-del mstar_ugrizJHK
-del Mhalo_ugrizJHK
 del imag_ugrizJHK
 del z__ugrizJHK
 del posx__ugrizJHK
 del posy__ugrizJHK
-del mstar__ugrizJHK
 del imag__ugrizJHK
-cat_ugriz = np.c_[z_ugriz,posx_ugriz,posy_ugriz,mstar_ugriz,imag_ugriz,Mhalo_ugriz]
+cat_ugriz = np.c_[z_ugriz,posx_ugriz,posy_ugriz,imag_ugriz]
 del z___ugriz
 del z_ugriz
 del posx_ugriz
 del posy_ugriz
-del mstar_ugriz
-del Mhalo_ugriz
 del imag_ugriz
 del z__ugriz
 del posx__ugriz
 del posy__ugriz
-del mstar__ugriz
 del imag__ugriz
 
 index_z = 0
@@ -756,8 +636,7 @@ cells = np.linspace(0,cells_on_a_side**2 - 1,cells_on_a_side**2)
 start_radius = time.time()
 
 cat = cat_ugrizJHK
-bands = "ugrizJHK"
-if lens == "J1206": bands = "griK"
+bands = "griK"
 weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappagamma,pln,bands)
 
 cat = cat_ugriz

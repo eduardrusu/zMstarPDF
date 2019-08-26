@@ -139,6 +139,27 @@ zinf = float(str(sys.argv[7]))
 zsup = float(str(sys.argv[8]))
 gap = 'gap_%s_%s' % (zinf,zsup)
 
+if lens == "0408":
+    z_s = 2.375
+    z_l = 0.596
+    brightmag = 0
+    limmag = 22.5
+    pln = 30
+    if (radiusstr == "45"):
+        hstcoverage = 1
+        radius = 45
+        fracspec20 = 0.5 # for gals, not stars
+        fracspec21 = 0.5
+        fracspec22 = 1
+        fracspec225 = 0.33
+    if (radiusstr == "120"):
+        hstcoverage = 0.575
+        radius = 120
+        fracspec20 = 0.77
+        fracspec21 = 0.77
+        fracspec22 = 1
+        fracspec225 = 0.05
+
 if lens == "B1608":
     z_s = 1.39
     pln = 37 # MS simulation plane
@@ -262,33 +283,63 @@ rootstars = "/lfs08/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
-cont_h12_18 = 0.00
-cont_h12_185 = 0.12
-cont_h12_19 = 0.08
-cont_h12_195 = 0.03
-cont_h12_20 = 0.04
-cont_h12_205 = 0.06
-cont_h12_21 = 0.05
-cont_h12_215 = 0.02
-cont_h12_22 = 0.01
-cont_h12_225 = 0.02
-cont_h12_23 = 0.03
-cont_h12_235 = 0.01
-cont_h12_24 = 0.01
+if lens != "0408" # use CFHTLenS
+    cont_h12_18 = 0.00
+    cont_h12_185 = 0.12
+    cont_h12_19 = 0.08
+    cont_h12_195 = 0.03
+    cont_h12_20 = 0.04
+    cont_h12_205 = 0.06
+    cont_h12_21 = 0.05
+    cont_h12_215 = 0.02
+    cont_h12_22 = 0.01
+    cont_h12_225 = 0.02
+    cont_h12_23 = 0.03
+    cont_h12_235 = 0.01
+    cont_h12_24 = 0.01
 
-inc_h12_18 = 0.20
-inc_h12_185 = 0.13
-inc_h12_19 = 0.20
-inc_h12_195 = 0.00
-inc_h12_20 = 0.03
-inc_h12_205 = 0.02
-inc_h12_21 = 0.01
-inc_h12_215 = 0.07
-inc_h12_22 = 0.05
-inc_h12_225 = 0.05
-inc_h12_23 = 0.03
-inc_h12_235 = 0.02
-inc_h12_24 = 0.01
+    inc_h12_18 = 0.20
+    inc_h12_185 = 0.13
+    inc_h12_19 = 0.20
+    inc_h12_195 = 0.00
+    inc_h12_20 = 0.03
+    inc_h12_205 = 0.02
+    inc_h12_21 = 0.01
+    inc_h12_215 = 0.07
+    inc_h12_22 = 0.05
+    inc_h12_225 = 0.05
+    inc_h12_23 = 0.03
+    inc_h12_235 = 0.02
+    inc_h12_24 = 0.01
+
+if lens == "0408" # use DES the MOF (worst case for the 3 lines) plot of Y3 from https://cdcvs.fnal.gov/redmine/projects/des-y3/wiki/Y3_Extended_Classifier_v2
+    cont_h12_18 = 0.01
+    cont_h12_185 = 0.01
+    cont_h12_19 = 0.01
+    cont_h12_195 = 0.01 # no data until here, but extrapolated from Drlica-Wagner et al. 2018
+    cont_h12_20 = 0.01
+    cont_h12_205 = 0.01
+    cont_h12_21 = 0.01
+    cont_h12_215 = 0.01
+    cont_h12_22 = 0.01
+    cont_h12_225 = 0.02
+    cont_h12_23 = 0.05
+    cont_h12_235 = 0.06
+    cont_h12_24 = 0.06
+
+    inc_h12_18 = 0.01
+    inc_h12_185 = 0.01
+    inc_h12_19 = 0.01
+    inc_h12_195 = 0.01
+    inc_h12_20 = 0.01
+    inc_h12_205 = 0.01
+    inc_h12_21 = 0.01
+    inc_h12_215 = 0.01
+    inc_h12_22 = 0.02
+    inc_h12_225 = 0.04
+    inc_h12_23 = 0.10
+    inc_h12_235 = 0.25
+    inc_h12_24 = 0.50
 
 nospec_18 = 1 - fracspec20
 nospec_185 = 1 - fracspec20
