@@ -21,6 +21,9 @@ import fitsio # https://github.com/esheldon/fitsio
 start_time=time.time()
 only8 = False # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
+henriques = True
+if henriques == False: sam = ""
+else: sam = "Henriques"
 
 lens = str(sys.argv[1])
 zinf = str(sys.argv[2])
@@ -73,14 +76,14 @@ weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
-min_kappa = -0.10
+min_kappa = -0.20
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
-increment2 = 4
-increment3 = 2
-increment4 = 2
-increment5 = 2
+increment1 = 1# refers to the E interval from Greene et al. 2014
+increment2 = 1
+increment3 = 1
+increment4 = 1
+increment5 = 1
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -157,7 +160,7 @@ if lens == "J1206":
         constrwidth_gamma_sup = 0.05
 
 if lens == "0408":
-    filters = "griz"
+    filters = "griz_lens"
     plane = 30
     if other == 'powerlaw':
         constr_gamma = 0.0468
@@ -176,9 +179,9 @@ measured_index120 = 3
 measured_index_inf120 = 4
 measured_index_sup120 = 5
 
-if lens != "J1206":
+if lens != "J1206" and lens != "0408":
     def declareweight(weightin):
-        if weightin.split('_')[1] == "gal": weight_index = 4
+        if weightin.split('_')[1] == "gal": weight_index = 4 # these are the column indices in the files produced by kappamed_insertstarsnobeta.py
         if weightin.split('_')[1] == "z": weight_index = 5
         if weightin.split('_')[1] == "mass": weight_index = 6
         if weightin.split('_')[1] == "mass2": weight_index = 7
@@ -198,15 +201,7 @@ if lens != "J1206":
         if weightin.split('_')[1] == "SIShalo": weight_index = 21
         if weightin.split('_')[1] == "gamma": weight_index = None
         return weight_index
-if lens == "J1206":
-    def declareweight(weightin):
-        if weightin.split('_')[1] == "gal": weight_index = 4
-        if weightin.split('_')[1] == "z": weight_index = 5
-        if weightin.split('_')[1] == "oneoverr": weight_index = 6
-        if weightin.split('_')[1] == "zoverr": weight_index = 7
-        if weightin.split('_')[1] == "gamma": weight_index = None
-        return weight_index
-if lens == "0408":
+if lens == "J1206" or "0408": # no mass quantities available
     def declareweight(weightin):
         if weightin.split('_')[1] == "gal": weight_index = 4
         if weightin.split('_')[1] == "z": weight_index = 5
@@ -226,150 +221,185 @@ if conjoined >= 2:
                 weight5_index = declareweight(weightin5)
 
 # read weight constraints
-constr_gal_meds45 = weightsfile[measured_index45][0]
-constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
-constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
+if lens != "0408":
+    constr_gal_meds45 = weightsfile[measured_index45][0]
+    constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
+    constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
 
-constr_z_meds45 = weightsfile[measured_index45][1]
-constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
-constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
+    constr_z_meds45 = weightsfile[measured_index45][1]
+    constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
+    constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
 
-constr_mass_meds45 = weightsfile[measured_index45][2]
-constrwidth_mass_meds_inf45 = weightsfile[measured_index_inf45][2]
-constrwidth_mass_meds_sup45 = weightsfile[measured_index_sup45][2]
+    constr_mass_meds45 = weightsfile[measured_index45][2]
+    constrwidth_mass_meds_inf45 = weightsfile[measured_index_inf45][2]
+    constrwidth_mass_meds_sup45 = weightsfile[measured_index_sup45][2]
 
-constr_mass2_meds45 = weightsfile[measured_index45][3]
-constrwidth_mass2_meds_inf45 = weightsfile[measured_index_inf45][3]
-constrwidth_mass2_meds_sup45 = weightsfile[measured_index_sup45][3]
+    constr_mass2_meds45 = weightsfile[measured_index45][3]
+    constrwidth_mass2_meds_inf45 = weightsfile[measured_index_inf45][3]
+    constrwidth_mass2_meds_sup45 = weightsfile[measured_index_sup45][3]
 
-constr_mass3_meds45 = weightsfile[measured_index45][4]
-constrwidth_mass3_meds_inf45 = weightsfile[measured_index_inf45][4]
-constrwidth_mass3_meds_sup45 = weightsfile[measured_index_sup45][4]
+    constr_mass3_meds45 = weightsfile[measured_index45][4]
+    constrwidth_mass3_meds_inf45 = weightsfile[measured_index_inf45][4]
+    constrwidth_mass3_meds_sup45 = weightsfile[measured_index_sup45][4]
 
-constr_oneoverr_meds45 = weightsfile[measured_index45][5]
-constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][5]
-constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][5]
+    constr_oneoverr_meds45 = weightsfile[measured_index45][5]
+    constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][5]
+    constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][5]
 
-constr_zoverr_meds45 = weightsfile[measured_index45][6]
-constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][6]
-constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][6]
+    constr_zoverr_meds45 = weightsfile[measured_index45][6]
+    constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][6]
+    constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][6]
 
-constr_massoverr_meds45 = weightsfile[measured_index45][7]
-constrwidth_massoverr_meds_inf45 = weightsfile[measured_index_inf45][7]
-constrwidth_massoverr_meds_sup45 = weightsfile[measured_index_sup45][7]
+    constr_massoverr_meds45 = weightsfile[measured_index45][7]
+    constrwidth_massoverr_meds_inf45 = weightsfile[measured_index_inf45][7]
+    constrwidth_massoverr_meds_sup45 = weightsfile[measured_index_sup45][7]
 
-constr_mass2overr_meds45 = weightsfile[measured_index45][8]
-constrwidth_mass2overr_meds_inf45 = weightsfile[measured_index_inf45][8]
-constrwidth_mass2overr_meds_sup45 = weightsfile[measured_index_sup45][8]
+    constr_mass2overr_meds45 = weightsfile[measured_index45][8]
+    constrwidth_mass2overr_meds_inf45 = weightsfile[measured_index_inf45][8]
+    constrwidth_mass2overr_meds_sup45 = weightsfile[measured_index_sup45][8]
 
-constr_mass3overr_meds45 = weightsfile[measured_index45][9]
-constrwidth_mass3overr_meds_inf45 = weightsfile[measured_index_inf45][9]
-constrwidth_mass3overr_meds_sup45 = weightsfile[measured_index_sup45][9]
+    constr_mass3overr_meds45 = weightsfile[measured_index45][9]
+    constrwidth_mass3overr_meds_inf45 = weightsfile[measured_index_inf45][9]
+    constrwidth_mass3overr_meds_sup45 = weightsfile[measured_index_sup45][9]
 
-constr_mass2rms_meds45 = weightsfile[measured_index45][10]
-constrwidth_mass2rms_meds_inf45 = weightsfile[measured_index_inf45][10]
-constrwidth_mass2rms_meds_sup45 = weightsfile[measured_index_sup45][10]
+    constr_mass2rms_meds45 = weightsfile[measured_index45][10]
+    constrwidth_mass2rms_meds_inf45 = weightsfile[measured_index_inf45][10]
+    constrwidth_mass2rms_meds_sup45 = weightsfile[measured_index_sup45][10]
 
-constr_mass3rms_meds45 = weightsfile[measured_index45][11]
-constrwidth_mass3rms_meds_inf45 = weightsfile[measured_index_inf45][11]
-constrwidth_mass3rms_meds_sup45 = weightsfile[measured_index_sup45][11]
+    constr_mass3rms_meds45 = weightsfile[measured_index45][11]
+    constrwidth_mass3rms_meds_inf45 = weightsfile[measured_index_inf45][11]
+    constrwidth_mass3rms_meds_sup45 = weightsfile[measured_index_sup45][11]
 
-constr_mass2overrrms_meds45 = weightsfile[measured_index45][12]
-constrwidth_mass2overrrms_meds_inf45 = weightsfile[measured_index_inf45][12]
-constrwidth_mass2overrrms_meds_sup45 = weightsfile[measured_index_sup45][12]
+    constr_mass2overrrms_meds45 = weightsfile[measured_index45][12]
+    constrwidth_mass2overrrms_meds_inf45 = weightsfile[measured_index_inf45][12]
+    constrwidth_mass2overrrms_meds_sup45 = weightsfile[measured_index_sup45][12]
 
-constr_mass3overrrms_meds45 = weightsfile[measured_index45][13]
-constrwidth_mass3overrrms_meds_inf45 = weightsfile[measured_index_inf45][13]
-constrwidth_mass3overrrms_meds_sup45 = weightsfile[measured_index_sup45][13]
+    constr_mass3overrrms_meds45 = weightsfile[measured_index45][13]
+    constrwidth_mass3overrrms_meds_inf45 = weightsfile[measured_index_inf45][13]
+    constrwidth_mass3overrrms_meds_sup45 = weightsfile[measured_index_sup45][13]
 
-constr_flexion_meds45 = weightsfile[measured_index45][14]
-constrwidth_flexion_meds_inf45 = weightsfile[measured_index_inf45][14]
-constrwidth_flexion_meds_sup45 = weightsfile[measured_index_sup45][14]
+    constr_flexion_meds45 = weightsfile[measured_index45][14]
+    constrwidth_flexion_meds_inf45 = weightsfile[measured_index_inf45][14]
+    constrwidth_flexion_meds_sup45 = weightsfile[measured_index_sup45][14]
 
-constr_tidal_meds45 = weightsfile[measured_index45][15]
-constrwidth_tidal_meds_inf45 = weightsfile[measured_index_inf45][15]
-constrwidth_tidal_meds_sup45 = weightsfile[measured_index_sup45][15]
+    constr_tidal_meds45 = weightsfile[measured_index45][15]
+    constrwidth_tidal_meds_inf45 = weightsfile[measured_index_inf45][15]
+    constrwidth_tidal_meds_sup45 = weightsfile[measured_index_sup45][15]
 
-constr_SIS_meds45 = weightsfile[measured_index45][16]
-constrwidth_SIS_meds_inf45 = weightsfile[measured_index_inf45][16]
-constrwidth_SIS_meds_sup45 = weightsfile[measured_index_sup45][16]
+    constr_SIS_meds45 = weightsfile[measured_index45][16]
+    constrwidth_SIS_meds_inf45 = weightsfile[measured_index_inf45][16]
+    constrwidth_SIS_meds_sup45 = weightsfile[measured_index_sup45][16]
 
-constr_SIShalo_meds45 = weightsfile[measured_index45][17]
-constrwidth_SIShalo_meds_inf45 = weightsfile[measured_index_inf45][17]
-constrwidth_SIShalo_meds_sup45 = weightsfile[measured_index_sup45][17]
+    constr_SIShalo_meds45 = weightsfile[measured_index45][17]
+    constrwidth_SIShalo_meds_inf45 = weightsfile[measured_index_inf45][17]
+    constrwidth_SIShalo_meds_sup45 = weightsfile[measured_index_sup45][17]
 
 
-constr_gal_meds120 = weightsfile[measured_index120][0]
-constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
-constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
+    constr_gal_meds120 = weightsfile[measured_index120][0]
+    constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
+    constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
 
-constr_z_meds120 = weightsfile[measured_index120][1]
-constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
-constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
+    constr_z_meds120 = weightsfile[measured_index120][1]
+    constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
+    constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
 
-constr_mass_meds120 = weightsfile[measured_index120][2]
-constrwidth_mass_meds_inf120 = weightsfile[measured_index_inf120][2]
-constrwidth_mass_meds_sup120 = weightsfile[measured_index_sup120][2]
+    constr_mass_meds120 = weightsfile[measured_index120][2]
+    constrwidth_mass_meds_inf120 = weightsfile[measured_index_inf120][2]
+    constrwidth_mass_meds_sup120 = weightsfile[measured_index_sup120][2]
 
-constr_mass2_meds120 = weightsfile[measured_index120][3]
-constrwidth_mass2_meds_inf120 = weightsfile[measured_index_inf120][3]
-constrwidth_mass2_meds_sup120 = weightsfile[measured_index_sup120][3]
+    constr_mass2_meds120 = weightsfile[measured_index120][3]
+    constrwidth_mass2_meds_inf120 = weightsfile[measured_index_inf120][3]
+    constrwidth_mass2_meds_sup120 = weightsfile[measured_index_sup120][3]
 
-constr_mass3_meds120 = weightsfile[measured_index120][4]
-constrwidth_mass3_meds_inf120 = weightsfile[measured_index_inf120][4]
-constrwidth_mass3_meds_sup120 = weightsfile[measured_index_sup120][4]
+    constr_mass3_meds120 = weightsfile[measured_index120][4]
+    constrwidth_mass3_meds_inf120 = weightsfile[measured_index_inf120][4]
+    constrwidth_mass3_meds_sup120 = weightsfile[measured_index_sup120][4]
 
-constr_oneoverr_meds120 = weightsfile[measured_index120][5]
-constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][5]
-constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][5]
+    constr_oneoverr_meds120 = weightsfile[measured_index120][5]
+    constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][5]
+    constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][5]
 
-constr_zoverr_meds120 = weightsfile[measured_index120][6]
-constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][6]
-constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][6]
+    constr_zoverr_meds120 = weightsfile[measured_index120][6]
+    constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][6]
+    constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][6]
 
-constr_massoverr_meds120 = weightsfile[measured_index120][7]
-constrwidth_massoverr_meds_inf120 = weightsfile[measured_index_inf120][7]
-constrwidth_massoverr_meds_sup120 = weightsfile[measured_index_sup120][7]
+    constr_massoverr_meds120 = weightsfile[measured_index120][7]
+    constrwidth_massoverr_meds_inf120 = weightsfile[measured_index_inf120][7]
+    constrwidth_massoverr_meds_sup120 = weightsfile[measured_index_sup120][7]
 
-constr_mass2overr_meds120 = weightsfile[measured_index120][8]
-constrwidth_mass2overr_meds_inf120 = weightsfile[measured_index_inf120][8]
-constrwidth_mass2overr_meds_sup120 = weightsfile[measured_index_sup120][8]
+    constr_mass2overr_meds120 = weightsfile[measured_index120][8]
+    constrwidth_mass2overr_meds_inf120 = weightsfile[measured_index_inf120][8]
+    constrwidth_mass2overr_meds_sup120 = weightsfile[measured_index_sup120][8]
 
-constr_mass3overr_meds120 = weightsfile[measured_index120][9]
-constrwidth_mass3overr_meds_inf120 = weightsfile[measured_index_inf120][9]
-constrwidth_mass3overr_meds_sup120 = weightsfile[measured_index_sup120][9]
+    constr_mass3overr_meds120 = weightsfile[measured_index120][9]
+    constrwidth_mass3overr_meds_inf120 = weightsfile[measured_index_inf120][9]
+    constrwidth_mass3overr_meds_sup120 = weightsfile[measured_index_sup120][9]
 
-constr_mass2rms_meds120 = weightsfile[measured_index120][10]
-constrwidth_mass2rms_meds_inf120 = weightsfile[measured_index_inf120][10]
-constrwidth_mass2rms_meds_sup120 = weightsfile[measured_index_sup120][10]
+    constr_mass2rms_meds120 = weightsfile[measured_index120][10]
+    constrwidth_mass2rms_meds_inf120 = weightsfile[measured_index_inf120][10]
+    constrwidth_mass2rms_meds_sup120 = weightsfile[measured_index_sup120][10]
 
-constr_mass3rms_meds120 = weightsfile[measured_index120][11]
-constrwidth_mass3rms_meds_inf120 = weightsfile[measured_index_inf120][11]
-constrwidth_mass3rms_meds_sup120 = weightsfile[measured_index_sup120][11]
+    constr_mass3rms_meds120 = weightsfile[measured_index120][11]
+    constrwidth_mass3rms_meds_inf120 = weightsfile[measured_index_inf120][11]
+    constrwidth_mass3rms_meds_sup120 = weightsfile[measured_index_sup120][11]
 
-constr_mass2overrrms_meds120 = weightsfile[measured_index120][12]
-constrwidth_mass2overrrms_meds_inf120 = weightsfile[measured_index_inf120][12]
-constrwidth_mass2overrrms_meds_sup120 = weightsfile[measured_index_sup120][12]
+    constr_mass2overrrms_meds120 = weightsfile[measured_index120][12]
+    constrwidth_mass2overrrms_meds_inf120 = weightsfile[measured_index_inf120][12]
+    constrwidth_mass2overrrms_meds_sup120 = weightsfile[measured_index_sup120][12]
 
-constr_mass3overrrms_meds120 = weightsfile[measured_index120][13]
-constrwidth_mass3overrrms_meds_inf120 = weightsfile[measured_index_inf120][13]
-constrwidth_mass3overrrms_meds_sup120 = weightsfile[measured_index_sup120][13]
+    constr_mass3overrrms_meds120 = weightsfile[measured_index120][13]
+    constrwidth_mass3overrrms_meds_inf120 = weightsfile[measured_index_inf120][13]
+    constrwidth_mass3overrrms_meds_sup120 = weightsfile[measured_index_sup120][13]
 
-constr_flexion_meds120 = weightsfile[measured_index120][14]
-constrwidth_flexion_meds_inf120 = weightsfile[measured_index_inf120][14]
-constrwidth_flexion_meds_sup120 = weightsfile[measured_index_sup120][14]
+    constr_flexion_meds120 = weightsfile[measured_index120][14]
+    constrwidth_flexion_meds_inf120 = weightsfile[measured_index_inf120][14]
+    constrwidth_flexion_meds_sup120 = weightsfile[measured_index_sup120][14]
 
-constr_tidal_meds120 = weightsfile[measured_index120][15]
-constrwidth_tidal_meds_inf120 = weightsfile[measured_index_inf120][15]
-constrwidth_tidal_meds_sup120 = weightsfile[measured_index_sup120][15]
+    constr_tidal_meds120 = weightsfile[measured_index120][15]
+    constrwidth_tidal_meds_inf120 = weightsfile[measured_index_inf120][15]
+    constrwidth_tidal_meds_sup120 = weightsfile[measured_index_sup120][15]
 
-constr_SIS_meds120 = weightsfile[measured_index120][16]
-constrwidth_SIS_meds_inf120 = weightsfile[measured_index_inf120][16]
-constrwidth_SIS_meds_sup120 = weightsfile[measured_index_sup120][16]
+    constr_SIS_meds120 = weightsfile[measured_index120][16]
+    constrwidth_SIS_meds_inf120 = weightsfile[measured_index_inf120][16]
+    constrwidth_SIS_meds_sup120 = weightsfile[measured_index_sup120][16]
 
-constr_SIShalo_meds120 = weightsfile[measured_index120][17]
-constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
-constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
+    constr_SIShalo_meds120 = weightsfile[measured_index120][17]
+    constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
+    constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
+
+if lens == "0408":
+    constr_gal_meds45 = weightsfile[measured_index45][0]
+    constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
+    constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
+
+    constr_z_meds45 = weightsfile[measured_index45][1]
+    constrwidth_z_meds_inf45 = weightsfile[measured_index_inf45][1]
+    constrwidth_z_meds_sup45 = weightsfile[measured_index_sup45][1]
+
+    constr_oneoverr_meds45 = weightsfile[measured_index45][2]
+    constrwidth_oneoverr_meds_inf45 = weightsfile[measured_index_inf45][2]
+    constrwidth_oneoverr_meds_sup45 = weightsfile[measured_index_sup45][2]
+
+    constr_zoverr_meds45 = weightsfile[measured_index45][3]
+    constrwidth_zoverr_meds_inf45 = weightsfile[measured_index_inf45][3]
+    constrwidth_zoverr_meds_sup45 = weightsfile[measured_index_sup45][3]
+
+
+    constr_gal_meds120 = weightsfile[measured_index120][0]
+    constrwidth_gal_meds_inf120 = weightsfile[measured_index_inf120][0]
+    constrwidth_gal_meds_sup120 = weightsfile[measured_index_sup120][0]
+
+    constr_z_meds120 = weightsfile[measured_index120][1]
+    constrwidth_z_meds_inf120 = weightsfile[measured_index_inf120][1]
+    constrwidth_z_meds_sup120 = weightsfile[measured_index_sup120][1]
+
+    constr_oneoverr_meds120 = weightsfile[measured_index120][2]
+    constrwidth_oneoverr_meds_inf120 = weightsfile[measured_index_inf120][2]
+    constrwidth_oneoverr_meds_sup120 = weightsfile[measured_index_sup120][2]
+
+    constr_zoverr_meds120 = weightsfile[measured_index120][3]
+    constrwidth_zoverr_meds_inf120 = weightsfile[measured_index_inf120][3]
+    constrwidth_zoverr_meds_sup120 = weightsfile[measured_index_sup120][3]
 
 def declareweight(weightin):
     if weightin.split('_')[0] == "45":
@@ -428,21 +458,21 @@ else: groupsstr = ''
 if conjoined == 5:
     if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int) | (type(weight5_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s_%s%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,weightin5,mag,mode,increment1,increment2,increment3,increment4,increment5,emptystr,groupsstr,stringshearprior,sam)
 if conjoined == 4:
     if ((type(weight2_index) != int) | (type(weight3_index) != int) | (type(weight4_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s_%s%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,weightin4,mag,mode,increment1,increment2,increment3,increment4,emptystr,groupsstr,stringshearprior,sam)
 if conjoined == 3:
     if ((type(weight2_index) != int) | (type(weight3_index) != int)) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_%s_increments%s_%s_%s%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,weightin3,mag,mode,increment1,increment2,increment3,emptystr,groupsstr,stringshearprior,sam)
 if conjoined == 2:
     if (type(weight2_index) != int) & (shearwithoutprior == True): stringshearprior = '_shearwithoutprior'
     else: stringshearprior = ''
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,stringshearprior)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_%s_increments%s_%s%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,weightin2,mag,mode,increment1,increment2,emptystr,groupsstr,stringshearprior,sam)
 if conjoined == 1:
-    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr)
+    output = '%skappahist_%s_%s_%sinnermask_nobeta%s_zgap%s_%s_%s_%s_%s_%s_increments%s%s%s%s.cat' % (rootout,lens,compmeas,innermask,handpickedstr,zinf,zsup,other,weightin1,mag,mode,increment1,emptystr,groupsstr,sam)
 
 def readfile(file,usecols):
     f = fitsio.FITS(file)
@@ -478,16 +508,17 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
     else: field = 8
     med1 = np.zeros(field)
     filters1 = "ugriz"
+    if lens == "0408": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight1_index) == int:
-            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index])
+            weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=[weight1_index])
             if i == 0:
                 weight1 = weight1_
             else:
                 weight1 = np.append(weight1,weight1_)
         else:
-            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[2,3])
+            weight1_1_,weight1_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=[2,3])
             if i == 0:
                 weight1_1 = weight1_1_
                 weight1_2 = weight1_2_
@@ -514,10 +545,11 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
     med1 = np.zeros(field)
     med2 = np.zeros(field)
     filters1 = "ugriz"
+    if lens == "0408": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index))
+            weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(weight1_index,weight2_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -525,7 +557,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
                 weight1 = np.append(weight1,weight1_)
                 weight2 = np.append(weight2,weight2_)
         else:
-            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=[weight1_index,2,3])
+            weight1_,weight2_1_,weight2_2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=[weight1_index,2,3])
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -560,10 +592,11 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
     med2 = np.zeros(field)
     med3 = np.zeros(field)
     filters1 = "ugriz"
+    if lens == "0408": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index))
+            weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(weight1_index,weight2_index,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -573,7 +606,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
                 weight2 = np.append(weight2,weight2_)
                 weight3 = np.append(weight3,weight3_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index))
+            weight1_,weight2_1_,weight2_2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(weight1_index,2,3,weight3_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -616,10 +649,11 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
     med3 = np.zeros(field)
     med4 = np.zeros(field)
     filters1 = "ugriz"
+    if lens == "0408": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,weight2_index,weight3_index,weight4_index))
+            weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(weight1_index,weight2_index,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2 = weight2_
@@ -631,7 +665,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
                 weight3 = np.append(weight3,weight3_)
                 weight4 = np.append(weight4,weight4_)
         else:
-            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(weight1_index,2,3,weight3_index,weight4_index))
+            weight1_,weight2_1_,weight2_2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(weight1_index,2,3,weight3_index,weight4_index))
             if i == 0:
                 weight1 = weight1_
                 weight2_1 = weight2_1_
@@ -682,10 +716,10 @@ def readconjoined1_ugrizJHK(radius,weight1_index,constr_weight1,increment1,med_w
     for j in range(field):
       for i in range(8):
         if type(weight1_index) == int:
-            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index))
+            id_,kappa_, weight1_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index))
             weight1_ = weight1_ / med_weight1
         else:
-            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,2,3))
+            id_,kappa_, gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -739,11 +773,11 @@ def readconjoined2_ugrizJHK(radius,weight1_index,weight2_index,constr_weight1,co
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index))
+            id_,kappa_, weight1_,weight2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,weight2_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
         else:
-            id_,kappa_,weight1_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,2,3))
+            id_,kappa_,weight1_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -814,12 +848,12 @@ def readconjoined3_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,con
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index))
+            id_,kappa_, weight1_,weight2_,weight3_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,weight2_index,weight3_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
         else:
-            id_,kappa_, weight1_,weight3_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,2,3))
+            id_,kappa_, weight1_,weight3_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,weight3_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -878,13 +912,13 @@ def readconjoined4_ugrizJHK(radius,weight1_index,weight2_index,weight3_index,wei
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
-            id_,kappa_, weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index))
+            id_,kappa_, weight1_,weight2_,weight3_,weight4_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,weight2_index,weight3_index,weight4_index))
             weight1_ = weight1_ / med_weight1
             weight2_ = weight2_ / med_weight2
             weight3_ = weight3_ / med_weight3
             weight4_ = weight4_ / med_weight4
         else:
-            id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup), usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3))
+            id_,kappa_, weight1_,weight3_,weight4_,gamma1_,gamma2_ = readfile("%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam), usecols=(0,1,weight1_index,weight3_index,weight4_index,2,3))
             gamma1 = gamma1_
             gamma2 = gamma2_
             gamma = gamma1 # just so that the array has the correct shape
@@ -959,7 +993,7 @@ def readconjoined1galinner_ugrizJHK(radius,weight1_index,constr_weight1,incremen
     else: field = 8
     for j in range(field):
       for i in range(8):
-        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam)
         f = fitsio.FITS(file)
         if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
@@ -1024,7 +1058,7 @@ def readconjoined2galinner_ugrizJHK(radius,weight1_index,weight2_index,constr_we
     else: field = 8
     for j in range(field):
       for i in range(8):
-        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam)
         f = fitsio.FITS(file)
         if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
@@ -1104,7 +1138,7 @@ def readconjoined3galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
     else: field = 8
     for j in range(field):
       for i in range(8):
-        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam)
         f = fitsio.FITS(file)
         if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
@@ -1200,7 +1234,7 @@ def readconjoined4galinner_ugrizJHK(radius,weight1_index,weight2_index,weight3_i
     else: field = 8
     for j in range(field):
       for i in range(8):
-        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup)
+        file = "%snobeta%s%s%sinject_%s_%s_GGL_los_8_%s_%s_%s_%s_%sarcsecinner_gap_%s_%s%s.fits" % (root,str(plane),compmeas,mode,filters1,lens,str(j),str(i),mag,radius,innermask,zinf,zsup,sam)
         f = fitsio.FITS(file)
         if 'galinner' not in f[1].get_colnames()[-1]:
             sys.exit('Only empty inner mask lines of sight requested, but the input file lacks the requested final column with the number of galaxies inside the mask.')
@@ -1763,7 +1797,7 @@ if conjoined == 5:
                                 else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
                                 if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
                                 else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
+                                kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / data.shape[0]
                                 if LOS == 0:
                                     unbiased_kappa_constrained = kappa_constrained
                                 else:
@@ -1800,7 +1834,7 @@ if conjoined == 5:
                                 else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
                                 if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
                                 else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
                                 if LOS == 0:
                                     unbiased_kappa_constrained = kappa_constrained
                                 else:
@@ -1837,7 +1871,7 @@ if conjoined == 5:
                                 else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
                                 if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
                                 else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
                                 if LOS == 0:
                                     unbiased_kappa_constrained = kappa_constrained
                                 else:
@@ -1874,7 +1908,7 @@ if conjoined == 5:
                                 else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
                                 if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
                                 else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
                                 if LOS == 0:
                                     unbiased_kappa_constrained = kappa_constrained
                                 else:
@@ -1911,7 +1945,7 @@ if conjoined == 5:
                                 else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
                                 if E5 < 0: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_inf)
                                 else: gauss_factorE5 = gauss.pdf(float(E5)/E_w5_sup)
-                                kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
+                                kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 * gauss_factorE5 / datamarginalizedshear.shape[0]
                                 if LOS == 0:
                                     unbiased_kappa_constrained = kappa_constrained
                                 else:
@@ -1943,7 +1977,7 @@ if conjoined == 4:
                             else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
                             if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
                             else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / data.shape[0]
+                            kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / data.shape[0]
                             if LOS == 0:
                                 unbiased_kappa_constrained = kappa_constrained
                             else:
@@ -1979,7 +2013,7 @@ if conjoined == 4:
                             else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
                             if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
                             else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
                             if LOS == 0:
                                 unbiased_kappa_constrained = kappa_constrained
                             else:
@@ -2015,7 +2049,7 @@ if conjoined == 4:
                             else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
                             if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
                             else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
                             if LOS == 0:
                                 unbiased_kappa_constrained = kappa_constrained
                             else:
@@ -2049,7 +2083,7 @@ if conjoined == 4:
                             else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
                             if E4 < 0: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_inf)
                             else: gauss_factorE4 = gauss.pdf(float(E4)/E_w4_sup)
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
+                            kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 * gauss_factorE4 / datamarginalizedshear.shape[0]
                             if LOS == 0:
                                 unbiased_kappa_constrained = kappa_constrained
                             else:
@@ -2076,7 +2110,7 @@ if conjoined == 3:
                         else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
                         if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
                         else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / data.shape[0]
+                        kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / data.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
@@ -2105,7 +2139,7 @@ if conjoined == 3:
                         else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
                         if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
                         else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
+                        kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
@@ -2134,7 +2168,7 @@ if conjoined == 3:
                         else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
                         if E3 < 0: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_inf)
                         else: gauss_factorE3 = gauss.pdf(float(E3)/E_w3_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
+                        kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 * gauss_factorE3 / datamarginalizedshear.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
@@ -2157,8 +2191,8 @@ if conjoined == 2:
                         if E2 < 0: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_inf)
                         else: gauss_factorE2 = gauss.pdf(float(E2)/E_w2_sup)
                         if (type(weight2_index) != int) & (shearwithoutprior == True) & (weightin1.split('_')[0] == weightin2.split('_')[0]):
-                            kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / datamarginalizedshear.shape[0]
-                        else: kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
+                            kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / datamarginalizedshear.shape[0]
+                        else: kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 * gauss_factorE2 / data.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:
@@ -2172,7 +2206,7 @@ if conjoined == 1:
                     if data.size > 0:
                         if E1 < 0: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_inf) # for asymmetric limits, implement a gaussian on each side
                         else: gauss_factorE1 = gauss.pdf(float(E1)/E_w1_sup)
-                        kappa_constrained = np.histogram(data, bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 / data.shape[0]
+                        kappa_constrained = np.histogram(data.astype(float), bins = bin_stat, range=(min_kappa,max_kappa))[0].astype(float) * gauss_factorE1 / data.shape[0]
                         if LOS == 0:
                             unbiased_kappa_constrained = kappa_constrained
                         else:

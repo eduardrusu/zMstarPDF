@@ -8,9 +8,9 @@ from scipy.stats import norm
 import numpy as np
 import sys
 
-min_kappa = -0.10
+min_kappa = -0.20
 max_kappa = 1
-min_kappa_plot = -0.05
+min_kappa_plot = -0.2
 max_kappa_plot = 0.2
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)

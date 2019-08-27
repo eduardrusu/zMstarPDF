@@ -156,16 +156,16 @@ if lens == "0408":
         fracspec20 = 0.5 # for gals, not stars
         fracspec21 = 0.5
         fracspec22 = 1
-        fracspec225 = 0.33
+        fracspec225 = 0.20
         fracspec23 = 0.
         fracspec24 = 0.
     if (radiusstr == "120"):
         hstcoverage = 0.575
         radius = 120
-        fracspec20 = 0.77
+        fracspec20 = 0.89
         fracspec21 = 0.77
         fracspec22 = 1
-        fracspec225 = 0.05
+        fracspec225 = 0.43
         fracspec23 = 0.
         fracspec24 = 0.
 
