@@ -21,7 +21,7 @@ import fitsio # https://github.com/esheldon/fitsio
 start_time=time.time()
 only8 = False # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
-henriques = True
+henriques = False
 if henriques == False: sam = ""
 else: sam = "Henriques"
 
