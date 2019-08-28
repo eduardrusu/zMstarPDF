@@ -1,4 +1,4 @@
-# produces density plot for catalogue vs. computed values of redshift, stellar masses and halo masses 
+# produces density plot for catalogue vs. computed values of redshift, stellar masses and halo masses
 
 from matplotlib.colors import LogNorm
 import scipy.optimize as optimization
