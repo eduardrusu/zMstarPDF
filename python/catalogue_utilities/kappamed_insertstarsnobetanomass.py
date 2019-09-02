@@ -169,6 +169,31 @@ if lens == "0408":
         fracspec23 = 0.
         fracspec24 = 0.
 
+if lens == "2038":
+    z_s = 0.777
+    z_l = 0.230
+    brightmag = 0
+    limmag = 22.5
+    pln = 44 # except for redshifts and pln, at the moment all values are copied from 0408
+    if (radiusstr == "45"):
+        hstcoverage = 1
+        radius = 45
+        fracspec20 = 0.5 # for gals, not stars
+        fracspec21 = 0.5
+        fracspec22 = 1
+        fracspec225 = 0.20
+        fracspec23 = 0.
+        fracspec24 = 0.
+    if (radiusstr == "120"):
+        hstcoverage = 0.575
+        radius = 120
+        fracspec20 = 0.89
+        fracspec21 = 0.77
+        fracspec22 = 1
+        fracspec225 = 0.43
+        fracspec23 = 0.
+        fracspec24 = 0.
+
 if lens == "B1608":
     z_s = 1.39
     pln = 37 # MS simulation plane
@@ -292,7 +317,7 @@ rootstars = "/lfs08/rusucs/insertstars/"
 
 # contamination and incompleteness based on Figure 9 W1 from Hildebrandt 2012
 
-if lens != "0408": # use CFHTLenS
+if lens != "0408" and lens != "2038": # use CFHTLenS
     cont_h12_18 = 0.00
     cont_h12_185 = 0.12
     cont_h12_19 = 0.08
@@ -321,7 +346,7 @@ if lens != "0408": # use CFHTLenS
     inc_h12_235 = 0.02
     inc_h12_24 = 0.01
 
-if lens == "0408": # use DES the MOF (worst case for the 3 lines) plot of Y3 from https://cdcvs.fnal.gov/redmine/projects/des-y3/wiki/Y3_Extended_Classifier_v2
+if lens == "0408" or lens == "2038": # use DES the MOF (worst case for the 3 lines) plot of Y3 from https://cdcvs.fnal.gov/redmine/projects/des-y3/wiki/Y3_Extended_Classifier_v2
     cont_h12_18 = 0.01
     cont_h12_185 = 0.01
     cont_h12_19 = 0.01
@@ -503,14 +528,14 @@ for i in range(sam_index):
             #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
             #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
         if "measured" in type:
-            if lens == "0408":
+            if lens == "0408" or lens == "2038":
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,4,5,1), unpack=True)
                 posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,4,5), unpack=True)
             else:
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
                 posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
         elif "computed" in type: # actually do not use this right now, because the files are located somewhere else
-            if lens == "0408":
+            if lens == "0408" or lens == "2038":
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1), unpack=True)
                 posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1), unpack=True)
             else:

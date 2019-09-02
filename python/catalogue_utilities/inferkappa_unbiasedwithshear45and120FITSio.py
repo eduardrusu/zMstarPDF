@@ -79,11 +79,11 @@ bin_stat = 2000
 min_kappa = -0.20
 max_kappa = 1
 
-increment1 = 1# refers to the E interval from Greene et al. 2014
-increment2 = 1
-increment3 = 1
-increment4 = 1
-increment5 = 1
+increment1 = 2# refers to the E interval from Greene et al. 2014
+increment2 = 2
+increment3 = 2
+increment4 = 2
+increment5 = 2
 
 # these quantities are only for dealing with galaxy groups
 degree = np.pi / 180
@@ -171,6 +171,10 @@ if lens == "0408":
         constrwidth_gamma_inf = 0.0257
         constrwidth_gamma_sup = 0.0265
 
+if lens == "2038":
+    filters = "griz_lens"
+    plane = 44
+
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile
 measured_index_inf45 = 1
@@ -179,7 +183,7 @@ measured_index120 = 3
 measured_index_inf120 = 4
 measured_index_sup120 = 5
 
-if lens != "J1206" and lens != "0408":
+if lens != "J1206" and lens != "0408" and lens != "2038":
     def declareweight(weightin):
         if weightin.split('_')[1] == "gal": weight_index = 4 # these are the column indices in the files produced by kappamed_insertstarsnobeta.py
         if weightin.split('_')[1] == "z": weight_index = 5
@@ -201,7 +205,7 @@ if lens != "J1206" and lens != "0408":
         if weightin.split('_')[1] == "SIShalo": weight_index = 21
         if weightin.split('_')[1] == "gamma": weight_index = None
         return weight_index
-if lens == "J1206" or "0408": # no mass quantities available
+if lens == "J1206" or lens == "0408" or lens == "2038": # no mass quantities available
     def declareweight(weightin):
         if weightin.split('_')[1] == "gal": weight_index = 4
         if weightin.split('_')[1] == "z": weight_index = 5
@@ -221,7 +225,7 @@ if conjoined >= 2:
                 weight5_index = declareweight(weightin5)
 
 # read weight constraints
-if lens != "0408":
+if lens != "0408" and lens != "2038":
     constr_gal_meds45 = weightsfile[measured_index45][0]
     constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
     constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
@@ -367,7 +371,7 @@ if lens != "0408":
     constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
     constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
 
-if lens == "0408":
+if lens == "0408" and lens != "2038":
     constr_gal_meds45 = weightsfile[measured_index45][0]
     constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
     constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
@@ -508,7 +512,7 @@ def readconjoined1_ugriz(radius,weight1_index,constr_weight1,constrwidth_weight1
     else: field = 8
     med1 = np.zeros(field)
     filters1 = "ugriz"
-    if lens == "0408": filters1 = "griz_calib"
+    if lens == "0408" or lens == "2038": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight1_index) == int:
@@ -545,7 +549,7 @@ def readconjoined2_ugriz(radius,weight1_index,weight2_index,constr_weight1,const
     med1 = np.zeros(field)
     med2 = np.zeros(field)
     filters1 = "ugriz"
-    if lens == "0408": filters1 = "griz_calib"
+    if lens == "0408" or lens == "2038": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
@@ -592,7 +596,7 @@ def readconjoined3_ugriz(radius,weight1_index,weight2_index,weight3_index,constr
     med2 = np.zeros(field)
     med3 = np.zeros(field)
     filters1 = "ugriz"
-    if lens == "0408": filters1 = "griz_calib"
+    if lens == "0408" or lens == "2038": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
@@ -649,7 +653,7 @@ def readconjoined4_ugriz(radius,weight1_index,weight2_index,weight3_index,weight
     med3 = np.zeros(field)
     med4 = np.zeros(field)
     filters1 = "ugriz"
-    if lens == "0408": filters1 = "griz_calib"
+    if lens == "0408" or lens == "2038": filters1 = "griz_calib"
     for j in range(field):
       for i in range(8):
         if type(weight2_index) == int:
