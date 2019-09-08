@@ -260,5 +260,5 @@ plt.plot(kappa_values[:-1],smooth(kappa_15,winlen,'flat')[(winlen/2-1):-(winlen/
 plt.xlabel(r'$\kappa$', fontsize=20)
 plt.ylabel(r'normalized counts', fontsize=20)
 plt.legend(loc="lower right",fontsize=7)
-plt.title("Convergence distributions using SA galaxies",fontsize=14)
+plt.title("Convergence distributions using De Lucia & Blaizot (2007) galaxies",fontsize=13)
 plt.savefig('%skappahist_handpicked.png' % root, dpi=250, bbox_inches='tight')

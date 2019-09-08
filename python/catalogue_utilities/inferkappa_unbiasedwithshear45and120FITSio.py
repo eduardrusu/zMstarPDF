@@ -19,9 +19,9 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
-only8 = False # in this case run only 8/64 MS fields
+only8 = True # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
-henriques = False
+henriques = True
 if henriques == False: sam = ""
 else: sam = "Henriques"
 
@@ -371,7 +371,7 @@ if lens != "0408" and lens != "2038":
     constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
     constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
 
-if lens == "0408" and lens != "2038":
+if lens == "0408" or lens == "2038":
     constr_gal_meds45 = weightsfile[measured_index45][0]
     constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
     constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
