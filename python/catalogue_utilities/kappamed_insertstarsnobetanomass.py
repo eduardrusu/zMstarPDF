@@ -517,16 +517,26 @@ if sam == "Henriques": sam_index = 1
 for i in range(sam_index):
     for j in range(sam_index):
         if sam == "":
-            file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
-            file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+            if "measured" in type:
+                file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+                file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griz_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+            elif "computed" in type:
+                if lens == "0408" or lens == "2038":
+                    file_ugrizJHK = '%sSA_gal_i225_redshift2375/SA_gal_i225_redshift2375%s_%d_%d_N_4096_ang_4.images.txt' % (rootgals,root[7:],i,j)
+                    file_ugriz = '%sSA_gal_i225_redshift2375/SA_gal_i225_redshift2375%s_%d_%d_N_4096_ang_4.images.txt' % (rootgals,root[7:],i,j)
         if sam == "Henriques":
-            file_ugrizJHK = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
-            file_ugriz = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
-            #file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
-            #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
-            #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
-            #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
-            #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
+            if "measured" in type:
+                file_ugrizJHK = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
+                file_ugriz = '%s%s_N_4096_ang_4_Henriques2014_galaxi_griz.images_forNAOJ.txt' % (rootgals,root)
+                #file_ugrizJHK = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (rootgals,root,i,j,lens)
+                #file_ugrizJHK = '/Volumes/LaCieDavis/lensing_simulations/SA_galaxies/original/J1206/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_griK_%s.images_forNAOJ.txt' % (root,i,j,lens)
+                #file_ugriz = '/lfs08/rusucs/WFI2033/MSgals/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+                #file_ugriz = '/mnt/scratch/rusucs/CFHTLenS/%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (root,i,j)
+                #file_ugriz = '%s%s_%d_%d_N_4096_ang_4_SA_galaxies_on_plane_27_to_63_ugriz.images_forNAOJ.txt' % (rootgals,root,i,j)
+            elif "computed" in type:
+                if lens == "0408" or lens == "2038":
+                    file_ugrizJHK = '%sHenriques_gal_i225_redshift2375/%s_N_4096_ang_4_Henriques2014_galaxies.txt' % (rootgals,root)
+                    file_ugriz = '%sHenriques_gal_i225_redshift2375/%s_N_4096_ang_4_Henriques2014_galaxies.txt' % (rootgals,root)
         if "measured" in type:
             if lens == "0408" or lens == "2038":
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,4,5,1), unpack=True)
@@ -534,10 +544,14 @@ for i in range(sam_index):
             else:
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK, zspec__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,7,8,1), unpack=True)
                 posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,7,8), unpack=True)
-        elif "computed" in type: # actually do not use this right now, because the files are located somewhere else
+        elif "computed" in type:
             if lens == "0408" or lens == "2038":
-                posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1), unpack=True)
-                posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1), unpack=True)
+                if sam == "Henriques":
+                    posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,4,1), unpack=True)
+                    posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,4,1), unpack=True)
+                elif sam != "Henriques":
+                    posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (1,2,5,0), unpack=True)
+                    posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (1,2,5,0), unpack=True)
             else:
                 posx__ugrizJHK, posy__ugrizJHK, imag__ugrizJHK, z__ugrizJHK = np.loadtxt(file_ugrizJHK, usecols = (2,3,6,1), unpack=True)
                 posx__ugriz, posy__ugriz, imag__ugriz, z__ugriz = np.loadtxt(file_ugriz, usecols = (2,3,6,1), unpack=True)
