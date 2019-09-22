@@ -7,22 +7,29 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 
 selectpdz = False # whether or not to actually select a number of desired samples, not just compute the theoretical distributions
-if selectpdz == True: samples = 10 # define any number of desired samples
-#mode = "poisson"
-mode = "mcmc"
+if selectpdz == True: samples = 20 # define any number of desired samples
+mode = "poisson"
+#mode = "mcmc"
 photoztolerance = 1.5 # number of sigmas; doesn't apply to PG1115
 #lens = 'PG1115'
-lens = 'WFI2033'
+#lens = 'WFI2033'
+lens = '0408'
 #zgroup = 0.6588 # WFI2033lens
-zgroup = 0.4956 # WFI2033
+#zgroup = 0.4956 # WFI2033
+if lens == '0408': zgroup = 0.598 # 0408, Jason's group 5, including the lens
 if lens == 'PG1115': zgroup = 0.3097
-if lens == 'WFI2033': limmag = 22.5
-if lens == 'PG1115': limmag = 22.5 # slightly fainter than faintest in Momcheva
-if lens == 'WFI2033': faintmagspec = 22.5
-if lens == 'PG1115': faintmagspec = 22.5 # PG1115, slightly fainter than faintest in Momcheva
+if lens == '0408' or lens == 'WFI2033' or lens == 'PG1115': limmag = 22.5 # slightly fainter than faintest in Momcheva, for PG1115
+if lens == '0408' or lens == 'WFI2033' or lens == 'PG1115': faintmagspec = 22.5 # for PG1115, slightly fainter than faintest in Momcheva
+if lens == '0408': center_lensx = '04:08:21.700'; center_lensy = '-53:53:59.40' # by eye from HST images
 if lens == 'WFI2033': center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.00' # WFI2033
 if lens == 'PG1115': center_lensx = '11:18:16.90'; center_lensy = '+07:45:59.00' # PG1115
 center_lens = SkyCoord(center_lensx + ' ' + center_lensy, frame='fk5', unit=(u.hourangle, u.deg))
+if lens == '0408' and zgroup == 0.598:
+    center_groupx = '62.0715'; center_groupy = '-53.900'
+    center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
+    err_group = 22.2 # converted to arcsec
+    virrad = 179 # actually R_200 in arcsec
+    virrad_err = 30
 if zgroup == 0.6588:
     center_groupx = '308.43557011'; center_groupy = '-47.37411275'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
@@ -46,6 +53,7 @@ sep_groupx = center_lens.separation(SkyCoord(center_groupx + ' ' + center_lensy,
 sep_groupy = center_lens.separation(SkyCoord(center_lensx + ' ' + center_groupy, frame='fk5', unit=(u.hourangle, u.deg))).arcsec
 # arcsec # using R_200, which is robust against Dominique's and is used in the reference papers
 # Each of the 2 groups in WFI2033 have 3 galaxies outside R_200 so I should not count these
+if lens == '0408' and zgroup == 0.598: observed_members = 11
 if zgroup == 0.6588: observed_members = 16 # inside virial radius; the last column in the table from Dominique
 if zgroup == 0.4956: observed_members = 7
 if zgroup == 0.3097: observed_members = 13
@@ -60,8 +68,13 @@ if lens == 'PG1115':
     flux_rad = 3
     r = 4
 if lens == 'WFI2033':
-    file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat" # WFI2033
+    file = "/Users/cerusu/Dropbox/Davis_work/code/WFI2033/rnoconv_inoconv_ugrizYJHK_detectin_ir_short_potentiallyi23_withbpzeazylephareclassified_IRACmagslephareclassifiedF160W.cat"
     data = np.loadtxt(file,usecols=[2,3,4,8,28,29,30,40,97])
+if lens == '0408':
+    file = "/Users/cerusu/Dropbox/Davis_work/code/0408/DESJ0408_cat_filtered_120arcsec_225_includesspeczcol.tab"
+    data = np.loadtxt(file,usecols=[0,1,4,2,10,11,11,15,3])
+    data[:,5] = data[:,4] - data[:,5]
+    data[:,6] = data[:,4] + data[:,6]
 ra = 0
 dec = 1
 i = 2
@@ -74,19 +87,19 @@ cls = 8
 
 coord = SkyCoord(ra=data[:,ra]*u.degree, dec=data[:,dec]*u.degree, frame='fk5')
 sep = coord.separation(center_lens).arcsec
-if lens == 'WFI2033': all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)])
+if lens == 'WFI2033' or lens == '0408': all = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)])
 if lens == 'PG1115': all = len(data[:,id][(sep <= 120) & (data[:,r] <= limmag) & (data[:,flux_rad] >= 1.25)])
 print "gals: ",all
-if lens == 'WFI2033': specs120 = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
+if lens == 'WFI2033' or lens == '0408': specs120 = len(data[:,id][(sep <= 120) & (data[:,i] <= limmag) & (data[:,spec] > 0)])
 if lens == 'PG1115':
     observed120_membersID = groupgals[:,0]
     specs120 = len(observed120_membersID) + 1 + np.shape(othergals)[0]  # adding the lens to the counts
 print "specs inside 120\": ",specs120
 if lens == 'WFI2033': observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
+if lens == '0408': observed120_membersID = data[:,id][(data[:,spec] <= zgroup + 0.01) & (data[:,spec] >= zgroup - 0.01) & (sep <= 120) & (data[:,i] <= limmag) & (data[:,cls] >= 0)]
 if (lens == 'PG1115') or (zgroup == 0.6588): print 'members inside 120\":',len(observed120_membersID) + 1
 else: print 'members inside 120\":',len(observed120_membersID)
-if lens == 'WFI2033': pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,cls] >= 0) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
-
+if lens == 'WFI2033' or lens == '0408': pool = data[:,id][(data[:,spec] == -1) & (sep <= 120) & (data[:,cls] >= 0) & (data[:,z] - photoztolerance * (data[:,z] - data[:,zinf]) <= zgroup) & (data[:,z] + photoztolerance * (data[:,zsup] - data[:,z]) >= zgroup) & (data[:,i] <= faintmagspec)]
 if lens == 'PG1115':
     pool = data[:,id][(sep <= 120) & (data[:,r] <= limmag) & (data[:,flux_rad] >= 1.25)]
     for i in range(len(othergals)):
@@ -94,11 +107,12 @@ if lens == 'PG1115':
     for i in range(np.shape(groupgals)[0]):
         pool = np.delete(pool,np.where(pool == groupgals[:,0][i]))
 print 'size of pool: ',len(pool)
-
+#veldisp0.598 (0408) = 425+/-80 (rest-frame) -> Fig 5 Andreon 2010 [median range: 8-(13)-18; 68% range around central '()' in x-axis; median range because of vel disp uncertainty 5-20, in quadrature 13-9+9] galaxies inside R_200
 #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
 #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
 #veldisp0.31 = 390+50-60 -> Fig 5 Andreon 2010 [median range: 5-(8)-12; 68% range around central '()' median 6-12, in quadrature 8-4+6] galaxies inside R_200
 #veldisp0.31 = 440+90-80 -> Fig 5 Andreon 2010 [median range: 6-(13)-20; 68% range around central '()' median 8-18, in quadrature 13+/-8.5] galaxies inside R_200
+if lens == '0408' and zgroup == 0.598: med = 13; stdinf = 9; stdsup = 9
 if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
 if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
 if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6 # Wilson
@@ -176,14 +190,14 @@ if mode == "poisson":
 pdz = np.array([])
 theorysamples = 50000
 for i in range(theorysamples):
-    if i % 10 == 0: print i,'/',theorysamples
+    if i % 100 == 0: print i,'/',theorysamples
     #print i
     expected = expected_members()
     if mode == "mcmc": pdz = np.append(pdz,int(round(expected[1] * expected[0])))
     if mode == "poisson": pdz = np.append(pdz,expected[0])
 pdznoprior = np.array([])
 for i in range(theorysamples):
-    if i % 10 == 0: print i,'/',theorysamples
+    if i % 100 == 0: print i,'/',theorysamples
     #print i
     expected = expected_members_noprior()
     if mode == "mcmc": pdznoprior = np.append(pdznoprior,int(round(expected[1] * expected[0])))
