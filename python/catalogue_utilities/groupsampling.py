@@ -10,7 +10,7 @@ selectpdz = True # whether or not to actually select a number of desired samples
 if selectpdz == True: samples = 20 # define any number of desired samples
 mode = "poisson"
 #mode = "mcmc"
-photoztolerance = 1.6 # number of sigmas; doesn't apply to PG1115
+photoztolerance = 2.5 # number of sigmas; doesn't apply to PG1115
 #lens = 'PG1115'
 #lens = 'WFI2033'
 lens = '0408'
