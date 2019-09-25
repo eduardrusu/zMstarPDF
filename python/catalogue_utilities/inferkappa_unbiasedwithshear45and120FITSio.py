@@ -19,9 +19,9 @@ import time
 import fitsio # https://github.com/esheldon/fitsio
 
 start_time=time.time()
-only8 = True # in this case run only 8/64 MS fields
+only8 = False # in this case run only 8/64 MS fields
 shearwithoutprior = True # if True, do not divide by N_LOS on the shear constraint
-henriques = True
+henriques = False
 if henriques == False: sam = ""
 else: sam = "Henriques"
 
@@ -163,13 +163,13 @@ if lens == "0408":
     filters = "griz_lens"
     plane = 30
     if other == 'powerlaw':
-        constr_gamma = 0.0468
-        constrwidth_gamma_inf = 0.0462
-        constrwidth_gamma_sup = 0.0472
+        constr_gamma = 0.0524
+        constrwidth_gamma_inf = 0.0464
+        constrwidth_gamma_sup = 0.0564
     if other == 'composite':
-        constr_gamma = 0.0260
-        constrwidth_gamma_inf = 0.0257
-        constrwidth_gamma_sup = 0.0265
+        constr_gamma = 0.0292
+        constrwidth_gamma_inf = 0.0220
+        constrwidth_gamma_sup = 0.0334
 
 if lens == "2038":
     filters = "griz_lens"

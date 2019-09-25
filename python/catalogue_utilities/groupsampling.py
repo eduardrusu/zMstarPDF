@@ -6,11 +6,11 @@ import numpy as np
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
-selectpdz = False # whether or not to actually select a number of desired samples, not just compute the theoretical distributions
+selectpdz = True # whether or not to actually select a number of desired samples, not just compute the theoretical distributions
 if selectpdz == True: samples = 20 # define any number of desired samples
 mode = "poisson"
 #mode = "mcmc"
-photoztolerance = 1.5 # number of sigmas; doesn't apply to PG1115
+photoztolerance = 1.6 # number of sigmas; doesn't apply to PG1115
 #lens = 'PG1115'
 #lens = 'WFI2033'
 lens = '0408'
@@ -25,11 +25,11 @@ if lens == 'WFI2033': center_lensx = '20:33:42.080'; center_lensy = '-47:23:43.0
 if lens == 'PG1115': center_lensx = '11:18:16.90'; center_lensy = '+07:45:59.00' # PG1115
 center_lens = SkyCoord(center_lensx + ' ' + center_lensy, frame='fk5', unit=(u.hourangle, u.deg))
 if lens == '0408' and zgroup == 0.598:
-    center_groupx = '62.0715'; center_groupy = '-53.900'
+    center_groupx = '62.0695'; center_groupy = '-53.8990'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
     err_group = 22.2 # converted to arcsec
-    virrad = 179 # actually R_200 in arcsec
-    virrad_err = 30
+    virrad = 169 # actually R_200 in arcsec
+    virrad_err = 54
 if zgroup == 0.6588:
     center_groupx = '308.43557011'; center_groupy = '-47.37411275'
     center_group = SkyCoord(center_groupx + ' ' + center_groupy, frame='fk5', unit=(u.deg, u.deg))
@@ -107,12 +107,12 @@ if lens == 'PG1115':
     for i in range(np.shape(groupgals)[0]):
         pool = np.delete(pool,np.where(pool == groupgals[:,0][i]))
 print 'size of pool: ',len(pool)
-#veldisp0.598 (0408) = 425+/-80 (rest-frame) -> Fig 5 Andreon 2010 [median range: 8-(13)-18; 68% range around central '()' in x-axis; median range because of vel disp uncertainty 5-20, in quadrature 13-9+9] galaxies inside R_200
+#veldisp0.598 (0408) = 410+105-70 (rest-frame) -> Fig 5 Andreon 2010 [median range: 6-(9)-14; 68% range around central '()' in x-axis; median range because of vel disp uncertainty 5-20, in quadrature 9-5+12] galaxies inside R_200
 #veldisp0.66 = 502+/-83 -> Fig 5 Andreon 2010 [median range: 10-(20)-32; 68% range around central '()' median 13-30, in quadrature 20-12+16] galaxies inside R_200
 #veldisp0.49 = 518+/-99 -> Fig 5 Andreon 2010 [median range: 10-(20)-39; 68% range around central '()' median 13-30, in quadrature 20-12+21] galaxies inside R_200
 #veldisp0.31 = 390+50-60 -> Fig 5 Andreon 2010 [median range: 5-(8)-12; 68% range around central '()' median 6-12, in quadrature 8-4+6] galaxies inside R_200
 #veldisp0.31 = 440+90-80 -> Fig 5 Andreon 2010 [median range: 6-(13)-20; 68% range around central '()' median 8-18, in quadrature 13+/-8.5] galaxies inside R_200
-if lens == '0408' and zgroup == 0.598: med = 13; stdinf = 9; stdsup = 9
+if lens == '0408' and zgroup == 0.598: med = 9; stdinf = 5; stdsup = 12
 if zgroup == 0.6588: med = 20; stdinf = 12; stdsup = 16
 if zgroup == 0.4956: med = 20; stdinf = 12; stdsup = 21
 if zgroup == 0.3097: med = 8; stdinf = 4; stdsup = 6 # Wilson
@@ -225,6 +225,7 @@ if selectpdz == True:
             # removing also the known group members
             missing120_membersra = np.append(missing120_membersra,data[:,ra][data[:,id]==observed120_membersID[k]][0])
             missing120_membersdec = np.append(missing120_membersdec,data[:,dec][data[:,id]==observed120_membersID[k]][0])
+        if lens == '0408': np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/0408/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
         #if zgroup == 0.6588: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgrouphandpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
         #if zgroup == 0.4956: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/WFI2033/removelensgroup049handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
         #if zgroup == 0.3097: np.savetxt("/Users/cerusu/Dropbox/Davis_work/code/PG1115/removelensgroup"+mode+"handpicked"+str(i)+".cat",np.c_[missing120_membersra,missing120_membersdec],fmt='%.8f %.9f')
