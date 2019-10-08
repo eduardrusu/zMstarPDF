@@ -151,10 +151,10 @@ if lens == "0408":
     limmag = 22.5
     pln = 30
     if (radiusstr == "45"):
-        hstcoverage = 1
+        hstcoverage = 1 #
         radius = 45
         fracspec20 = 0.5 # for gals, not stars
-        fracspec21 = 0.5
+        fracspec21 = 0.5 # means between 20 and 21
         fracspec22 = 1
         fracspec225 = 0.20
         fracspec23 = 0.
@@ -174,23 +174,23 @@ if lens == "2038":
     z_l = 0.230
     brightmag = 0
     limmag = 22.5
-    pln = 44 # except for redshifts and pln, at the moment all values are copied from 0408
+    pln = 44
     if (radiusstr == "45"):
-        hstcoverage = 1
+        hstcoverage = 0. # 1 but ignore since Liz did not implement classification correction
         radius = 45
-        fracspec20 = 0.5 # for gals, not stars
-        fracspec21 = 0.5
-        fracspec22 = 1
-        fracspec225 = 0.20
+        fracspec20 = 1.0 # for gals, not stars
+        fracspec21 = 0.25
+        fracspec22 = 0.20
+        fracspec225 = 0.33
         fracspec23 = 0.
         fracspec24 = 0.
     if (radiusstr == "120"):
-        hstcoverage = 0.575
+        hstcoverage = 0.  # 0.605 but ignore since Liz did not implement classification correction
         radius = 120
-        fracspec20 = 0.89
-        fracspec21 = 0.77
-        fracspec22 = 1
-        fracspec225 = 0.43
+        fracspec20 = 0.24
+        fracspec21 = 0.29
+        fracspec22 = 0.21
+        fracspec225 = 0.11
         fracspec23 = 0.
         fracspec24 = 0.
 
