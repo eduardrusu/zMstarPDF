@@ -143,54 +143,56 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                     insert[index_index] = missing[k]
                     cat_msk=np.append(cat_msk,insert.reshape(1,8),axis = 0)
 
-            p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
-            p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
-            p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
-            p_mass = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass':1.0 * cat_msk[:,index_mstar]})
-            p_mass2 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2':1.0 * (cat_msk[:,index_mstar]) ** 2})
-            p_mass3 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3':1.0 * (cat_msk[:,index_mstar]) ** 3})
-            p_massoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'massoverr':1.0 * cat_msk[:,index_mstar] / cat_msk[:,index_sep]})
-            p_mass2overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2overr':1.0 * (cat_msk[:,index_mstar] ** 2) / cat_msk[:,index_sep]})
-            p_mass3overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3overr':1.0 * (cat_msk[:,index_mstar] ** 3) / cat_msk[:,index_sep]})
-            p_flexion = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'flexion':cat_msk[:,index_mstar]  / (cat_msk[:,index_sep] ** 3)})
-            p_tidal = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'tidal':cat_msk[:,index_mstar] / (cat_msk[:,index_sep] ** 2)})
-            p_SIS = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIS':np.sqrt(cat_msk[:,index_mstar]) / cat_msk[:,index_sep]})
-            p_SIShalo = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIShalo':np.sqrt(cat_msk[:,index_Mhalo]) / cat_msk[:,index_sep]})
-            #for k in range(len(missing)):
-                #cat_msk = np.delete(cat_msk,-1,axis = 0) # delete the last line I inserted above; actually this is not necessary because cat_msk is no longer used
+            try:
+                p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
+                p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
+                p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
+                p_mass = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass':1.0 * cat_msk[:,index_mstar]})
+                p_mass2 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2':1.0 * (cat_msk[:,index_mstar]) ** 2})
+                p_mass3 = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3':1.0 * (cat_msk[:,index_mstar]) ** 3})
+                p_massoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'massoverr':1.0 * cat_msk[:,index_mstar] / cat_msk[:,index_sep]})
+                p_mass2overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass2overr':1.0 * (cat_msk[:,index_mstar] ** 2) / cat_msk[:,index_sep]})
+                p_mass3overr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'mass3overr':1.0 * (cat_msk[:,index_mstar] ** 3) / cat_msk[:,index_sep]})
+                p_flexion = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'flexion':cat_msk[:,index_mstar]  / (cat_msk[:,index_sep] ** 3)})
+                p_tidal = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'tidal':cat_msk[:,index_mstar] / (cat_msk[:,index_sep] ** 2)})
+                p_SIS = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIS':np.sqrt(cat_msk[:,index_mstar]) / cat_msk[:,index_sep]})
+                p_SIShalo = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'SIShalo':np.sqrt(cat_msk[:,index_Mhalo]) / cat_msk[:,index_sep]})
+                #for k in range(len(missing)):
+                    #cat_msk = np.delete(cat_msk,-1,axis = 0) # delete the last line I inserted above; actually this is not necessary because cat_msk is no longer used
 
-            w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass_2X = p_mass.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2_2X = p_mass2.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass3_2X = p_mass3.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_massoverr_2X = p_massoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2overr_2X = p_mass2overr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass3overr_2X = p_mass3overr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_flexion_2X = p_flexion.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_tidal_2X = p_tidal.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_SIS_2X = p_SIS.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_SIShalo_2X = p_SIShalo.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_mass2rms_2X = np.sqrt(w_mass2_2X)
-            w_mass3rms_2X = scipy.special.cbrt(w_mass3_2X)
-            w_mass2overrms_2X = np.sqrt(w_mass2overr_2X)
-            w_mass3overrms_2X = scipy.special.cbrt(w_mass3overr_2X)
+                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass_2X = p_mass.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2_2X = p_mass2.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass3_2X = p_mass3.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_massoverr_2X = p_massoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2overr_2X = p_mass2overr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass3overr_2X = p_mass3overr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_flexion_2X = p_flexion.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_tidal_2X = p_tidal.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_SIS_2X = p_SIS.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_SIShalo_2X = p_SIShalo.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_mass2rms_2X = np.sqrt(w_mass2_2X)
+                w_mass3rms_2X = scipy.special.cbrt(w_mass3_2X)
+                w_mass2overrms_2X = np.sqrt(w_mass2overr_2X)
+                w_mass3overrms_2X = scipy.special.cbrt(w_mass3overr_2X)
 
-            cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X,galinner]
-            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),np.around(cellkappagamma[:,9],decimals=4),np.around(cellkappagamma[:,10],decimals=4),np.around(cellkappagamma[:,11],decimals=4),np.around(cellkappagamma[:,12],decimals=4),np.around(cellkappagamma[:,13],decimals=4),np.around(cellkappagamma[:,14],decimals=4),np.around(cellkappagamma[:,15],decimals=4),np.around(cellkappagamma[:,16],decimals=4),np.around(cellkappagamma[:,17],decimals=4),np.around(cellkappagamma[:,18],decimals=4),np.around(cellkappagamma[:,19],decimals=4),np.around(cellkappagamma[:,20],decimals=4),np.around(cellkappagamma[:,21],decimals=4),np.around(cellkappagamma[:,22],decimals=4),cellkappagamma[:,23].astype(int)]
-            if initialized != 0:
-            	cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
-            else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
-                os.system('rm -f %s' % f)
-                cellkappagammafinal = cellkappagammastyle
-                initialized = 1
-            if (i == spacing - 1) and (j == spacing - 1):
-                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_mass_%s' % limmag, 'w_mass2_%s' % limmag, 'w_mass3_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'w_massoverr_%s' % limmag, 'w_mass2overr_%s' % limmag, 'w_mass3overr_%s' % limmag, 'w_mass2rms_%s' % limmag, 'w_mass3rms_%s' % limmag, 'w_mass2overrms_%s' % limmag, 'w_mass3overrms_%s' % limmag, 'w_flexion_%s' % limmag, 'w_tidal_%s' % limmag, 'w_SIS_%s' % limmag, 'w_SIShalo_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.int32))
-                #fits.append(f, tableout.as_array())
-                tableout.write(f)
-                del tableout
+                cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_mass_2X,w_mass2_2X,w_mass3_2X,w_oneoverr_2X,w_zoverr_2X,w_massoverr_2X,w_mass2overr_2X,w_mass3overr_2X,w_mass2rms_2X,w_mass3rms_2X,w_mass2overrms_2X,w_mass3overrms_2X,w_flexion_2X,w_tidal_2X,w_SIS_2X,w_SIShalo_2X,galinner]
+                cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),np.around(cellkappagamma[:,9],decimals=4),np.around(cellkappagamma[:,10],decimals=4),np.around(cellkappagamma[:,11],decimals=4),np.around(cellkappagamma[:,12],decimals=4),np.around(cellkappagamma[:,13],decimals=4),np.around(cellkappagamma[:,14],decimals=4),np.around(cellkappagamma[:,15],decimals=4),np.around(cellkappagamma[:,16],decimals=4),np.around(cellkappagamma[:,17],decimals=4),np.around(cellkappagamma[:,18],decimals=4),np.around(cellkappagamma[:,19],decimals=4),np.around(cellkappagamma[:,20],decimals=4),np.around(cellkappagamma[:,21],decimals=4),np.around(cellkappagamma[:,22],decimals=4),cellkappagamma[:,23].astype(int)]
+                if initialized != 0: cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
+                else:
+                    f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],limmag,radius,innermsk,gap)
+                    os.system('rm -f %s' % f)
+                    cellkappagammafinal = cellkappagammastyle
+                    initialized = 1
+                if (i == spacing - 1) and (j == spacing - 1):
+                    tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_mass_%s' % limmag, 'w_mass2_%s' % limmag, 'w_mass3_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'w_massoverr_%s' % limmag, 'w_mass2overr_%s' % limmag, 'w_mass3overr_%s' % limmag, 'w_mass2rms_%s' % limmag, 'w_mass3rms_%s' % limmag, 'w_mass2overrms_%s' % limmag, 'w_mass3overrms_%s' % limmag, 'w_flexion_%s' % limmag, 'w_tidal_%s' % limmag, 'w_SIS_%s' % limmag, 'w_SIShalo_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.float32,np.int32))
+                    #fits.append(f, tableout.as_array())
+                    tableout.write(f)
+                    del tableout
+            except: pass
+
 
 ############################
 # lens information
@@ -218,7 +220,7 @@ if lens == "HE0435":
     #pln = 34 & 35
     if (radiusstr == "45"):
         radius = 45
-        fracspec20 = 1 # I need to check all lenses before 0408, because this fraction should be only for galaxies, not counting stars; 
+        fracspec20 = 1 # I need to check all lenses before 0408, because this fraction should be only for galaxies, not counting stars;
         fracspec21 = 0.75 # this means 20 < mag < 21
         fracspec22 = 0.83
         fracspec23 = 0.11

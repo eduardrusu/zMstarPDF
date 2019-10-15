@@ -178,6 +178,10 @@ if lens == "0408":
 if lens == "2038":
     filters = "griz_lens"
     plane = 44
+    if other == 'powerlaw':
+        constr_gamma = 0.15
+        constrwidth_gamma_inf = 0.145
+        constrwidth_gamma_sup = 0.155
 
 # declare which weights to read
 measured_index45 = 0 # specifies the column index in weightsfile

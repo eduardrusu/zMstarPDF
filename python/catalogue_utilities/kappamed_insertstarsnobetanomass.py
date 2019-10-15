@@ -99,29 +99,30 @@ def weightedcounts(cat,spacing,lim1D,cells_on_a_side,L_field,L_pix,cells,kappaga
                     insert[index_index] = missing[k]
                     cat_msk=np.append(cat_msk,insert.reshape(1,6),axis = 0)
 
-            p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
-            p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
-            p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
+            try: # in rare cases even the tests above do not work, so I'm skipping over the whole block
+                p_zweight = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zweight':1.0 * (z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2})
+                p_zoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'zoverr':1.0 * ((z_s * cat_msk[:,index_z]) - cat_msk[:,index_z]**2) / cat_msk[:,index_sep]})
+                p_oneoverr = pd.DataFrame({'cell':cat_msk[:,index_index].astype(int),'oneoverr':1.0 / cat_msk[:,index_sep]})
 
-            w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-            w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
-
-            #print np.shape(cellkappagamma), np.shape(w_gal_2X), np.shape(galinner)
-            cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
-            cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),cellkappagamma[:,9].astype(int)]
-            if initialized != 0:
-                cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
-            else:
-                f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],float(limmag),radius,innermsk,gap,sam)
-                os.system('rm -f %s' % f)
-                cellkappagammafinal = cellkappagammastyle
-                initialized = 1
-            if (i == spacing - 1) and (j == spacing - 1):
-                tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.int32))
-                #fits.append(f, tableout.as_array())
-                tableout.write(f)
-                del tableout
+                w_zweight_2X = p_zweight.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_oneoverr_2X = p_oneoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                w_zoverr_2X = p_zoverr.groupby(['cell']).median().values[:,0] * w_gal_2X
+                #print np.shape(cellkappagamma), np.shape(w_gal_2X), np.shape(galinner)
+                cellkappagamma = np.c_[cellkappagamma,w_gal_2X,w_zweight_2X,w_oneoverr_2X,w_zoverr_2X,galinner]
+                cellkappagammastyle = np.c_[cellkappagamma[:,1].astype(int),np.around(cellkappagamma[:,2],decimals=5),np.around(cellkappagamma[:,3],decimals=5),np.around(cellkappagamma[:,4],decimals=5),cellkappagamma[:,5].astype(int),np.around(cellkappagamma[:,6],decimals=4),np.around(cellkappagamma[:,7],decimals=4),np.around(cellkappagamma[:,8],decimals=4),cellkappagamma[:,9].astype(int)]
+                if initialized != 0:
+                    cellkappagammafinal = np.r_[cellkappagammafinal,cellkappagammastyle]
+                else:
+                    f = '%snobeta%s%smedinject_%s_%s_%s_%s_%s_%sarcsecinner_%s%s.fits' % (rootwghtratios,pln,type,bands,lens,plane[0:13],float(limmag),radius,innermsk,gap,sam)
+                    os.system('rm -f %s' % f)
+                    cellkappagammafinal = cellkappagammastyle
+                    initialized = 1
+                if (i == spacing - 1) and (j == spacing - 1):
+                    tableout = table.Table(cellkappagammafinal, names=('ID', 'kappa', 'gamma1', 'gamma2', 'w_gal_%s' % limmag, 'w_zweight_%s' % limmag, 'w_oneoverr_%s' % limmag, 'w_zoverr_%s' % limmag, 'galinner_%s' % limmag), dtype=(np.int32,np.float32,np.float32,np.float32,np.int32,np.float32,np.float32,np.float32,np.int32))
+                                    #fits.append(f, tableout.as_array())
+                    tableout.write(f)
+                    del tableout
+            except: pass
 
 ############################
 # lens information

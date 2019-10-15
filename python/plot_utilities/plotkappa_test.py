@@ -11,7 +11,7 @@ import sys
 min_kappa = -0.20
 max_kappa = 1
 min_kappa_plot = -0.2
-max_kappa_plot = 0.2
+max_kappa_plot = 0.3
 bin_stat = 2000
 halfwidth = (max_kappa - min_kappa) / (bin_stat * 2.0)
 
@@ -154,7 +154,7 @@ plt.subplot(1,1,1)
 ax = plt.subplot(1,1,1)
 ax.tick_params(labelsize=15)
 plt.xlim(min_kappa_plot, max_kappa_plot)
-plt.ylim(0, 0.4)
+plt.ylim(0, 0.1)
 
 plt.plot(kappa_values[:-1][::1],kappa_0[::1],linewidth=2, label ='', linestyle=':') # every 1th point
 ax.text(0.6, 0.90, s0, fontsize=10, transform=ax.transAxes)
