@@ -177,7 +177,7 @@ if lens == "2038":
     limmag = 22.5
     pln = 44
     if (radiusstr == "45"):
-        hstcoverage = 0. # 1 but ignore since Liz did not implement classification correction
+        hstcoverage = 1. # 1 but ignore since Liz did not implement classification correction
         radius = 45
         fracspec20 = 1.0 # for gals, not stars
         fracspec21 = 0.25
@@ -186,7 +186,7 @@ if lens == "2038":
         fracspec23 = 0.
         fracspec24 = 0.
     if (radiusstr == "120"):
-        hstcoverage = 0.  # 0.605 but ignore since Liz did not implement classification correction
+        hstcoverage = 0.605  # 0.605 but ignore since Liz did not implement classification correction
         radius = 120
         fracspec20 = 0.24
         fracspec21 = 0.29
