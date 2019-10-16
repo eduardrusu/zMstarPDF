@@ -113,6 +113,11 @@ def smooth(x,window_len=11,window='hanning'):
 
 plt.clf()
 
+kappa_0  = np.loadtxt("%skappahistallLOS_plane30.cat" % root, usecols=[0], unpack=True)
+median0,stddev0,kappa_values = statistics(kappa_0,bin_stat,min_kappa,max_kappa)
+kappa_0 = kappa_0 / np.sum(kappa_0 * np.abs((kappa_values[:-1]+halfwidth)))
+
+
 kappa_11  = np.loadtxt("%skappahist_0408_measured_5innermask_nobeta_removehandpicked_zgap-1.0_-1.0_fiducial_45_gal_45_oneoverr_22.5_med_increments2_2_emptymsk.cat" % root, usecols=[0], unpack=True)
 median11,stddev11,kappa_values = statistics(kappa_11,bin_stat,min_kappa,max_kappa)
 kappa_11 = kappa_11 / np.sum(kappa_11 * np.abs((kappa_values[:-1]+halfwidth)))
@@ -163,7 +168,7 @@ median40,stddev40,kappa_values = statistics(kappa_40,bin_stat,min_kappa,max_kapp
 kappa_40 = kappa_40 / np.sum(kappa_40 * np.abs((kappa_values[:-1]+halfwidth)))
 
 #s = "%.3f %.3f LOS=%d" % (median,std1,LOS)
-#s0 = "%.3f %.3f" % (median0,stddev0)
+s0 = "%.3f %.3f" % (median0,stddev0)
 #s1 = "%.3f %.3f" % (median1,stddev1)
 #s2 = "%.3f %.3f" % (median2,stddev2)
 #s3 = "%.3f %.3f" % (median3,stddev3)
@@ -204,19 +209,21 @@ winlen = 12
 #smooth(kappa_3,winlen,'bartlett')
 #smooth(kappa_3,winlen,'blackman')
 
+plt.plot(kappa_values[:-1],smooth(kappa_0,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='k', linewidth=1, linestyle='-', label ='%s; all LOS' %s0)
+
 plt.plot(kappa_values[:-1],smooth(kappa_11,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='b', linewidth=1, linestyle='-', label ='%s; $45: 1,1/r$; w/ group' %s11)
 plt.plot(kappa_values[:-1],smooth(kappa_12,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='g', linewidth=1, linestyle='-', label ='%s; $45: 1,z/r$; w/ group' %s12)
 plt.plot(kappa_values[:-1],smooth(kappa_17,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='r', linewidth=1, linestyle='-', label ='%s; $120: 1,1/r$; w/ group' %s17)
 plt.plot(kappa_values[:-1],smooth(kappa_20,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='c', linewidth=1, linestyle='-', label ='%s; $120: 1,z/r$; w/ group' %s20)
 plt.plot(kappa_values[:-1],smooth(kappa_18,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='m', linewidth=1, linestyle='-', label ='%s; $120: 1,1/r; 45:1,1/r$; w/ group' %s18)
-plt.plot(kappa_values[:-1],smooth(kappa_19,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='k', linewidth=1, linestyle='-', label ='%s; $120: 1,1/r; 45:1,z/r$; w/ group' %s19)
+plt.plot(kappa_values[:-1],smooth(kappa_19,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='orange', linewidth=1, linestyle='-', label ='%s; $120: 1,1/r; 45:1,z/r$; w/ group' %s19)
 
 plt.plot(kappa_values[:-1],smooth(kappa_31,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='b', linewidth=1, linestyle=':', label ='%s; $45: 1,1/r$; w/o group' %s31)
 plt.plot(kappa_values[:-1],smooth(kappa_32,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='g', linewidth=1, linestyle=':', label ='%s; $45: 1,z/r$; w/o group' %s32)
 plt.plot(kappa_values[:-1],smooth(kappa_37,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='r', linewidth=1, linestyle=':', label ='%s; $120: 1,1/r$; w/o group' %s37)
 plt.plot(kappa_values[:-1],smooth(kappa_40,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='c', linewidth=1, linestyle=':', label ='%s; $120: 1,z/r$; w/o group' %s40)
 plt.plot(kappa_values[:-1],smooth(kappa_38,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='m', linewidth=1, linestyle=':', label ='%s; $120: 1,1/r; 45:1,1/r$; w/o group' %s38)
-plt.plot(kappa_values[:-1],smooth(kappa_39,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='k', linewidth=1, linestyle=':', label ='%s; $120: 1,1/r; 45:1,z/r$; w/o group' %s39)
+plt.plot(kappa_values[:-1],smooth(kappa_39,winlen,'flat')[(winlen/2-1):-(winlen/2)],color='orange', linewidth=1, linestyle=':', label ='%s; $120: 1,1/r; 45:1,z/r$; w/o group' %s39)
 
 plt.xlabel(r'$\kappa$', fontsize=14)
 plt.ylabel(r'normalized counts', fontsize=14)
