@@ -72,14 +72,15 @@ rootcode = "/lfs08/rusucs/code/"
 rootout = "/lfs08/rusucs/%s/MSkapparesults/" % lens
 #rootout = "/Volumes/LaCieSubaru/kapparesults/"
 #rootout = "/mnt/scratch/rusucs/%s/MSkapparesults/" % lens
-weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local_customdensity.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
+#weightsfile = np.loadtxt(rootcode+'weightedcounts_%s_%ss_%s_%sinner%s_zgap%s_%s_local_customdensity.cat' %(lens,mode,mag,innermask,handpickedstr,zinf,zsup),usecols=[1,2,3,4,5,6],unpack=True) # the file where I recorded the overdensities which I measured for the real lens
 if removegroups == 'removegroups': groupsfile = np.loadtxt(rootcode+'8_0_0groups.cat',usecols=[2,3,8],unpack=True)
 limsigma = 2 # sigma limits on either side of the assumed gaussians
 bin_stat = 2000
 min_kappa = -0.20
 max_kappa = 1
 
-increment1 = 2# refers to the E interval from Greene et al. 2014
+increment1 = 4# refers to the E interval from Greene et al. 2014
 increment2 = 2
 increment3 = 2
 increment4 = 2
@@ -153,7 +154,7 @@ if lens == "WFI2033":
 
 if lens == "J1206":
     filters = "griK"
-    plane = 34
+    plane = 44 # actually 34 but for the figure test in appendix Rusu et al 2019 I need this
     if other == 'fiducial' and (handpicked == 'removegrouphandpicked' or handpicked == 'nohandpicked'):
         constr_gamma = 0.04
         constrwidth_gamma_inf = 0.03
@@ -225,7 +226,7 @@ if conjoined >= 2:
                 weight5_index = declareweight(weightin5)
 
 # read weight constraints
-if lens != "0408" and lens != "2038":
+if lens != "0408" and lens != "2038" and lens != "J1206":
     constr_gal_meds45 = weightsfile[measured_index45][0]
     constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
     constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
@@ -371,7 +372,7 @@ if lens != "0408" and lens != "2038":
     constrwidth_SIShalo_meds_inf120 = weightsfile[measured_index_inf120][17]
     constrwidth_SIShalo_meds_sup120 = weightsfile[measured_index_sup120][17]
 
-if lens == "0408" or lens == "2038":
+if lens == "0408" or lens == "2038" or lens == "J1206":
     constr_gal_meds45 = weightsfile[measured_index45][0]
     constrwidth_gal_meds_inf45 = weightsfile[measured_index_inf45][0]
     constrwidth_gal_meds_sup45 = weightsfile[measured_index_sup45][0]
