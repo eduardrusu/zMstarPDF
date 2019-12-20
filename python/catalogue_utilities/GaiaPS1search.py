@@ -4,27 +4,28 @@ import astropy.units as u
 
 search = "Gaia"
 #search = "PS1"
-file = "/Volumes/LaCieSubaru/Ciprian_candidates/candidatesJan2019.cat"
+#file = "/Volumes/LaCieSubaru/Ciprian_candidates/candidatesJan2019.cat"
 #file = "/Users/cerusu/OneDrive - Subaru Telescope/candidates.cat"
+file = "/Users/cerusu/Dropbox/clustermostpromising.txt"
 cat = np.loadtxt(file, usecols = [0,1], unpack=True)
 
 if search == "Gaia":
     from astropy.coordinates import SkyCoord
     from astroquery.gaia import Gaia
     #rad = 9.0 # arcsec # used for Gaia
-    rad = 3.0 # arcsec
+    rad = 20.0 # arcsec
     radius = u.Quantity(rad, u.arcsec)
     #for i in range(1):
     for i in range(len(cat[0])):
         coord = SkyCoord(ra=cat[0][i], dec=cat[1][i], unit=(u.degree, u.degree), frame='icrs')
         j = Gaia.cone_search_async(coord, radius)
         r = j.get_results()
-        #print cat[0][i], cat[1][i]
-        #print 'dist           ra             dec            G       astrom_exc_noise parallax/err pmra/err    pmdec/err'
+        #print r.columns
+        print cat[0][i], cat[1][i]
+        print 'dist           ra             dec            G       astrom_exc_noise astrom_exc_noise_sig proper_motion_significance'
         for j in range(len(r)):
-            #print r[j]['dist']*3600,r[j]['ra'],r[j]['dec'],r[j]['phot_g_mean_mag'],r[j]['astrometric_excess_noise'],abs(r[j]['parallax_over_error']),np.sqrt((r[j]['pmra']/r[j]['pmra_error'])**2+(r[j]['pmdec']/r[j]['pmdec_error'])**2)
-            #if j ==1:
-            print cat[0][i], cat[1][i], SkyCoord(cat[0][i], cat[1][i], unit='deg').separation(SkyCoord(r[j]['ra'], r[j]['dec'], unit='deg')).arcsec, r[j]['phot_g_mean_mag'],r[j]['phot_bp_mean_mag'],r[j]['phot_rp_mean_mag']
+            #if j ==1: print cat[0][i], cat[1][i], SkyCoord(cat[0][i], cat[1][i], unit='deg').separation(SkyCoord(r[j]['ra'], r[j]['dec'], unit='deg')).arcsec, r[j]['phot_g_mean_mag'],r[j]['phot_bp_mean_mag'],r[j]['phot_rp_mean_mag']
+            print r[j]['dist']*3600,r[j]['ra'],r[j]['dec'],r[j]['phot_g_mean_mag'],r[j]['astrometric_excess_noise'],r[j]['astrometric_excess_noise_sig'],np.sqrt((r[j]['pmra']/r[j]['pmra_error'])**2+(r[j]['pmdec']/r[j]['pmdec_error'])**2)
 
 def panstarrs_query(ra_deg, dec_deg, rad_asec, maxmag=23,
                     maxsources=1): # from https://michaelmommert.wordpress.com/2017/02/13/accessing-the-gaia-and-pan-starrs-catalogs-using-python/
