@@ -48,7 +48,7 @@ def R_hat(samples): # https://groups.google.com/forum/#!topic/hddm-users/qWzCWTz
     R_hat = np.sqrt(Var_hat / W)
     return R_hat
 
-for i in range(np.shape(mcmci)[0] - 1):
+for i in range(np.shape(mcmci)[0]):
     for j in range(chains):
         if j == 0: samples = list[0][i][:minsize]
         else: samples = np.vstack((samples,list[j][i][:minsize]))
